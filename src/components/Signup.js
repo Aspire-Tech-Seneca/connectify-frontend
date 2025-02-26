@@ -111,7 +111,7 @@ const Signup = () => {
       <Overlay />
       <FormContainer>
         <Typography variant="h4" gutterBottom style={{ fontWeight: "bold", color: "#89574c" }}>
-          Sign Up to Connectify
+          Sign Up to Connectify Today!
         </Typography>
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
           <TextField label="Full Name" name="fullName" value={formData.fullName} onChange={handleChange} error={!!errors.fullName} helperText={errors.fullName} required fullWidth InputProps={{ startAdornment: (<InputAdornment position="start"><AccountCircle style={{ color: "red" }} /></InputAdornment>), }} />
