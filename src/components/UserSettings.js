@@ -42,7 +42,7 @@ const FormContainer = styled(Container)({
 
 // Styled Button
 const StyledButton = styled(Button)({
-  background: "linear-gradient(to right, #89574c, #ffb6b9)",
+  background: "linear-gradient(to right, #89574c, #a7311a)",
   color: "white",
   fontWeight: "bold",
   padding: "14px",
@@ -62,18 +62,23 @@ const StyledTextField = styled(TextField)({
   },
 });
 
-// Navbar
-const Navbar = () => (
-  <AppBar position="static" sx={{ background: "#89574c" }}>
-    <Toolbar>
-      <img src={logo} alt="Logo" style={{ height: "50px", marginRight: "15px" }} />
-      <Typography variant="h6" sx={{ flexGrow: 1 }}>Connectify</Typography>
-      <Button color="inherit" href="/">Home</Button>
-      <Button color="inherit" href="/settings">Settings</Button>
-      <Button color="inherit" href="/logout">Logout</Button>
-    </Toolbar>
-  </AppBar>
-);
+const Navbar = () => {
+  const navigate = useNavigate();
+  return (
+    <AppBar position="fixed" sx={{ background: "#89574c" }}>
+      <Toolbar>
+        <img src={logo} alt="Logo" style={{ height: "60px", marginRight: "15px", cursor: "pointer" }} onClick={() => navigate("/")}/>
+        <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: "bold", color: "white" }}>
+          Connectify
+        </Typography>
+        <Button color="inherit" onClick={() => navigate("/")}>Home</Button>
+        <Button color="inherit" onClick={() => navigate("/about")}>About Us</Button>
+        <Button color="inherit" onClick={() => navigate("/profile")}>Profile</Button>
+      </Toolbar>
+    </AppBar>
+  );
+};
+
 
 const UserSettings = () => {
   const [formData, setFormData] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
