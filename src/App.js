@@ -10,6 +10,7 @@ import Signup from "./components/Signup";
 import WelcomePage from "./components/WelcomePage";
 import ChatPage from "./components/ChatPage";
 import CreateEvent from "./components/CreateEvent";
+import MyMatches from "./components/MyMatches";
 
 
 const App = () => {
@@ -34,6 +35,7 @@ const App = () => {
           <Route path="/profile" element={<Profile />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/" element={<WelcomePage />} />
+          <Route path="/matches" element={<MyMatches/>} />
           <Route path="/ChatPage" element={<ChatPage/>} />
 		  <Route path="/createevent" element={<CreateEvent />} /> 
         </Routes>

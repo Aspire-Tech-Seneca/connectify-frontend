@@ -259,17 +259,17 @@ const Profile = () => {
 };
 
 const styles = {
-  // Outer container fully transparent
+  // Outer container now takes the full viewport width
   outerContainer: {
     background: "transparent",
     minHeight: "100vh",
     fontFamily: "'Roboto', sans-serif",
+    width: "100vw",
   },
-  // Content wrapper: Nude container with peach image background,
-  // semi-transparent so the peach texture shows, with an enhanced shadow.
+  // Content wrapper remains the same for the inner content
   contentWrapper: {
-    background: "rgba(245,236,227,0.4)", // Nude overlay at 40% opacity
-    backgroundImage: "url('./peach.jpg')", // Peach image background (ensure the path is correct)
+    background: "rgba(245,236,227,0.4)",
+    backgroundImage: "url('./peach.jpg')",
     backgroundRepeat: "no-repeat",
     backgroundSize: "cover",
     margin: "20px auto",
@@ -348,7 +348,6 @@ const styles = {
     border: "1px solid #ccc",
     resize: "vertical",
   },
-  // Updated button styles for all action buttons to match the top bar color:
   editButton: {
     background: "#C38282",
     color: "white",
@@ -475,7 +474,7 @@ const styles = {
     display: "flex",
     gap: "10px",
   },
-  // NAV BAR styles – revert to previous look with centered menu items and white text.
+  // Updated NavBar style to match the MyMatches page (full width)
   navbar: {
     backgroundColor: "#C38282",
     padding: "25px",
@@ -483,6 +482,7 @@ const styles = {
     justifyContent: "center",
     alignItems: "center",
     color: "white",
+    width: "100%",
   },
   navItems: {
     display: "flex",
@@ -496,7 +496,7 @@ const styles = {
     fontWeight: "bold",
     cursor: "pointer",
     transition: "color 0.3s",
-    whiteSpace: "nowrap", // Prevents text wrapping
+    whiteSpace: "nowrap",
   },
 };
 
