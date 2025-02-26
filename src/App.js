@@ -12,6 +12,7 @@ import ChatPage from "./components/ChatPage";
 import CreateEvent from "./components/CreateEvent";
 import MyMatches from "./components/MyMatches";
 import UserSettings from "./components/UserSettings";
+import ViewEvents from "./components/ViewEvents";
 
 
 const App = () => {
@@ -39,7 +40,7 @@ const App = () => {
           <Route path="/matches" element={<MyMatches/>} />
           <Route path="/ChatPage" element={<ChatPage/>} />
 		  <Route path="/UserSettings" element={<UserSettings />} />
-
+		  <Route path="/ViewEvents" element={<ViewEvents />} />
 		  <Route path="/createevent" element={<CreateEvent />} /> 
         </Routes>
       </div>
