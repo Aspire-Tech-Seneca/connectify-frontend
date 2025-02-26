@@ -48,7 +48,7 @@ const StyledButton = styled(Button)({
   padding: "14px",
   transition: "0.3s",
   "&:hover": {
-    background: "linear-gradient(to right, #ffb6b9, #ff7e7e)",
+    background: "linear-gradient(to right, #c7a69f, #89574c)",
     transform: "scale(1.05)",
   },
 });
