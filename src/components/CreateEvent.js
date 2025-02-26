@@ -64,12 +64,20 @@ const CreateEvent = () => {
     description: "",
     category: "",
   });
+    const [image, setImage] = useState(null); // New state for image
   const [previewOpen, setPreviewOpen] = useState(false); // Preview modal state
 
   const categories = ["Outdoor", "Tech", "Arts & Crafts", "Food & Drinks", "Networking", "Other"];
 
-  const handleChange = (e) => {
+ const handleChange = (e) => {
     setEventData({ ...eventData, [e.target.name]: e.target.value });
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImage(URL.createObjectURL(file)); // Set image preview
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -197,6 +205,16 @@ const CreateEvent = () => {
               <MenuItem key={option} value={option}>{option}</MenuItem>
             ))}
           </TextField>
+		  
+		  
+          {/* File input for image */}
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            style={{ marginBottom: "15px" }}
+          />
+          {image && <img src={image} alt="Preview" style={{ maxWidth: "100%", marginBottom: "15px" }} />} 
           <StyledButton variant="contained" onClick={handlePreview}>Preview</StyledButton>
           <StyledButton variant="contained" type="submit">Create Event</StyledButton>
         </form>
@@ -231,6 +249,9 @@ const CreateEvent = () => {
             <Typography variant="body1"><strong>Location:</strong> {eventData.location}</Typography>
             <Typography variant="body1"><strong>Description:</strong> {eventData.description}</Typography>
             <Typography variant="body1"><strong>Category:</strong> {eventData.category}</Typography>
+
+			{image && <img src={image} alt="Event" style={{ maxWidth: "100%" }} />}
+
           </Box>
           <Box sx={{ mt: 2 }}>
             <Button onClick={handleClosePreview} variant="outlined" sx={{ mr: 2 }}>Close</Button>
