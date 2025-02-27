@@ -91,33 +91,25 @@ const HomePage = () => {
 };
 
 const styles = {
-  // Outer container fully transparent
-  outerContainer: {
-    background: "transparent",
-    fontFamily: "'Roboto', sans-serif",
-    width: "100%",
-    maxWidth: "1200px",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    position: "absolute",
-    top: "0",
-  },
-  // Content wrapper: Nude container with peach image background,
-  // semi-transparent so the peach texture shows, with an enhanced shadow.
-  contentWrapper: {
-    background: "rgba(245,236,227,0.4)", // Nude overlay at 40% opacity
-    backgroundImage: "url('./peach.jpg')", // Peach image background (ensure the path is correct)
-    backgroundRepeat: "no-repeat",
-    backgroundSize: "cover",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
-    borderRadius: "8px",
-    maxWidth: "1200px",
-    width: "100%",
-    padding: "20px",
-    margin: "20px",
-  },
+ // Outer container now takes the full viewport width
+ outerContainer: {
+  background: "transparent",
+  minHeight: "100vh",
+  fontFamily: "'Roboto', sans-serif",
+  width: "100vw",
+},
+// Content wrapper remains the same for the inner content
+contentWrapper: {
+  background: "rgba(245,236,227,0.4)",
+  backgroundImage: "url('./peach.jpg')",
+  backgroundRepeat: "no-repeat",
+  backgroundSize: "cover",
+  margin: "20px auto",
+  padding: "2rem",
+  boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+  borderRadius: "8px",
+  maxWidth: "1200px",
+},
   contentContainer: {
     display: "grid",
     gap: "20px",
@@ -136,7 +128,6 @@ const styles = {
     alignItems: "center",
     color: "white",
     width: "100%",
-    maxWidth: "1200px",
   },
   logo: {
     fontSize: "24px",
@@ -145,6 +136,16 @@ const styles = {
   navItems: {
     display: "flex",
     gap: "20px",
+  },
+  navButton: {
+    background: "none",
+    border: "none",
+    color: "white", // white text for nav links
+    fontSize: "20px",
+    fontWeight: "bold",
+    cursor: "pointer",
+    transition: "color 0.3s",
+    whiteSpace: "nowrap", // Prevents text wrapping
   },
   navLink: {
     color: "white",
@@ -224,20 +225,7 @@ const styles = {
     boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
     transition: "background 0.3s, transform 0.3s",
   },
-  navItems: {
-    display: "flex",
-    gap: "20px",
-  },
-  navButton: {
-    background: "none",
-    border: "none",
-    color: "white", // white text for nav links
-    fontSize: "20px",
-    fontWeight: "bold",
-    cursor: "pointer",
-    transition: "color 0.3s",
-    whiteSpace: "nowrap", // Prevents text wrapping
-  },
+  
 };
 
 export default HomePage;
