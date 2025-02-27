@@ -78,7 +78,7 @@ const HomePage = () => {
                         </span>
                       ))}
                     </div>
-                    <button style={styles.messageBtn}>Send Message</button>
+                    <button style={styles.messageBtn}>Match</button>
                   </div>
                 </div>
               ))}
