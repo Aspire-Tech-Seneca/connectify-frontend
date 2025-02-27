@@ -105,14 +105,8 @@ const styles = {
   outerContainer: {
     background: "transparent",
     fontFamily: "'Roboto', sans-serif",
-    width: "100%",
-    maxWidth: "1200px",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    position: "absolute",
-    top: "0",
+    width: "100vw",
+    minHeight: "100vh",
   },
   // Content wrapper: Nude container with peach image background,
   // semi-transparent so the peach texture shows, with an enhanced shadow.
@@ -124,9 +118,8 @@ const styles = {
     boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
     borderRadius: "8px",
     maxWidth: "1200px",
-    width: "100%",
-    padding: "20px",
-    margin: "20px",
+    padding: "2rem",
+    margin: "20px auto",
 
   },
   contentContainer: {
@@ -147,7 +140,7 @@ const styles = {
     alignItems: "center",
     color: "white",
     width: "100%",
-    maxWidth: "1200px",
+    
   },
   logo: {
     fontSize: "24px",
@@ -156,6 +149,16 @@ const styles = {
   navItems: {
     display: "flex",
     gap: "20px",
+  },
+  navButton: {
+    background: "none",
+    border: "none",
+    color: "white", // white text for nav links
+    fontSize: "20px",
+    fontWeight: "bold",
+    cursor: "pointer",
+    transition: "color 0.3s",
+    whiteSpace: "nowrap", // Prevents text wrapping
   },
   navLink: {
     color: "white",
@@ -234,20 +237,6 @@ const styles = {
     cursor: "pointer",
     boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
     transition: "background 0.3s, transform 0.3s",
-  },
-  navItems: {
-    display: "flex",
-    gap: "20px",
-  },
-  navButton: {
-    background: "none",
-    border: "none",
-    color: "white", // white text for nav links
-    fontSize: "20px",
-    fontWeight: "bold",
-    cursor: "pointer",
-    transition: "color 0.3s",
-    whiteSpace: "nowrap", // Prevents text wrapping
   },
 };
 
