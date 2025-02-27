@@ -1,20 +1,20 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import eni from '../image/Eni.jpg';
+import shailendra from '../image/shailendra.jpg';
 
 const dummyMatches = [
   {
     name: "Eni Zeqo",
     age: 25,
     interests: ["Reading", "Traveling", "Music"],
-    imgUrl:
-      "https://media-yyz1-1.cdn.whatsapp.net/v/t61.24694-24/473396411_613803474517207_7371020398974454938_n.jpg?ccb=11-4&oh=01_Q5AaIB5_ifmhHU70NtZP463tzx2gAaCm9hSd10X0OL7PT68J&oe=67C4E871&_nc_sid=5e03e0&_nc_cat=106",
+    imgUrl: eni,
   },
   {
     name: "Shailendra Kushwaha",
     age: 25,
     interests: ["Sports", "Technology", "Movies"],
-    imgUrl:
-      "https://media-yyz1-1.cdn.whatsapp.net/v/t61.24694-24/473396367_1678596543064566_7931647013761059272_n.jpg?ccb=11-4&oh=01_Q5AaIIDWHx1B3ABNpx32-1zbDfKWZLyzwjFlwbMkJFLIP5uL&oe=67C50E01&_nc_sid=5e03e0&_nc_cat=104",
+    imgUrl: shailendra,
   },
 ];
 

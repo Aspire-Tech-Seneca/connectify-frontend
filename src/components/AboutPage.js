@@ -1,5 +1,11 @@
 import React from 'react';
 import { useNavigate } from "react-router-dom";
+import eni from '../image/Eni.jpg';
+import shailendra from '../image/shailendra.jpg';
+import jiyun from '../image/Jiyun.jpg';
+import john from '../image/John.jpg';
+import behzad from '../image/Behzad.jpg';
+import zahrah from '../image/Zahrah.jpg';
 
 // Navbar component (you can adjust the navbar styling as needed)
 function Navbar({navigate}){
@@ -48,32 +54,32 @@ const AboutPage = () => {
             <h2>Meet the Team</h2>
             <div className="team">
               <div className="team-member">
-                <img src="https://media-yyz1-1.cdn.whatsapp.net/v/t61.24694-24/473396367_1678596543064566_7931647013761059272_n.jpg?ccb=11-4&oh=01_Q5AaIIDWHx1B3ABNpx32-1zbDfKWZLyzwjFlwbMkJFLIP5uL&oe=67C50E01&_nc_sid=5e03e0&_nc_cat=104" alt="Team Member" />
+                <img src={shailendra} alt="Team Member" />
                 <h3>Shailendra</h3>
                 <p>Frontend</p>
               </div>
               <div className="team-member">
-                <img src="https://media-yyz1-1.cdn.whatsapp.net/v/t61.24694-24/473396411_613803474517207_7371020398974454938_n.jpg?ccb=11-4&oh=01_Q5AaIB5_ifmhHU70NtZP463tzx2gAaCm9hSd10X0OL7PT68J&oe=67C4E871&_nc_sid=5e03e0&_nc_cat=106" alt="Team Member" />
+                <img src={eni} alt="Team Member" />
                 <h3>Eni Zeqo</h3>
                 <p>Frontend</p>
               </div>
               <div className="team-member">
-                <img src="https://media-yyz1-1.cdn.whatsapp.net/v/t61.24694-24/471647999_1330364294624497_2124070232912017468_n.jpg?ccb=11-4&oh=01_Q5AaIOE_kdK7KB5IB0ZDoU_ljWEj3w7PJPPouLYb-1yJQIQA&oe=67BA8546&_nc_sid=5e03e0&_nc_cat=107" alt="Team Member" />
+                <img src={zahrah} alt="Team Member" />
                 <h3>Zahrah</h3>
                 <p>Frontend</p>
               </div>
               <div className="team-member">
-                <img src="https://media-yyz1-1.cdn.whatsapp.net/v/t61.24694-24/421924633_1087240256101484_8615319572908836399_n.jpg?ccb=11-4&oh=01_Q5AaIBUpgjHqEMl81XeEcYtc4JfchwrP_5OJmhIEIWCBegAJ&oe=67BAB33D&_nc_sid=5e03e0&_nc_cat=106" alt="Team Member" />
+                <img src={behzad} alt="Team Member" />
                 <h3>Behzad</h3>
                 <p>Backend</p>
               </div>
               <div className="team-member">
-                <img src="https://raw.githubusercontent.com/JillianGuo/CAA900-TEMP/refs/heads/main/IMG_4208(2).jpg" alt="Team Member" />
+                <img src={jiyun} alt="Team Member" />
                 <h3>Jiyun Guo</h3>
                 <p>Backend</p>
               </div>
               <div className="team-member">
-                <img src="https://media-yyz1-1.cdn.whatsapp.net/v/t61.24694-24/436887954_3792826047673392_2520651519346363110_n.jpg?ccb=11-4&oh=01_Q5AaIPG5GjrIB0QAHBjn8DTs_KOAXZ8X4J8xHqOex4Amk-zU&oe=67BAA1C4&_nc_sid=5e03e0&_nc_cat=111" alt="Team Member" />
+                <img src={john} alt="Team Member" />
                 <h3>John</h3>
                 <p>SRE</p>
               </div>
