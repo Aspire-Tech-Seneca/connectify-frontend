@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-// Load environment variables for API endpoints and blob storage
+// Load environment variables
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost";
 const BASE_PATH = process.env.REACT_APP_BASE_PATH || "/api";
-const BLOB_STORAGE_URL = process.env.REACT_APP_BLOB_STORAGE_URL || "https://yourpublicblobstorage.com";
+// Use the Azure Blob Storage base URL for images from env
+const BLOB_STORAGE_BASE_URL = process.env.REACT_APP_BLOB_STORAGE_BASE_URL || "https://yourpublicblobstorage.com/";
 
 // Navigation Bar Component – menu items centered
 const NavBar = ({ navigate }) => {
@@ -54,7 +55,12 @@ const ProfileCard = ({
     <div style={styles.profileContent}>
       {/* Profile picture on the left */}
       <div style={styles.profilePicContainer}>
-        <img src={profilePic} alt="Profile" style={styles.fixedProfilePic} />
+        <img
+          // Use the Azure Blob Storage base URL for the default profile pic
+          src={profilePic || `${BLOB_STORAGE_BASE_URL}defaultProfilePic.jpg`}
+          alt="Profile"
+          style={styles.fixedProfilePic}
+        />
       </div>
       <div style={styles.profileInfo}>
         {isEditing ? (
@@ -214,11 +220,12 @@ const Profile = () => {
     "I am new in Canada and I want to make more friends that have the same interests as me"
   );
   const [age, setAge] = useState(25);
-  const [profilePic, setProfilePic] = useState("https://via.placeholder.com/150");
+  // Default profile picture now uses the BLOB_STORAGE_BASE_URL if no picture is set
+  const [profilePic, setProfilePic] = useState(`${BLOB_STORAGE_BASE_URL}defaultProfilePic.jpg`);
   const [isEditing, setIsEditing] = useState(false);
   const [categories, setCategories] = useState([]);
   // For now, availableCategories is empty.
-  // You can later fetch this from your backend API.
+  // Later, integrate with your backend API.
   const [availableCategories, setAvailableCategories] = useState([]);
   const [suggestedMatches, setSuggestedMatches] = useState([
     { id: 1, name: "Sofia Martinez", age: 24, interests: ["Tech", "Books"], photo: "https://via.placeholder.com/150" },
@@ -251,7 +258,7 @@ const Profile = () => {
   const handleGalleryImageUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
-      // In the future, you can upload this file to BLOB_STORAGE_URL
+      // Later, upload this file to Azure Blob Storage using BLOB_STORAGE_BASE_URL
       const imageUrl = URL.createObjectURL(file);
       setGalleryImages((prev) => [...prev, { id: Date.now(), url: imageUrl }]);
     }
