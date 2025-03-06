@@ -39,11 +39,7 @@ const CurrentMatches = ({ currentMatches, handleChat }) => {
         currentMatches.map((match) => (
           <div key={match.id} style={styles.matchedUserCard}>
             <div style={styles.matchContent}>
-              <img
-                src={match.photo}
-                alt={match.name}
-                style={styles.matchPhoto}
-              />
+              <img src={match.photo} alt={match.name} style={styles.matchPhoto} />
               <div style={styles.matchDetails}>
                 <p style={styles.matchName}>
                   <strong>
@@ -56,10 +52,7 @@ const CurrentMatches = ({ currentMatches, handleChat }) => {
               </div>
             </div>
             <div style={styles.buttonRow}>
-              <button
-                onClick={() => handleChat(match.id)}
-                style={styles.matchButton}
-              >
+              <button onClick={() => handleChat(match.id)} style={styles.matchButton}>
                 Chat
               </button>
             </div>
@@ -70,8 +63,12 @@ const CurrentMatches = ({ currentMatches, handleChat }) => {
   );
 };
 
-// Component for displaying suggested matches (similar to your profile page)
-const SuggestedMatches = ({ suggestedMatches, handleApproveMatch }) => {
+// Component for displaying suggested matches with separate actions for removal and approval
+const SuggestedMatches = ({
+  suggestedMatches,
+  handleApproveMatch,
+  handleRemoveSuggestedMatch,
+}) => {
   return (
     <div>
       <h2 style={styles.sectionTitle}>Suggested Matches</h2>
@@ -81,11 +78,7 @@ const SuggestedMatches = ({ suggestedMatches, handleApproveMatch }) => {
         suggestedMatches.map((match) => (
           <div key={match.id} style={styles.matchedUserCard}>
             <div style={styles.matchContent}>
-              <img
-                src={match.photo}
-                alt={match.name}
-                style={styles.matchPhoto}
-              />
+              <img src={match.photo} alt={match.name} style={styles.matchPhoto} />
               <div style={styles.matchDetails}>
                 <p style={styles.matchName}>
                   <strong>
@@ -99,7 +92,7 @@ const SuggestedMatches = ({ suggestedMatches, handleApproveMatch }) => {
             </div>
             <div style={styles.buttonRow}>
               <button
-                onClick={() => handleApproveMatch(match.id)}
+                onClick={() => handleRemoveSuggestedMatch(match.id)}
                 style={styles.removeButton}
               >
                 ❌ Remove
@@ -163,16 +156,23 @@ const MatchesPage = () => {
     },
   ]);
 
+  // Navigate to ChatPage when user clicks Chat
   const handleChat = (id) => {
     navigate("/ChatPage");
   };
 
+  // Approve a match: move the match from suggestedMatches to currentMatches
   const handleApproveMatch = (id) => {
     const match = suggestedMatches.find((m) => m.id === id);
     if (match) {
       setSuggestedMatches(suggestedMatches.filter((m) => m.id !== id));
       setCurrentMatches([...currentMatches, match]);
     }
+  };
+
+  // Remove a suggested match without approving
+  const handleRemoveSuggestedMatch = (id) => {
+    setSuggestedMatches(suggestedMatches.filter((m) => m.id !== id));
   };
 
   return (
@@ -182,16 +182,14 @@ const MatchesPage = () => {
         <div style={styles.contentContainer}>
           {/* Left Column: Current Matches */}
           <div style={styles.column}>
-            <CurrentMatches
-              currentMatches={currentMatches}
-              handleChat={handleChat}
-            />
+            <CurrentMatches currentMatches={currentMatches} handleChat={handleChat} />
           </div>
           {/* Right Column: Suggested Matches */}
           <div style={styles.column}>
             <SuggestedMatches
               suggestedMatches={suggestedMatches}
               handleApproveMatch={handleApproveMatch}
+              handleRemoveSuggestedMatch={handleRemoveSuggestedMatch}
             />
           </div>
         </div>
@@ -201,14 +199,12 @@ const MatchesPage = () => {
 };
 
 const styles = {
-  // Outer container takes full viewport width
   outerContainer: {
     background: "transparent",
     minHeight: "100vh",
     fontFamily: "'Roboto', sans-serif",
     width: "100vw",
   },
-  // Same container style as in your profile page
   contentWrapper: {
     background: "rgba(245,236,227,0.4)",
     backgroundImage: "url('./peach.jpg')",
@@ -221,13 +217,11 @@ const styles = {
     maxWidth: "1200px",
     width: "100%",
   },
-  // Matches the profile page: flex container without extra wrapping settings
   contentContainer: {
     display: "flex",
     gap: "20px",
     alignItems: "stretch",
   },
-  // Use the same column style as in your profile page
   column: {
     flex: 1,
     display: "flex",
@@ -297,7 +291,6 @@ const styles = {
     boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
     transition: "background 0.3s, transform 0.3s",
   },
-  // NavBar style exactly matching the profile page
   navbar: {
     backgroundColor: "#C38282",
     padding: "25px",
