@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Snackbar, Alert } from "@mui/material";
 
 // Load environment variables for API endpoints
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost";
@@ -32,8 +33,9 @@ const NavBar = ({ navigate }) => {
   );
 };
 
-// Component for displaying current matches with a chat button
-const CurrentMatches = ({ currentMatches, handleChat }) => {
+// Component for displaying current (approved and pending outgoing) matches.
+// Pending matches will show a "Pending" label and a Cancel button.
+const CurrentMatches = ({ currentMatches, handleChat, handleCancelRequest }) => {
   return (
     <div>
       <h2 style={styles.sectionTitle}>Current Matches</h2>
@@ -43,15 +45,16 @@ const CurrentMatches = ({ currentMatches, handleChat }) => {
         currentMatches.map((match) => (
           <div key={match.id} style={styles.matchedUserCard}>
             <div style={styles.matchContent}>
-              <img
-                src={match.photo}
-                alt={match.name}
-                style={styles.matchPhoto}
-              />
+              <img src={match.photo} alt={match.name} style={styles.matchPhoto} />
               <div style={styles.matchDetails}>
                 <p style={styles.matchName}>
                   <strong>
-                    {match.name}, {match.age}
+                    {match.name}, {match.age}{" "}
+                    {match.status === "pending" && (
+                      <span style={{ fontStyle: "italic", color: "#ae4040" }}>
+                        (Pending)
+                      </span>
+                    )}
                   </strong>
                 </p>
                 <p style={styles.matchInterests}>
@@ -60,11 +63,49 @@ const CurrentMatches = ({ currentMatches, handleChat }) => {
               </div>
             </div>
             <div style={styles.buttonRow}>
-              <button
-                onClick={() => handleChat(match.id)}
-                style={styles.matchButton}
-              >
+              <button onClick={() => handleChat(match.id)} style={styles.matchButton}>
                 Chat
+              </button>
+              {match.status === "pending" && (
+                <button onClick={() => handleCancelRequest(match.id)} style={styles.removeButton}>
+                  Cancel Request
+                </button>
+              )}
+            </div>
+          </div>
+        ))
+      )}
+    </div>
+  );
+};
+
+// Component for displaying incoming match requests.
+const IncomingRequests = ({ incomingRequests, handleApproveIncoming, handleDeclineIncoming }) => {
+  return (
+    <div>
+      <h2 style={styles.sectionTitle}>Incoming Requests</h2>
+      {incomingRequests.length === 0 ? (
+        <p style={styles.emptyText}>No incoming requests.</p>
+      ) : (
+        incomingRequests.map((match) => (
+          <div key={match.id} style={styles.matchedUserCard}>
+            <div style={styles.matchContent}>
+              <img src={match.photo} alt={match.name} style={styles.matchPhoto} />
+              <div style={styles.matchDetails}>
+                <p style={styles.matchName}>
+                  <strong>{match.name}, {match.age}</strong>
+                </p>
+                <p style={styles.matchInterests}>
+                  Interests: {match.interests.join(", ")}
+                </p>
+              </div>
+            </div>
+            <div style={styles.buttonRow}>
+              <button onClick={() => handleDeclineIncoming(match.id)} style={styles.removeButton}>
+                ❌ Decline
+              </button>
+              <button onClick={() => handleApproveIncoming(match.id)} style={styles.matchButton}>
+                ✅ Approve
               </button>
             </div>
           </div>
@@ -74,12 +115,8 @@ const CurrentMatches = ({ currentMatches, handleChat }) => {
   );
 };
 
-// Component for displaying suggested matches with separate actions for removal and approval
-const SuggestedMatches = ({
-  suggestedMatches,
-  handleApproveMatch,
-  handleRemoveSuggestedMatch,
-}) => {
+// Component for displaying suggested matches with an option to send a match request.
+const SuggestedMatches = ({ suggestedMatches, handleSendRequest, handleDeclineSuggested }) => {
   return (
     <div>
       <h2 style={styles.sectionTitle}>Suggested Matches</h2>
@@ -89,16 +126,10 @@ const SuggestedMatches = ({
         suggestedMatches.map((match) => (
           <div key={match.id} style={styles.matchedUserCard}>
             <div style={styles.matchContent}>
-              <img
-                src={match.photo}
-                alt={match.name}
-                style={styles.matchPhoto}
-              />
+              <img src={match.photo} alt={match.name} style={styles.matchPhoto} />
               <div style={styles.matchDetails}>
                 <p style={styles.matchName}>
-                  <strong>
-                    {match.name}, {match.age}
-                  </strong>
+                  <strong>{match.name}, {match.age}</strong>
                 </p>
                 <p style={styles.matchInterests}>
                   Interests: {match.interests.join(", ")}
@@ -106,17 +137,11 @@ const SuggestedMatches = ({
               </div>
             </div>
             <div style={styles.buttonRow}>
-              <button
-                onClick={() => handleRemoveSuggestedMatch(match.id)}
-                style={styles.removeButton}
-              >
-                ❌ Remove
+              <button onClick={() => handleDeclineSuggested(match.id)} style={styles.removeButton}>
+                ❌ Decline
               </button>
-              <button
-                onClick={() => handleApproveMatch(match.id)}
-                style={styles.matchButton}
-              >
-                ✅ Match
+              <button onClick={() => handleSendRequest(match.id)} style={styles.matchButton}>
+                ➤ Send Request
               </button>
             </div>
           </div>
@@ -128,17 +153,27 @@ const SuggestedMatches = ({
 
 const MatchesPage = () => {
   const navigate = useNavigate();
+
+  // State for matches
   const [currentMatches, setCurrentMatches] = useState([]);
+  const [incomingRequests, setIncomingRequests] = useState([]);
   const [suggestedMatches, setSuggestedMatches] = useState([]);
 
-  // Fetch current matches from the backend API
+  // Notification state for Snackbar
+  const [notification, setNotification] = useState({
+    open: false,
+    message: "",
+    severity: "success", // "success", "error", "info", "warning"
+  });
+
+  // Fetch current matches (approved and pending outgoing) from backend API
   useEffect(() => {
     fetch(`${BASE_URL}${BASE_PATH}/matches/current`)
       .then((res) => res.json())
       .then((data) => setCurrentMatches(data))
       .catch((err) => {
         console.error("Failed to fetch current matches:", err);
-        // Fallback sample data
+        // Fallback sample data (status can be "approved" or "pending")
         setCurrentMatches([
           {
             id: 1,
@@ -146,6 +181,7 @@ const MatchesPage = () => {
             age: 24,
             interests: ["Tech", "Books"],
             photo: "https://via.placeholder.com/150",
+            status: "approved",
           },
           {
             id: 2,
@@ -153,12 +189,42 @@ const MatchesPage = () => {
             age: 26,
             interests: ["Volleyball", "Music"],
             photo: "https://via.placeholder.com/150",
+            status: "approved",
+          },
+          // Outgoing pending request example
+          {
+            id: 6,
+            name: "Kevin Lee",
+            age: 27,
+            interests: ["Sports", "Movies"],
+            photo: "https://via.placeholder.com/150",
+            status: "pending",
           },
         ]);
       });
   }, []);
 
-  // Fetch suggested matches from the backend API
+  // Fetch incoming match requests from backend API
+  useEffect(() => {
+    fetch(`${BASE_URL}${BASE_PATH}/matches/incoming`)
+      .then((res) => res.json())
+      .then((data) => setIncomingRequests(data))
+      .catch((err) => {
+        console.error("Failed to fetch incoming requests:", err);
+        // Fallback sample data
+        setIncomingRequests([
+          {
+            id: 7,
+            name: "Emily Davis",
+            age: 23,
+            interests: ["Art", "Books"],
+            photo: "https://via.placeholder.com/150",
+          },
+        ]);
+      });
+  }, []);
+
+  // Fetch suggested matches from backend API
   useEffect(() => {
     fetch(`${BASE_URL}${BASE_PATH}/matches/suggested`)
       .then((res) => res.json())
@@ -192,22 +258,68 @@ const MatchesPage = () => {
       });
   }, []);
 
+  // Notification close handler
+  const handleNotificationClose = (event, reason) => {
+    if (reason === "clickaway") return;
+    setNotification({ ...notification, open: false });
+  };
+
+  // Navigate to ChatPage
   const handleChat = (id) => {
     navigate("/ChatPage");
   };
 
-  // Approve a match: move it from suggested to current matches
-  const handleApproveMatch = (id) => {
+  // Outgoing: Send a match request to a suggested match.
+  // Add it to currentMatches with status "pending" and remove from suggested.
+  const handleSendRequest = (id) => {
     const match = suggestedMatches.find((m) => m.id === id);
     if (match) {
       setSuggestedMatches(suggestedMatches.filter((m) => m.id !== id));
-      setCurrentMatches([...currentMatches, match]);
+      setCurrentMatches([...currentMatches, { ...match, status: "pending" }]);
+      setNotification({
+        open: true,
+        message: `Match request sent to ${match.name}.`,
+        severity: "info",
+      });
     }
   };
 
-  // Remove a suggested match without approving
-  const handleRemoveSuggestedMatch = (id) => {
-    setSuggestedMatches(suggestedMatches.filter((m) => m.id !== id));
+  // Outgoing: Cancel a pending request.
+  const handleCancelRequest = (id) => {
+    const match = currentMatches.find((m) => m.id === id && m.status === "pending");
+    if (match) {
+      setCurrentMatches(currentMatches.filter((m) => m.id !== id));
+      setNotification({
+        open: true,
+        message: `Request to ${match.name} cancelled.`,
+        severity: "info",
+      });
+    }
+  };
+
+  // Incoming: Approve a received match request.
+  const handleApproveIncoming = (id) => {
+    const match = incomingRequests.find((m) => m.id === id);
+    if (match) {
+      setIncomingRequests(incomingRequests.filter((m) => m.id !== id));
+      setCurrentMatches([...currentMatches, { ...match, status: "approved" }]);
+      setNotification({
+        open: true,
+        message: `You approved the match with ${match.name}.`,
+        severity: "success",
+      });
+    }
+  };
+
+  // Incoming: Decline a received match request.
+  const handleDeclineIncoming = (id) => {
+    const match = incomingRequests.find((m) => m.id === id);
+    setIncomingRequests(incomingRequests.filter((m) => m.id !== id));
+    setNotification({
+      open: true,
+      message: `${match ? match.name : "Match"} request declined.`,
+      severity: "info",
+    });
   };
 
   return (
@@ -215,23 +327,48 @@ const MatchesPage = () => {
       <NavBar navigate={navigate} />
       <div style={styles.contentWrapper}>
         <div style={styles.contentContainer}>
-          {/* Left Column: Current Matches */}
+          {/* Left Column: Current Matches (approved & pending outgoing) */}
           <div style={styles.column}>
             <CurrentMatches
               currentMatches={currentMatches}
               handleChat={handleChat}
+              handleCancelRequest={handleCancelRequest}
             />
           </div>
-          {/* Right Column: Suggested Matches */}
+          {/* Right Column: Incoming Requests and Suggested Matches */}
           <div style={styles.column}>
+            <IncomingRequests
+              incomingRequests={incomingRequests}
+              handleApproveIncoming={handleApproveIncoming}
+              handleDeclineIncoming={handleDeclineIncoming}
+            />
             <SuggestedMatches
               suggestedMatches={suggestedMatches}
-              handleApproveMatch={handleApproveMatch}
-              handleRemoveSuggestedMatch={handleRemoveSuggestedMatch}
+              handleSendRequest={handleSendRequest}
+              handleDeclineSuggested={(id) => {
+                const match = suggestedMatches.find((m) => m.id === id);
+                setSuggestedMatches(suggestedMatches.filter((m) => m.id !== id));
+                setNotification({
+                  open: true,
+                  message: `${match ? match.name : "Match"} declined.`,
+                  severity: "info",
+                });
+              }}
             />
           </div>
         </div>
       </div>
+      {/* Notification Snackbar */}
+      <Snackbar
+        open={notification.open}
+        autoHideDuration={3000}
+        onClose={handleNotificationClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert onClose={handleNotificationClose} severity={notification.severity} sx={{ width: "100%" }}>
+          {notification.message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };
