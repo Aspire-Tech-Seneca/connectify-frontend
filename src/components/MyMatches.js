@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Snackbar, Alert } from "@mui/material";
+import { Snackbar, Alert, IconButton, Badge } from "@mui/material";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 
 // Load environment variables for API endpoints
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost";
 const BASE_PATH = process.env.REACT_APP_BASE_PATH || "/api";
 
-// Navigation Bar Component – same as your profile page nav bar
-const NavBar = ({ navigate }) => {
+// Modified NavBar to include a notification icon with badge
+const NavBar = ({ navigate, notificationCount }) => {
   const navItems = [
     { label: "Home", path: "/home" },
     { label: "Chat", path: "/ChatPage" },
@@ -16,6 +17,7 @@ const NavBar = ({ navigate }) => {
     { label: "My Matches", path: "/matches" },
     { label: "Logout", path: "/login" },
   ];
+
   return (
     <nav style={styles.navbar}>
       <div style={styles.navItems}>
@@ -28,13 +30,18 @@ const NavBar = ({ navigate }) => {
             {item.label}
           </button>
         ))}
+        {/* Notification Icon */}
+        <IconButton onClick={() => navigate("/notifications")}>
+          <Badge badgeContent={notificationCount} color="error">
+            <NotificationsIcon style={{ color: "white" }} />
+          </Badge>
+        </IconButton>
       </div>
     </nav>
   );
 };
 
 // Component for displaying current (approved and pending outgoing) matches.
-// Pending matches will show a "Pending" label and a Cancel button.
 const CurrentMatches = ({ currentMatches, handleChat, handleCancelRequest }) => {
   return (
     <div>
@@ -137,10 +144,16 @@ const SuggestedMatches = ({ suggestedMatches, handleSendRequest, handleDeclineSu
               </div>
             </div>
             <div style={styles.buttonRow}>
-              <button onClick={() => handleDeclineSuggested(match.id)} style={styles.removeButton}>
+              <button
+                onClick={() => handleDeclineSuggested(match.id)}
+                style={styles.removeButton}
+              >
                 ❌ Decline
               </button>
-              <button onClick={() => handleSendRequest(match.id)} style={styles.matchButton}>
+              <button
+                onClick={() => handleSendRequest(match.id)}
+                style={styles.matchButton}
+              >
                 ➤ Send Request
               </button>
             </div>
@@ -322,9 +335,12 @@ const MatchesPage = () => {
     });
   };
 
+  // For the top bar notification badge, we can show the count of new incoming requests.
+  const notificationCount = incomingRequests.length;
+
   return (
     <div style={styles.outerContainer}>
-      <NavBar navigate={navigate} />
+      <NavBar navigate={navigate} notificationCount={notificationCount} />
       <div style={styles.contentWrapper}>
         <div style={styles.contentContainer}>
           {/* Left Column: Current Matches (approved & pending outgoing) */}
