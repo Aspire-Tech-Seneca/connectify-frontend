@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-// Using environment variables for base URL and base path
+// Load environment variables for API endpoints and blob storage
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost";
 const BASE_PATH = process.env.REACT_APP_BASE_PATH || "/api";
 const BLOB_STORAGE_URL = process.env.REACT_APP_BLOB_STORAGE_URL || "https://yourpublicblobstorage.com";
@@ -218,7 +218,7 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [categories, setCategories] = useState([]);
   // For now, availableCategories is empty.
-  // Later, you can fetch this from your backend API.
+  // You can later fetch this from your backend API.
   const [availableCategories, setAvailableCategories] = useState([]);
   const [suggestedMatches, setSuggestedMatches] = useState([
     { id: 1, name: "Sofia Martinez", age: 24, interests: ["Tech", "Books"], photo: "https://via.placeholder.com/150" },
@@ -230,8 +230,8 @@ const Profile = () => {
   const [galleryImages, setGalleryImages] = useState([]);
   const profilePicInputRef = useRef(null);
 
-  // The API call for categories is currently omitted.
-  // You can integrate the call later when your backend API is ready.
+  // The API call for categories is omitted for now.
+  // Once your backend API is ready, integrate it here.
   // useEffect(() => {
   //   fetch(`${BASE_URL}${BASE_PATH}/categories`)
   //     .then((res) => res.json())
@@ -240,8 +240,6 @@ const Profile = () => {
   //     })
   //     .catch((err) => {
   //       console.error("Failed to fetch categories:", err);
-  //       // Fallback if the API call fails
-  //       setAvailableCategories(["Tech", "Books", "Art", "Music", "Sports"]);
   //     });
   // }, []);
 
@@ -253,7 +251,7 @@ const Profile = () => {
   const handleGalleryImageUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
-      // You might later upload this file to blob storage using BLOB_STORAGE_URL
+      // In the future, you can upload this file to BLOB_STORAGE_URL
       const imageUrl = URL.createObjectURL(file);
       setGalleryImages((prev) => [...prev, { id: Date.now(), url: imageUrl }]);
     }
@@ -317,14 +315,12 @@ const Profile = () => {
 };
 
 const styles = {
-  // Outer container now takes the full viewport width
   outerContainer: {
     background: "transparent",
     minHeight: "100vh",
     fontFamily: "'Roboto', sans-serif",
     width: "100vw",
   },
-  // Content wrapper remains the same for the inner content
   contentWrapper: {
     background: "rgba(245,236,227,0.4)",
     backgroundImage: "url('./peach.jpg')",
@@ -532,7 +528,6 @@ const styles = {
     display: "flex",
     gap: "10px",
   },
-  // Updated NavBar style to match the MyMatches page (full width)
   navbar: {
     backgroundColor: "#C38282",
     padding: "25px",
@@ -556,7 +551,6 @@ const styles = {
     transition: "color 0.3s",
     whiteSpace: "nowrap",
   },
-  // Styles for Categories section in the profile card
   categoriesContainer: {
     margin: "10px 0",
   },
