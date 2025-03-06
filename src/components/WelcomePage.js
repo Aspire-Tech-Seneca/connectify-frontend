@@ -3,7 +3,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Container, Typography, Box, Button } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import peach from "./peach.jpg"; // Ensure the path is correct
+import peach from "./peach.jpg"; // Consider using an env variable if needed
 
 // Fullscreen background container with the peach image
 const BackgroundContainer = styled("div")({
@@ -18,11 +18,11 @@ const BackgroundContainer = styled("div")({
   position: "relative",
 });
 
-// Content container with a semi-transparent nude overlay
+// Content container with a semi-transparent overlay
 const ContentContainer = styled(Container)({
   position: "relative",
   zIndex: 2,
-  background: "rgba(245,236,227,0.4)", // Nude overlay at 40% opacity
+  background: "rgba(245,236,227,0.4)", // Semi-transparent overlay
   padding: "30px",
   borderRadius: "10px",
   boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.6)",
@@ -48,22 +48,32 @@ const StyledButton = styled(Button)({
 
 const WelcomePage = () => {
   const navigate = useNavigate();
+
   return (
     <BackgroundContainer>
       <ContentContainer>
         {/* Header */}
-        <Typography variant="h4" gutterBottom sx={{ fontWeight: "bold", color: "#C38282" }}>
+        <Typography
+          variant="h4"
+          gutterBottom
+          sx={{ fontWeight: "bold", color: "#C38282" }}
+        >
           Connectify: a platform that brings people together.
         </Typography>
 
         {/* Hero Section */}
         <Box sx={{ my: 4 }}>
-          <Typography variant="h5" gutterBottom sx={{ color: "#5D4037", mb: 2 }}>
+          <Typography
+            variant="h5"
+            gutterBottom
+            sx={{ color: "#5D4037", mb: 2 }}
+          >
             Connect with People Who Share Your Passions
           </Typography>
           <Typography variant="body1" sx={{ color: "#5D4037", mb: 3 }}>
-            Welcome to Connectify – where you can discover your community based on shared interests.
-            Whether you're into tech, art, sports, or literature, find friends and build meaningful connections.
+            Welcome to Connectify – where you can discover your community based
+            on shared interests. Whether you're into tech, art, sports, or
+            literature, find friends and build meaningful connections.
           </Typography>
           <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
             <StyledButton onClick={() => navigate("/signup")}>
@@ -89,8 +99,8 @@ const WelcomePage = () => {
             What Our Users Say
           </Typography>
           <Typography variant="body2" sx={{ color: "#5D4037", mb: 1 }}>
-            "Connectify has completely transformed the way I connect with people who share my interests.
-            I’ve made lifelong friends!"
+            "Connectify has completely transformed the way I connect with people
+            who share my interests. I’ve made lifelong friends!"
           </Typography>
           <Typography variant="caption" sx={{ color: "#C38282" }}>
             — Jordan
@@ -107,18 +117,23 @@ const WelcomePage = () => {
             boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
           }}
         >
-          <Typography variant="h6" gutterBottom sx={{ color: "#5D4037", mb: 2 }}>
+          <Typography
+            variant="h6"
+            gutterBottom
+            sx={{ color: "#5D4037", mb: 2 }}
+          >
             Why Choose Connectify?
           </Typography>
           <Typography variant="body1" sx={{ color: "#5D4037" }}>
-            Our innovative matching system connects you with like-minded individuals,
-            helping you form meaningful relationships. Join our vibrant community and explore
-            new opportunities to learn, collaborate, and grow.
+            Our innovative matching system connects you with like-minded
+            individuals, helping you form meaningful relationships. Join our
+            vibrant community and explore new opportunities to learn, collaborate,
+            and grow.
           </Typography>
         </Box>
 
-        {/* Footer */}
-        
+        {/* Optional Footer or additional content could be added here */}
+
       </ContentContainer>
     </BackgroundContainer>
   );
