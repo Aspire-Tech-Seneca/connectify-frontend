@@ -1,5 +1,10 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+
+// Using environment variables for base URL and base path
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost";
+const BASE_PATH = process.env.REACT_APP_BASE_PATH || "/api";
+const BLOB_STORAGE_URL = process.env.REACT_APP_BLOB_STORAGE_URL || "https://yourpublicblobstorage.com";
 
 // Navigation Bar Component – menu items centered
 const NavBar = ({ navigate }) => {
@@ -28,7 +33,7 @@ const NavBar = ({ navigate }) => {
   );
 };
 
-// Profile Card Component with Categories Option
+// Profile Card Component with Categories Option (max 3)
 const ProfileCard = ({
   profilePic,
   isEditing,
@@ -84,19 +89,20 @@ const ProfileCard = ({
               style={styles.textarea}
               placeholder="Bio"
             />
-            {/* Categories selection */}
+            {/* Categories selection with max 3 selections */}
             <div style={styles.categoriesContainer}>
-              <p style={styles.categoryTitle}>Choose Categories:</p>
+              <p style={styles.categoryTitle}>Choose Categories (max 3):</p>
               <div style={styles.checkboxGroup}>
                 {availableCategories.map((cat) => (
                   <label key={cat} style={styles.checkboxLabel}>
                     <input
                       type="checkbox"
                       checked={categories.includes(cat)}
+                      disabled={!categories.includes(cat) && categories.length >= 3}
                       onChange={() => {
                         if (categories.includes(cat)) {
                           setCategories(categories.filter((c) => c !== cat));
-                        } else {
+                        } else if (categories.length < 3) {
                           setCategories([...categories, cat]);
                         }
                       }}
@@ -120,7 +126,8 @@ const ProfileCard = ({
               <strong>Bio:</strong> {bio}
             </p>
             <p style={styles.profileDetail}>
-              <strong>Categories:</strong> {categories.length ? categories.join(", ") : "None selected"}
+              <strong>Categories:</strong>{" "}
+              {categories.length ? categories.join(", ") : "None selected"}
             </p>
             <button onClick={() => setIsEditing(true)} style={styles.editButton}>
               Edit Profile
@@ -210,7 +217,9 @@ const Profile = () => {
   const [profilePic, setProfilePic] = useState("https://via.placeholder.com/150");
   const [isEditing, setIsEditing] = useState(false);
   const [categories, setCategories] = useState([]);
-  const availableCategories = ["Tech", "Books", "Art", "Music", "Sports"];
+  // For now, availableCategories is empty.
+  // Later, you can fetch this from your backend API.
+  const [availableCategories, setAvailableCategories] = useState([]);
   const [suggestedMatches, setSuggestedMatches] = useState([
     { id: 1, name: "Sofia Martinez", age: 24, interests: ["Tech", "Books"], photo: "https://via.placeholder.com/150" },
     { id: 2, name: "Alex Johnson", age: 26, interests: ["Volleyball", "Music"], photo: "https://via.placeholder.com/150" },
@@ -221,6 +230,21 @@ const Profile = () => {
   const [galleryImages, setGalleryImages] = useState([]);
   const profilePicInputRef = useRef(null);
 
+  // The API call for categories is currently omitted.
+  // You can integrate the call later when your backend API is ready.
+  // useEffect(() => {
+  //   fetch(`${BASE_URL}${BASE_PATH}/categories`)
+  //     .then((res) => res.json())
+  //     .then((data) => {
+  //       setAvailableCategories(data);
+  //     })
+  //     .catch((err) => {
+  //       console.error("Failed to fetch categories:", err);
+  //       // Fallback if the API call fails
+  //       setAvailableCategories(["Tech", "Books", "Art", "Music", "Sports"]);
+  //     });
+  // }, []);
+
   const handleProfilePicChange = (event) => {
     const file = event.target.files[0];
     if (file) setProfilePic(URL.createObjectURL(file));
@@ -229,6 +253,7 @@ const Profile = () => {
   const handleGalleryImageUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
+      // You might later upload this file to blob storage using BLOB_STORAGE_URL
       const imageUrl = URL.createObjectURL(file);
       setGalleryImages((prev) => [...prev, { id: Date.now(), url: imageUrl }]);
     }
