@@ -1,5 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+
+// Load environment variables for API endpoints
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost";
+const BASE_PATH = process.env.REACT_APP_BASE_PATH || "/api";
 
 // Navigation Bar Component – same as your profile page nav bar
 const NavBar = ({ navigate }) => {
@@ -39,7 +43,11 @@ const CurrentMatches = ({ currentMatches, handleChat }) => {
         currentMatches.map((match) => (
           <div key={match.id} style={styles.matchedUserCard}>
             <div style={styles.matchContent}>
-              <img src={match.photo} alt={match.name} style={styles.matchPhoto} />
+              <img
+                src={match.photo}
+                alt={match.name}
+                style={styles.matchPhoto}
+              />
               <div style={styles.matchDetails}>
                 <p style={styles.matchName}>
                   <strong>
@@ -52,7 +60,10 @@ const CurrentMatches = ({ currentMatches, handleChat }) => {
               </div>
             </div>
             <div style={styles.buttonRow}>
-              <button onClick={() => handleChat(match.id)} style={styles.matchButton}>
+              <button
+                onClick={() => handleChat(match.id)}
+                style={styles.matchButton}
+              >
                 Chat
               </button>
             </div>
@@ -78,7 +89,11 @@ const SuggestedMatches = ({
         suggestedMatches.map((match) => (
           <div key={match.id} style={styles.matchedUserCard}>
             <div style={styles.matchContent}>
-              <img src={match.photo} alt={match.name} style={styles.matchPhoto} />
+              <img
+                src={match.photo}
+                alt={match.name}
+                style={styles.matchPhoto}
+              />
               <div style={styles.matchDetails}>
                 <p style={styles.matchName}>
                   <strong>
@@ -113,55 +128,75 @@ const SuggestedMatches = ({
 
 const MatchesPage = () => {
   const navigate = useNavigate();
+  const [currentMatches, setCurrentMatches] = useState([]);
+  const [suggestedMatches, setSuggestedMatches] = useState([]);
 
-  // Sample data for current matches and suggested matches
-  const [currentMatches, setCurrentMatches] = useState([
-    {
-      id: 1,
-      name: "Sofia Martinez",
-      age: 24,
-      interests: ["Tech", "Books"],
-      photo: "https://via.placeholder.com/150",
-    },
-    {
-      id: 2,
-      name: "Alex Johnson",
-      age: 26,
-      interests: ["Volleyball", "Music"],
-      photo: "https://via.placeholder.com/150",
-    },
-  ]);
+  // Fetch current matches from the backend API
+  useEffect(() => {
+    fetch(`${BASE_URL}${BASE_PATH}/matches/current`)
+      .then((res) => res.json())
+      .then((data) => setCurrentMatches(data))
+      .catch((err) => {
+        console.error("Failed to fetch current matches:", err);
+        // Fallback sample data
+        setCurrentMatches([
+          {
+            id: 1,
+            name: "Sofia Martinez",
+            age: 24,
+            interests: ["Tech", "Books"],
+            photo: "https://via.placeholder.com/150",
+          },
+          {
+            id: 2,
+            name: "Alex Johnson",
+            age: 26,
+            interests: ["Volleyball", "Music"],
+            photo: "https://via.placeholder.com/150",
+          },
+        ]);
+      });
+  }, []);
 
-  const [suggestedMatches, setSuggestedMatches] = useState([
-    {
-      id: 3,
-      name: "Daniel Kim",
-      age: 25,
-      interests: ["Gaming", "Books"],
-      photo: "https://via.placeholder.com/150",
-    },
-    {
-      id: 4,
-      name: "Lina Roberts",
-      age: 22,
-      interests: ["Art", "Tech"],
-      photo: "https://via.placeholder.com/150",
-    },
-    {
-      id: 5,
-      name: "George Evans",
-      age: 28,
-      interests: ["Fitness", "Books"],
-      photo: "https://via.placeholder.com/150",
-    },
-  ]);
+  // Fetch suggested matches from the backend API
+  useEffect(() => {
+    fetch(`${BASE_URL}${BASE_PATH}/matches/suggested`)
+      .then((res) => res.json())
+      .then((data) => setSuggestedMatches(data))
+      .catch((err) => {
+        console.error("Failed to fetch suggested matches:", err);
+        // Fallback sample data
+        setSuggestedMatches([
+          {
+            id: 3,
+            name: "Daniel Kim",
+            age: 25,
+            interests: ["Gaming", "Books"],
+            photo: "https://via.placeholder.com/150",
+          },
+          {
+            id: 4,
+            name: "Lina Roberts",
+            age: 22,
+            interests: ["Art", "Tech"],
+            photo: "https://via.placeholder.com/150",
+          },
+          {
+            id: 5,
+            name: "George Evans",
+            age: 28,
+            interests: ["Fitness", "Books"],
+            photo: "https://via.placeholder.com/150",
+          },
+        ]);
+      });
+  }, []);
 
-  // Navigate to ChatPage when user clicks Chat
   const handleChat = (id) => {
     navigate("/ChatPage");
   };
 
-  // Approve a match: move the match from suggestedMatches to currentMatches
+  // Approve a match: move it from suggested to current matches
   const handleApproveMatch = (id) => {
     const match = suggestedMatches.find((m) => m.id === id);
     if (match) {
@@ -182,7 +217,10 @@ const MatchesPage = () => {
         <div style={styles.contentContainer}>
           {/* Left Column: Current Matches */}
           <div style={styles.column}>
-            <CurrentMatches currentMatches={currentMatches} handleChat={handleChat} />
+            <CurrentMatches
+              currentMatches={currentMatches}
+              handleChat={handleChat}
+            />
           </div>
           {/* Right Column: Suggested Matches */}
           <div style={styles.column}>
