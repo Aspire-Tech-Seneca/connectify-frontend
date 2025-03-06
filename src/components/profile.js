@@ -28,16 +28,19 @@ const NavBar = ({ navigate }) => {
   );
 };
 
-// Profile Card Component
+// Profile Card Component with Categories Option
 const ProfileCard = ({
   profilePic,
   isEditing,
   name,
   age,
   bio,
+  categories,
+  availableCategories,
   setName,
   setAge,
   setBio,
+  setCategories,
   setIsEditing,
   handleProfilePicChange,
   hiddenFileInputRef,
@@ -81,6 +84,28 @@ const ProfileCard = ({
               style={styles.textarea}
               placeholder="Bio"
             />
+            {/* Categories selection */}
+            <div style={styles.categoriesContainer}>
+              <p style={styles.categoryTitle}>Choose Categories:</p>
+              <div style={styles.checkboxGroup}>
+                {availableCategories.map((cat) => (
+                  <label key={cat} style={styles.checkboxLabel}>
+                    <input
+                      type="checkbox"
+                      checked={categories.includes(cat)}
+                      onChange={() => {
+                        if (categories.includes(cat)) {
+                          setCategories(categories.filter((c) => c !== cat));
+                        } else {
+                          setCategories([...categories, cat]);
+                        }
+                      }}
+                    />
+                    {cat}
+                  </label>
+                ))}
+              </div>
+            </div>
             <button onClick={() => setIsEditing(false)} style={styles.editButton}>
               Save Profile
             </button>
@@ -93,6 +118,9 @@ const ProfileCard = ({
             </p>
             <p style={styles.profileDetail}>
               <strong>Bio:</strong> {bio}
+            </p>
+            <p style={styles.profileDetail}>
+              <strong>Categories:</strong> {categories.length ? categories.join(", ") : "None selected"}
             </p>
             <button onClick={() => setIsEditing(true)} style={styles.editButton}>
               Edit Profile
@@ -181,6 +209,8 @@ const Profile = () => {
   const [age, setAge] = useState(25);
   const [profilePic, setProfilePic] = useState("https://via.placeholder.com/150");
   const [isEditing, setIsEditing] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const availableCategories = ["Tech", "Books", "Art", "Music", "Sports"];
   const [suggestedMatches, setSuggestedMatches] = useState([
     { id: 1, name: "Sofia Martinez", age: 24, interests: ["Tech", "Books"], photo: "https://via.placeholder.com/150" },
     { id: 2, name: "Alex Johnson", age: 26, interests: ["Volleyball", "Music"], photo: "https://via.placeholder.com/150" },
@@ -235,9 +265,12 @@ const Profile = () => {
               name={name}
               age={age}
               bio={bio}
+              categories={categories}
+              availableCategories={availableCategories}
               setName={setName}
               setAge={setAge}
               setBio={setBio}
+              setCategories={setCategories}
               setIsEditing={setIsEditing}
               handleProfilePicChange={handleProfilePicChange}
               hiddenFileInputRef={profilePicInputRef}
@@ -491,12 +524,30 @@ const styles = {
   navButton: {
     background: "none",
     border: "none",
-    color: "white", // white text for nav links
+    color: "white",
     fontSize: "20px",
     fontWeight: "bold",
     cursor: "pointer",
     transition: "color 0.3s",
     whiteSpace: "nowrap",
+  },
+  // Styles for Categories section in the profile card
+  categoriesContainer: {
+    margin: "10px 0",
+  },
+  categoryTitle: {
+    marginBottom: "5px",
+    fontWeight: "bold",
+  },
+  checkboxGroup: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "10px",
+  },
+  checkboxLabel: {
+    display: "flex",
+    alignItems: "center",
+    gap: "5px",
   },
 };
 
