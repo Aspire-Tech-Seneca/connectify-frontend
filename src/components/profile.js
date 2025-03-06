@@ -4,8 +4,33 @@ import { useNavigate } from "react-router-dom";
 // Load environment variables
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost";
 const BASE_PATH = process.env.REACT_APP_BASE_PATH || "/api";
-// Use the Azure Blob Storage base URL for images from env
+// Azure Blob Storage Base URL for images
 const BLOB_STORAGE_BASE_URL = process.env.REACT_APP_BLOB_STORAGE_BASE_URL || "https://yourpublicblobstorage.com/";
+// SAS token used to authorize the upload. Ensure it starts with "?".
+const BLOB_SAS_TOKEN = process.env.REACT_APP_BLOB_SAS_TOKEN || "";
+
+/**
+ * Upload a file to Azure Blob Storage using the SAS token.
+ * Returns a Promise that resolves with the public URL of the uploaded file.
+ */
+async function uploadFileToBlob(file) {
+  const uniqueFileName = `${Date.now()}_${file.name}`;
+  // Construct the upload URL: base URL + file name + SAS token
+  const uploadUrl = `${BLOB_STORAGE_BASE_URL}${uniqueFileName}${BLOB_SAS_TOKEN}`;
+  const response = await fetch(uploadUrl, {
+    method: "PUT",
+    headers: {
+      "x-ms-blob-type": "BlockBlob",
+      "Content-Type": file.type,
+    },
+    body: file,
+  });
+  if (!response.ok) {
+    throw new Error("Upload failed");
+  }
+  // Assuming the container is public, return the URL without the SAS token
+  return `${BLOB_STORAGE_BASE_URL}${uniqueFileName}`;
+}
 
 // Navigation Bar Component – menu items centered
 const NavBar = ({ navigate }) => {
@@ -56,7 +81,6 @@ const ProfileCard = ({
       {/* Profile picture on the left */}
       <div style={styles.profilePicContainer}>
         <img
-          // Use the Azure Blob Storage base URL for the default profile pic
           src={profilePic || `${BLOB_STORAGE_BASE_URL}defaultProfilePic.jpg`}
           alt="Profile"
           style={styles.fixedProfilePic}
@@ -220,12 +244,11 @@ const Profile = () => {
     "I am new in Canada and I want to make more friends that have the same interests as me"
   );
   const [age, setAge] = useState(25);
-  // Default profile picture now uses the BLOB_STORAGE_BASE_URL if no picture is set
+  // Default profile picture uses the Azure Blob Storage URL if not set
   const [profilePic, setProfilePic] = useState(`${BLOB_STORAGE_BASE_URL}defaultProfilePic.jpg`);
   const [isEditing, setIsEditing] = useState(false);
   const [categories, setCategories] = useState([]);
-  // For now, availableCategories is empty.
-  // Later, integrate with your backend API.
+  // For now, availableCategories is empty. Later integrate with your backend API.
   const [availableCategories, setAvailableCategories] = useState([]);
   const [suggestedMatches, setSuggestedMatches] = useState([
     { id: 1, name: "Sofia Martinez", age: 24, interests: ["Tech", "Books"], photo: "https://via.placeholder.com/150" },
@@ -250,17 +273,29 @@ const Profile = () => {
   //     });
   // }, []);
 
-  const handleProfilePicChange = (event) => {
-    const file = event.target.files[0];
-    if (file) setProfilePic(URL.createObjectURL(file));
-  };
-
-  const handleGalleryImageUpload = (event) => {
+  // Update profile picture by uploading to Azure Blob Storage
+  const handleProfilePicChange = async (event) => {
     const file = event.target.files[0];
     if (file) {
-      // Later, upload this file to Azure Blob Storage using BLOB_STORAGE_BASE_URL
-      const imageUrl = URL.createObjectURL(file);
-      setGalleryImages((prev) => [...prev, { id: Date.now(), url: imageUrl }]);
+      try {
+        const uploadedUrl = await uploadFileToBlob(file);
+        setProfilePic(uploadedUrl);
+      } catch (error) {
+        console.error("Profile picture upload failed:", error);
+      }
+    }
+  };
+
+  // Upload gallery image to Azure Blob Storage and add it to the gallery
+  const handleGalleryImageUpload = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      try {
+        const uploadedUrl = await uploadFileToBlob(file);
+        setGalleryImages((prev) => [...prev, { id: Date.now(), url: uploadedUrl }]);
+      } catch (error) {
+        console.error("Gallery image upload failed:", error);
+      }
     }
   };
 
