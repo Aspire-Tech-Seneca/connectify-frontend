@@ -1,27 +1,38 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Snackbar, Alert, IconButton, Badge } from "@mui/material";
+import { Snackbar, Alert, IconButton, Badge, Popover, List, ListItem, ListItemText } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 
 // Load environment variables for API endpoints
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost";
 const BASE_PATH = process.env.REACT_APP_BASE_PATH || "/api";
 
-// Modified NavBar to include a notification icon with badge
-const NavBar = ({ navigate, notificationCount }) => {
-  const navItems = [
-    { label: "Home", path: "/home" },
-    { label: "Chat", path: "/ChatPage" },
-    { label: "My Profile", path: "/profile" },
-    { label: "About Us", path: "/about" },
-    { label: "My Matches", path: "/matches" },
-    { label: "Logout", path: "/login" },
-  ];
+// Modified NavBar that includes a notification icon with a popover list
+const NavBar = ({ navigate, notificationCount, notifications }) => {
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleNotificationIconClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClosePopover = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
+  const popoverId = open ? "notification-popover" : undefined;
 
   return (
     <nav style={styles.navbar}>
       <div style={styles.navItems}>
-        {navItems.map((item) => (
+        {[
+          { label: "Home", path: "/home" },
+          { label: "Chat", path: "/ChatPage" },
+          { label: "My Profile", path: "/profile" },
+          { label: "About Us", path: "/about" },
+          { label: "My Matches", path: "/matches" },
+          { label: "Logout", path: "/login" },
+        ].map((item) => (
           <button
             key={item.label}
             style={styles.navButton}
@@ -31,11 +42,47 @@ const NavBar = ({ navigate, notificationCount }) => {
           </button>
         ))}
         {/* Notification Icon */}
-        <IconButton onClick={() => navigate("/notifications")}>
+        <IconButton onClick={handleNotificationIconClick}>
           <Badge badgeContent={notificationCount} color="error">
             <NotificationsIcon style={{ color: "white" }} />
           </Badge>
         </IconButton>
+        {/* Popover with list of notifications */}
+        <Popover
+          id={popoverId}
+          open={open}
+          anchorEl={anchorEl}
+          onClose={handleClosePopover}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "center",
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "center",
+          }}
+        >
+          <List>
+            {notifications.length === 0 ? (
+              <ListItem>
+                <ListItemText primary="No new notifications" />
+              </ListItem>
+            ) : (
+              notifications.map((notif, index) => (
+                <ListItem
+                  button
+                  key={index}
+                  onClick={() => {
+                    handleClosePopover();
+                    navigate("/notifications");
+                  }}
+                >
+                  <ListItemText primary={notif} />
+                </ListItem>
+              ))
+            )}
+          </List>
+        </Popover>
       </div>
     </nav>
   );
@@ -167,19 +214,20 @@ const SuggestedMatches = ({ suggestedMatches, handleSendRequest, handleDeclineSu
 const MatchesPage = () => {
   const navigate = useNavigate();
 
-  // State for matches
+  // States for matches
   const [currentMatches, setCurrentMatches] = useState([]);
   const [incomingRequests, setIncomingRequests] = useState([]);
   const [suggestedMatches, setSuggestedMatches] = useState([]);
-
+  // State for top bar notifications (a list of string messages)
+  const [notificationList, setNotificationList] = useState([]);
   // Notification state for Snackbar
-  const [notification, setNotification] = useState({
+  const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
     severity: "success", // "success", "error", "info", "warning"
   });
 
-  // Fetch current matches (approved and pending outgoing) from backend API
+  // Fetch current matches from backend API
   useEffect(() => {
     fetch(`${BASE_URL}${BASE_PATH}/matches/current`)
       .then((res) => res.json())
@@ -271,10 +319,10 @@ const MatchesPage = () => {
       });
   }, []);
 
-  // Notification close handler
-  const handleNotificationClose = (event, reason) => {
+  // Snackbar close handler
+  const handleSnackbarClose = (event, reason) => {
     if (reason === "clickaway") return;
-    setNotification({ ...notification, open: false });
+    setSnackbar({ ...snackbar, open: false });
   };
 
   // Navigate to ChatPage
@@ -282,65 +330,56 @@ const MatchesPage = () => {
     navigate("/ChatPage");
   };
 
-  // Outgoing: Send a match request to a suggested match.
-  // Add it to currentMatches with status "pending" and remove from suggested.
+  // Outgoing: Send a match request (move from suggested to current as pending)
   const handleSendRequest = (id) => {
     const match = suggestedMatches.find((m) => m.id === id);
     if (match) {
       setSuggestedMatches(suggestedMatches.filter((m) => m.id !== id));
       setCurrentMatches([...currentMatches, { ...match, status: "pending" }]);
-      setNotification({
-        open: true,
-        message: `Match request sent to ${match.name}.`,
-        severity: "info",
-      });
+      const message = `Match request sent to ${match.name}.`;
+      setSnackbar({ open: true, message, severity: "info" });
+      setNotificationList([...notificationList, message]);
     }
   };
 
-  // Outgoing: Cancel a pending request.
+  // Outgoing: Cancel a pending request
   const handleCancelRequest = (id) => {
     const match = currentMatches.find((m) => m.id === id && m.status === "pending");
     if (match) {
       setCurrentMatches(currentMatches.filter((m) => m.id !== id));
-      setNotification({
-        open: true,
-        message: `Request to ${match.name} cancelled.`,
-        severity: "info",
-      });
+      const message = `Request to ${match.name} cancelled.`;
+      setSnackbar({ open: true, message, severity: "info" });
+      setNotificationList([...notificationList, message]);
     }
   };
 
-  // Incoming: Approve a received match request.
+  // Incoming: Approve a received match request
   const handleApproveIncoming = (id) => {
     const match = incomingRequests.find((m) => m.id === id);
     if (match) {
       setIncomingRequests(incomingRequests.filter((m) => m.id !== id));
       setCurrentMatches([...currentMatches, { ...match, status: "approved" }]);
-      setNotification({
-        open: true,
-        message: `You approved the match with ${match.name}.`,
-        severity: "success",
-      });
+      const message = `You approved the match with ${match.name}.`;
+      setSnackbar({ open: true, message, severity: "success" });
+      setNotificationList([...notificationList, message]);
     }
   };
 
-  // Incoming: Decline a received match request.
+  // Incoming: Decline a received match request
   const handleDeclineIncoming = (id) => {
     const match = incomingRequests.find((m) => m.id === id);
     setIncomingRequests(incomingRequests.filter((m) => m.id !== id));
-    setNotification({
-      open: true,
-      message: `${match ? match.name : "Match"} request declined.`,
-      severity: "info",
-    });
+    const message = `${match ? match.name : "Match"} request declined.`;
+    setSnackbar({ open: true, message, severity: "info" });
+    setNotificationList([...notificationList, message]);
   };
 
-  // For the top bar notification badge, we can show the count of new incoming requests.
+  // For the top bar notification badge, we'll use the length of incomingRequests as a simple count.
   const notificationCount = incomingRequests.length;
 
   return (
     <div style={styles.outerContainer}>
-      <NavBar navigate={navigate} notificationCount={notificationCount} />
+      <NavBar navigate={navigate} notificationCount={notificationCount} notifications={notificationList} />
       <div style={styles.contentWrapper}>
         <div style={styles.contentContainer}>
           {/* Left Column: Current Matches (approved & pending outgoing) */}
@@ -364,25 +403,23 @@ const MatchesPage = () => {
               handleDeclineSuggested={(id) => {
                 const match = suggestedMatches.find((m) => m.id === id);
                 setSuggestedMatches(suggestedMatches.filter((m) => m.id !== id));
-                setNotification({
-                  open: true,
-                  message: `${match ? match.name : "Match"} declined.`,
-                  severity: "info",
-                });
+                const message = `${match ? match.name : "Match"} declined.`;
+                setSnackbar({ open: true, message, severity: "info" });
+                setNotificationList([...notificationList, message]);
               }}
             />
           </div>
         </div>
       </div>
-      {/* Notification Snackbar */}
+      {/* Snackbar for action notifications */}
       <Snackbar
-        open={notification.open}
+        open={snackbar.open}
         autoHideDuration={3000}
-        onClose={handleNotificationClose}
+        onClose={handleSnackbarClose}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
-        <Alert onClose={handleNotificationClose} severity={notification.severity} sx={{ width: "100%" }}>
-          {notification.message}
+        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: "100%" }}>
+          {snackbar.message}
         </Alert>
       </Snackbar>
     </div>
