@@ -127,7 +127,7 @@ const LoginForm = () => {
         throw new Error(data.error || "Login failed");
       }
 
-      localStorage.setItem("authToken", data.token);
+      localStorage.setItem("authToken", data.access);
       alert("Login successful!");
       // Redirect to the profile page or home page as needed
       navigate("/profile");
