@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { IconButton, Badge, Popover, List, ListItem, ListItemText } from "@mui/material";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 
 // Load environment variables
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost";
@@ -32,20 +34,32 @@ async function uploadFileToBlob(file) {
   return `${BLOB_STORAGE_BASE_URL}${uniqueFileName}`;
 }
 
-// Navigation Bar Component – menu items centered
-const NavBar = ({ navigate }) => {
-  const navItems = [
-    { label: "Home", path: "/home" },
-    { label: "Chat", path: "/ChatPage" },
-    { label: "My Profile", path: "/profile" },
-    { label: "About Us", path: "/about" },
-    { label: "My Matches", path: "/matches" },
-    { label: "Logout", path: "/login" },
-  ];
+// Modified NavBar with Notification Icon and Popover
+const NavBar = ({ navigate, notificationCount, notifications }) => {
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleNotificationIconClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClosePopover = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
+  const popoverId = open ? "notification-popover" : undefined;
+
   return (
     <nav style={styles.navbar}>
       <div style={styles.navItems}>
-        {navItems.map((item) => (
+        {[
+          { label: "Home", path: "/home" },
+          { label: "Chat", path: "/ChatPage" },
+          { label: "My Profile", path: "/profile" },
+          { label: "About Us", path: "/about" },
+          { label: "My Matches", path: "/matches" },
+          { label: "Logout", path: "/login" },
+        ].map((item) => (
           <button
             key={item.label}
             style={styles.navButton}
@@ -54,6 +68,47 @@ const NavBar = ({ navigate }) => {
             {item.label}
           </button>
         ))}
+        {/* Notification Icon */}
+        <IconButton onClick={handleNotificationIconClick}>
+          <Badge badgeContent={notificationCount} color="error">
+            <NotificationsIcon style={{ color: "white" }} />
+          </Badge>
+        </IconButton>
+        <Popover
+          id={popoverId}
+          open={open}
+          anchorEl={anchorEl}
+          onClose={handleClosePopover}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "center",
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "center",
+          }}
+        >
+          <List>
+            {notifications.length === 0 ? (
+              <ListItem>
+                <ListItemText primary="No new notifications" />
+              </ListItem>
+            ) : (
+              notifications.map((notif, index) => (
+                <ListItem
+                  button
+                  key={index}
+                  onClick={() => {
+                    handleClosePopover();
+                    navigate("/notifications");
+                  }}
+                >
+                  <ListItemText primary={notif} />
+                </ListItem>
+              ))
+            )}
+          </List>
+        </Popover>
       </div>
     </nav>
   );
@@ -159,9 +214,15 @@ const ProfileCard = ({
         ) : (
           <div>
             <h3 style={styles.profileName}>{name}</h3>
-            <p style={styles.profileDetail}><strong>Age:</strong> {age}</p>
-            <p style={styles.profileDetail}><strong>Bio:</strong> {bio}</p>
-            <p style={styles.profileDetail}><strong>Location:</strong> {location ? location : "Not set"}</p>
+            <p style={styles.profileDetail}>
+              <strong>Age:</strong> {age}
+            </p>
+            <p style={styles.profileDetail}>
+              <strong>Bio:</strong> {bio}
+            </p>
+            <p style={styles.profileDetail}>
+              <strong>Location:</strong> {location ? location : "Not set"}
+            </p>
             <p style={styles.profileDetail}>
               <strong>Categories:</strong>{" "}
               {categories.length ? categories.join(", ") : "None selected"}
@@ -298,8 +359,7 @@ const Profile = () => {
     }
   };
 
-  const removeGalleryImage = (id) =>
-    setGalleryImages((prev) => prev.filter((img) => img.id !== id));
+  const removeGalleryImage = (id) => setGalleryImages((prev) => prev.filter((img) => img.id !== id));
 
   const handleApproveMatch = (id) => {
     setSuggestedMatches((prev) => {
@@ -315,9 +375,15 @@ const Profile = () => {
     });
   };
 
+  // Dummy notifications state for the NavBar; later will be fetched from backend
+  const [notifications, setNotifications] = useState([]);
+
+  // For notification count, you can simply use notifications.length
+  const notificationCount = notifications.length;
+
   return (
     <div style={styles.outerContainer}>
-      <NavBar navigate={navigate} />
+      <NavBar navigate={navigate} notificationCount={notificationCount} notifications={notifications} />
       <div style={styles.contentWrapper}>
         <div style={styles.contentContainer}>
           {/* Left Column: Profile Info & Gallery */}
