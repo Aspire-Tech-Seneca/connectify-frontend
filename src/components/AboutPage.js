@@ -7,6 +7,10 @@ import john from '../image/John.jpg';
 import behzad from '../image/Behzad.jpg';
 import zahrah from '../image/Zahrah.jpg';
 
+// Load environment variables
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost";
+const BASE_PATH = process.env.REACT_APP_BASE_PATH || "/api";
+
 // Navbar component (you can adjust the navbar styling as needed)
 function Navbar({navigate}){
   const navItems = [
@@ -102,8 +106,6 @@ const AboutPage = () => {
       </div>
     </div>
   );
-
-
 }
 
 const styles = {
