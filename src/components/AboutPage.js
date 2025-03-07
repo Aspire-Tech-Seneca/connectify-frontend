@@ -1,5 +1,7 @@
-import React from 'react';
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { IconButton, Badge } from "@mui/material";
+import NotificationsIcon from "@mui/icons-material/Notifications";
+import { useNavigate, Link } from "react-router-dom";
 import eni from '../image/Eni.jpg';
 import shailendra from '../image/shailendra.jpg';
 import jiyun from '../image/Jiyun.jpg';
@@ -41,6 +43,8 @@ async function uploadFileToBlob(file) {
 }
 // Navbar component (you can adjust the navbar styling as needed)
 function Navbar({navigate}){
+      const [notifications, setNotifications] = useState([/* Add notification objects here */]);
+  
   const navItems = [
     { label: "Home", path: "/home" },
     { label: "Chat", path: "/ChatPage" },
@@ -61,6 +65,12 @@ function Navbar({navigate}){
             {item.label}
           </button>
         ))}
+        {/* Bell Icon with Notifications */}
+        <IconButton color="inherit"  component={Link} to="/notifications">
+                  <Badge badgeContent={notifications.length} color="error">
+                    <NotificationsIcon />
+                  </Badge>
+                </IconButton>
       </div>
     </nav>
   );
@@ -140,24 +150,24 @@ const styles = {
   // Outer container fully transparent
   outerContainer: {
     background: "transparent",
-    fontFamily: "'Roboto', sans-serif",
-    width: "100vw",
     minHeight: "100vh",
+    fontFamily: "'Roboto', sans-serif",
+    width: "100vw"
   },
   // Content wrapper: Nude container with peach image background,
   // semi-transparent so the peach texture shows, with an enhanced shadow.
   contentWrapper: {
-    background: "rgba(245,236,227,0.4)", // Nude overlay at 40% opacity
-    backgroundImage: "url('./peach.jpg')", // Peach image background (ensure the path is correct)
+    background: "rgba(245,236,227,0.4)",
+    backgroundImage: "url('./peach.jpg')",
     backgroundRepeat: "no-repeat",
     backgroundSize: "cover",
+    margin: "20px auto",
+    padding: "2rem",
     boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
     borderRadius: "8px",
     maxWidth: "1200px",
-    padding: "2rem",
-    margin: "20px auto",
-
   },
+
   contentContainer: {
     display: "grid",
     gap: "20px",
