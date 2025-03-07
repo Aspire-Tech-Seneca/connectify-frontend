@@ -1,14 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { IconButton, Badge, Popover, List, ListItem, ListItemText } from "@mui/material";
-import NotificationsIcon from "@mui/icons-material/Notifications";
 
 // Load environment variables
-const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost";
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://74.235.209.82:8000";
 const BASE_PATH = process.env.REACT_APP_BASE_PATH || "/api";
-// Azure Blob Storage Base URL for images
-const BLOB_STORAGE_BASE_URL = process.env.REACT_APP_BLOB_STORAGE_BASE_URL || "https://yourpublicblobstorage.com/";
-// SAS token used to authorize the upload. Ensure it starts with "?".
+const BLOB_STORAGE_BASE_URL =
+  process.env.REACT_APP_BLOB_STORAGE_BASE_URL || "https://yourpublicblobstorage.com/";
 const BLOB_SAS_TOKEN = process.env.REACT_APP_BLOB_SAS_TOKEN || "";
 
 /**
@@ -17,8 +14,8 @@ const BLOB_SAS_TOKEN = process.env.REACT_APP_BLOB_SAS_TOKEN || "";
  */
 async function uploadFileToBlob(file) {
   const uniqueFileName = `${Date.now()}_${file.name}`;
-  // Construct the upload URL: base URL + file name + SAS token
   const uploadUrl = `${BLOB_STORAGE_BASE_URL}${uniqueFileName}${BLOB_SAS_TOKEN}`;
+  console.log("Uploading file to:", uploadUrl);
   const response = await fetch(uploadUrl, {
     method: "PUT",
     headers: {
@@ -28,38 +25,25 @@ async function uploadFileToBlob(file) {
     body: file,
   });
   if (!response.ok) {
-    throw new Error("Upload failed");
+    throw new Error("Upload failed: " + response.statusText);
   }
-  // Assuming the container is public, return the URL without the SAS token
   return `${BLOB_STORAGE_BASE_URL}${uniqueFileName}`;
 }
 
-// Modified NavBar with Notification Icon and Popover
+// Navigation Bar Component – basic version (notification icon optional)
 const NavBar = ({ navigate, notificationCount, notifications }) => {
-  const [anchorEl, setAnchorEl] = useState(null);
-
-  const handleNotificationIconClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClosePopover = () => {
-    setAnchorEl(null);
-  };
-
-  const open = Boolean(anchorEl);
-  const popoverId = open ? "notification-popover" : undefined;
-
+  const navItems = [
+    { label: "Home", path: "/home" },
+    { label: "Chat", path: "/ChatPage" },
+    { label: "My Profile", path: "/profile" },
+    { label: "About Us", path: "/about" },
+    { label: "My Matches", path: "/matches" },
+    { label: "Logout", path: "/login" },
+  ];
   return (
     <nav style={styles.navbar}>
       <div style={styles.navItems}>
-        {[
-          { label: "Home", path: "/home" },
-          { label: "Chat", path: "/ChatPage" },
-          { label: "My Profile", path: "/profile" },
-          { label: "About Us", path: "/about" },
-          { label: "My Matches", path: "/matches" },
-          { label: "Logout", path: "/login" },
-        ].map((item) => (
+        {navItems.map((item) => (
           <button
             key={item.label}
             style={styles.navButton}
@@ -68,53 +52,13 @@ const NavBar = ({ navigate, notificationCount, notifications }) => {
             {item.label}
           </button>
         ))}
-        {/* Notification Icon */}
-        <IconButton onClick={handleNotificationIconClick}>
-          <Badge badgeContent={notificationCount} color="error">
-            <NotificationsIcon style={{ color: "white" }} />
-          </Badge>
-        </IconButton>
-        <Popover
-          id={popoverId}
-          open={open}
-          anchorEl={anchorEl}
-          onClose={handleClosePopover}
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "center",
-          }}
-          transformOrigin={{
-            vertical: "top",
-            horizontal: "center",
-          }}
-        >
-          <List>
-            {notifications.length === 0 ? (
-              <ListItem>
-                <ListItemText primary="No new notifications" />
-              </ListItem>
-            ) : (
-              notifications.map((notif, index) => (
-                <ListItem
-                  button
-                  key={index}
-                  onClick={() => {
-                    handleClosePopover();
-                    navigate("/notifications");
-                  }}
-                >
-                  <ListItemText primary={notif} />
-                </ListItem>
-              ))
-            )}
-          </List>
-        </Popover>
+        {/* Optionally add a notification icon here */}
       </div>
     </nav>
   );
 };
 
-// Profile Card Component with Categories Option (max 3) and Location field
+// ProfileCard Component: displays & edits profile data
 const ProfileCard = ({
   profilePic,
   isEditing,
@@ -132,10 +76,10 @@ const ProfileCard = ({
   setIsEditing,
   handleProfilePicChange,
   hiddenFileInputRef,
+  handleSaveProfile,
 }) => (
   <div style={styles.profileCard}>
     <div style={styles.profileContent}>
-      {/* Profile picture on the left */}
       <div style={styles.profilePicContainer}>
         <img
           src={profilePic || `${BLOB_STORAGE_BASE_URL}defaultProfilePic.jpg`}
@@ -176,7 +120,6 @@ const ProfileCard = ({
               style={styles.textarea}
               placeholder="Bio"
             />
-            {/* New Location Input */}
             <input
               type="text"
               value={location}
@@ -184,7 +127,6 @@ const ProfileCard = ({
               style={styles.input}
               placeholder="Enter your city (e.g., Toronto)"
             />
-            {/* Categories selection with max 3 selections */}
             <div style={styles.categoriesContainer}>
               <p style={styles.categoryTitle}>Choose Categories (max 3):</p>
               <div style={styles.checkboxGroup}>
@@ -207,25 +149,20 @@ const ProfileCard = ({
                 ))}
               </div>
             </div>
-            <button onClick={() => setIsEditing(false)} style={styles.editButton}>
+            <button onClick={handleSaveProfile} style={styles.editButton}>
               Save Profile
             </button>
           </div>
         ) : (
           <div>
             <h3 style={styles.profileName}>{name}</h3>
-            <p style={styles.profileDetail}>
-              <strong>Age:</strong> {age}
-            </p>
-            <p style={styles.profileDetail}>
-              <strong>Bio:</strong> {bio}
-            </p>
+            <p style={styles.profileDetail}><strong>Age:</strong> {age}</p>
+            <p style={styles.profileDetail}><strong>Bio:</strong> {bio}</p>
             <p style={styles.profileDetail}>
               <strong>Location:</strong> {location ? location : "Not set"}
             </p>
             <p style={styles.profileDetail}>
-              <strong>Categories:</strong>{" "}
-              {categories.length ? categories.join(", ") : "None selected"}
+              <strong>Categories:</strong> {categories.length ? categories.join(", ") : "None selected"}
             </p>
             <button onClick={() => setIsEditing(true)} style={styles.editButton}>
               Edit Profile
@@ -237,7 +174,7 @@ const ProfileCard = ({
   </div>
 );
 
-// Gallery Component
+// Gallery Component: displays uploaded gallery images
 const Gallery = ({ galleryImages, handleGalleryImageUpload, removeGalleryImage }) => (
   <div style={styles.gallerySection}>
     <h2 style={styles.sectionTitle}>My Gallery</h2>
@@ -255,15 +192,8 @@ const Gallery = ({ galleryImages, handleGalleryImageUpload, removeGalleryImage }
       ) : (
         galleryImages.map((image) => (
           <div key={image.id} style={styles.galleryItem}>
-            <img
-              src={image.url}
-              alt={`Gallery ${image.id}`}
-              style={styles.galleryImage}
-            />
-            <button
-              style={styles.deleteButton}
-              onClick={() => removeGalleryImage(image.id)}
-            >
+            <img src={image.url} alt={`Gallery ${image.id}`} style={styles.galleryImage} />
+            <button style={styles.deleteButton} onClick={() => removeGalleryImage(image.id)}>
               X
             </button>
           </div>
@@ -273,7 +203,7 @@ const Gallery = ({ galleryImages, handleGalleryImageUpload, removeGalleryImage }
   </div>
 );
 
-// Matches Component for Suggested Matches
+// Matches Component for Suggested Matches (unchanged for now)
 const Matches = ({ suggestedMatches, handleApproveMatch }) => (
   <div>
     <h2 style={styles.sectionTitle}>Suggested Matches</h2>
@@ -305,35 +235,56 @@ const Matches = ({ suggestedMatches, handleApproveMatch }) => (
 
 const Profile = () => {
   const navigate = useNavigate();
-  const [name, setName] = useState("Eni Zeqo");
-  const [bio, setBio] = useState("I am new in Canada and I want to make more friends that have the same interests as me");
-  const [age, setAge] = useState(25);
+
+  // State for profile fields; initially empty, will be loaded from backend
+  const [name, setName] = useState("");
+  const [bio, setBio] = useState("");
+  const [age, setAge] = useState("");
   const [location, setLocation] = useState("");
-  // Default profile picture uses the Azure Blob Storage URL if not set
   const [profilePic, setProfilePic] = useState(`${BLOB_STORAGE_BASE_URL}defaultProfilePic.jpg`);
   const [isEditing, setIsEditing] = useState(false);
   const [categories, setCategories] = useState([]);
-  // For now, availableCategories is empty. Later integrate with your backend API.
   const [availableCategories, setAvailableCategories] = useState([]);
-  const [suggestedMatches, setSuggestedMatches] = useState([
-    { id: 1, name: "Sofia Martinez", age: 24, interests: ["Tech", "Books"], photo: "https://via.placeholder.com/150" },
-    { id: 2, name: "Alex Johnson", age: 26, interests: ["Volleyball", "Music"], photo: "https://via.placeholder.com/150" },
-    { id: 3, name: "Daniel Kim", age: 25, interests: ["Gaming", "Books"], photo: "https://via.placeholder.com/150" },
-    { id: 4, name: "Lina Roberts", age: 22, interests: ["Art", "Tech"], photo: "https://via.placeholder.com/150" },
-    { id: 5, name: "George Evans", age: 28, interests: ["Fitness", "Books"], photo: "https://via.placeholder.com/150" },
-  ]);
+  const [suggestedMatches, setSuggestedMatches] = useState([]);
   const [galleryImages, setGalleryImages] = useState([]);
   const profilePicInputRef = useRef(null);
+  const [notifications, setNotifications] = useState([]);
+  const notificationCount = notifications.length;
 
-  // The API call for categories is omitted for now.
-  // useEffect(() => {
-  //   fetch(`${BASE_URL}${BASE_PATH}/categories`)
-  //     .then((res) => res.json())
-  //     .then((data) => setAvailableCategories(data))
-  //     .catch((err) => console.error("Failed to fetch categories:", err));
-  // }, []);
+  // Load profile data from backend on mount
+  useEffect(() => {
+    fetch(`${BASE_URL}/users/profile/`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setName(data.fullname || "");
+        setAge(data.age || "");
+        setBio(data.bio || "");
+        setLocation(data.location || "");
+        setCategories(data.categories || []);
+        if (data.profilePic) {
+          setProfilePic(data.profilePic);
+        }
+      })
+      .catch((err) => console.error("Failed to load profile:", err));
+  }, []);
 
-  // Update profile picture by uploading to Azure Blob Storage
+  // Fetch available categories (interest list) from the backend
+  useEffect(() => {
+    fetch(`${BASE_URL}/users/get-interest-list/`)
+      .then((res) => res.json())
+      .then((data) => {
+        setAvailableCategories(data.map((item) => item.label));
+      })
+      .catch((err) => console.error("Failed to fetch interest list:", err));
+  }, []);
+
+  // Handle profile picture upload
   const handleProfilePicChange = async (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -346,7 +297,7 @@ const Profile = () => {
     }
   };
 
-  // Upload gallery image to Azure Blob Storage and add it to the gallery
+  // Handle gallery image upload
   const handleGalleryImageUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -359,27 +310,45 @@ const Profile = () => {
     }
   };
 
-  const removeGalleryImage = (id) => setGalleryImages((prev) => prev.filter((img) => img.id !== id));
+  const removeGalleryImage = (id) =>
+    setGalleryImages((prev) => prev.filter((img) => img.id !== id));
 
-  const handleApproveMatch = (id) => {
-    setSuggestedMatches((prev) => {
-      const updated = prev.filter((match) => match.id !== id);
-      const newMatch = {
-        id: Date.now(),
-        name: "New Match",
-        age: 27,
-        interests: ["Photography", "Movies"],
-        photo: "https://via.placeholder.com/150",
-      };
-      return [...updated, newMatch].slice(0, 5);
-    });
+  // Save updated profile data to backend
+  const handleSaveProfile = () => {
+    const payload = {
+      fullname: name,
+      age: parseInt(age, 10),
+      bio: bio,
+      location: location,
+      categories: categories,
+      profilePic: profilePic,
+    };
+    console.log("Saving profile with payload:", payload);
+    fetch(`${BASE_URL}/users/update/`, {
+      method: "POST", // Change to PUT if your API expects that
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+      body: JSON.stringify(payload),
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Profile update failed: " + res.statusText);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        console.log("Profile updated successfully:", data);
+        setIsEditing(false);
+      })
+      .catch((err) => console.error("Failed to update profile:", err));
   };
 
-  // Dummy notifications state for the NavBar; later will be fetched from backend
-  const [notifications, setNotifications] = useState([]);
-
-  // For notification count, you can simply use notifications.length
-  const notificationCount = notifications.length;
+  // Dummy handleApproveMatch for Suggested Matches
+  const handleApproveMatch = (id) => {
+    setSuggestedMatches((prev) => prev.filter((match) => match.id !== id));
+  };
 
   return (
     <div style={styles.outerContainer}>
@@ -406,6 +375,7 @@ const Profile = () => {
               setIsEditing={setIsEditing}
               handleProfilePicChange={handleProfilePicChange}
               hiddenFileInputRef={profilePicInputRef}
+              handleSaveProfile={handleSaveProfile}
             />
             <Gallery
               galleryImages={galleryImages}
