@@ -2,9 +2,11 @@ import React, { useState } from "react";
 import { AppBar, Toolbar, Typography, Button, TextField, MenuItem, Container, Box, InputAdornment, Modal } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { Event, CalendarToday, AccessTime, LocationOn, Description, Category } from "@mui/icons-material";
-import peachImage from "../peach.jpg"; // Ensure correct path
-import logo from "../logo.jpg"; // Ensure correct path
+import peachImage from "../peach.jpg";
+import logo from "../logo.jpg";
 import axios from "axios";
+
+const BASE_IMAGE_URL = "https://atcdevstorageaccount.blob.core.windows.net/atcdevstoragecontainer/";
 
 const BackgroundContainer = styled("div")({
   backgroundImage: `url(${peachImage})`,
@@ -28,7 +30,7 @@ const FormContainer = styled(Container)({
   minWidth: "650px",
   textAlign: "center",
   zIndex: 2,
-  marginTop: "100px", // Space from navbar
+  marginTop: "100px",
 });
 
 const StyledButton = styled(Button)({
@@ -63,20 +65,22 @@ const CreateEvent = () => {
     location: "",
     description: "",
     category: "",
+    imageUrl: "",
   });
-    const [image, setImage] = useState(null); // New state for image
-  const [previewOpen, setPreviewOpen] = useState(false); // Preview modal state
+
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   const categories = ["Outdoor", "Tech", "Arts & Crafts", "Food & Drinks", "Networking", "Other"];
 
- const handleChange = (e) => {
+  const handleChange = (e) => {
     setEventData({ ...eventData, [e.target.name]: e.target.value });
   };
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setImage(URL.createObjectURL(file)); // Set image preview
+      const imageUrl = `${BASE_IMAGE_URL}${file.name}`;
+      setEventData({ ...eventData, imageUrl });
     }
   };
 
@@ -93,11 +97,11 @@ const CreateEvent = () => {
   };
 
   const handlePreview = () => {
-    setPreviewOpen(true); // Open preview modal
+    setPreviewOpen(true);
   };
 
   const handleClosePreview = () => {
-    setPreviewOpen(false); // Close preview modal
+    setPreviewOpen(false);
   };
 
   return (
@@ -205,60 +209,13 @@ const CreateEvent = () => {
               <MenuItem key={option} value={option}>{option}</MenuItem>
             ))}
           </TextField>
-		  
-		  
-          {/* File input for image */}
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageChange}
-            style={{ marginBottom: "15px" }}
-          />
-          {image && <img src={image} alt="Preview" style={{ maxWidth: "100%", marginBottom: "15px" }} />} 
+
+          <input type="file" accept="image/*" onChange={handleImageChange} style={{ marginBottom: "15px" }} />
+          {eventData.imageUrl && <img src={eventData.imageUrl} alt="Preview" style={{ maxWidth: "100%", marginBottom: "15px" }} />} 
           <StyledButton variant="contained" onClick={handlePreview}>Preview</StyledButton>
           <StyledButton variant="contained" type="submit">Create Event</StyledButton>
         </form>
       </FormContainer>
-
-      {/* Event Preview Modal */}
-      <Modal
-        open={previewOpen}
-        onClose={handleClosePreview}
-        aria-labelledby="event-preview-modal"
-        aria-describedby="event-preview-description"
-      >
-        <Box
-          sx={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            bgcolor: 'background.paper',
-            border: '2px solid #000',
-            boxShadow: 24,
-            p: 4,
-            width: '400px',
-            maxWidth: '80%',
-          }}
-        >
-          <Typography variant="h5" gutterBottom>Event Preview</Typography>
-          <Box>
-            <Typography variant="body1"><strong>Event Name:</strong> {eventData.name}</Typography>
-            <Typography variant="body1"><strong>Date:</strong> {eventData.date}</Typography>
-            <Typography variant="body1"><strong>Time:</strong> {eventData.time}</Typography>
-            <Typography variant="body1"><strong>Location:</strong> {eventData.location}</Typography>
-            <Typography variant="body1"><strong>Description:</strong> {eventData.description}</Typography>
-            <Typography variant="body1"><strong>Category:</strong> {eventData.category}</Typography>
-
-			{image && <img src={image} alt="Event" style={{ maxWidth: "100%" }} />}
-
-          </Box>
-          <Box sx={{ mt: 2 }}>
-            <Button onClick={handleClosePreview} variant="outlined" sx={{ mr: 2 }}>Close</Button>
-            <Button onClick={handleSubmit} variant="contained" color="success">Confirm and Create</Button>
-          </Box>
-        </Box>
-      </Modal>
     </BackgroundContainer>
   );
 };
