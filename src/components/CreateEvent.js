@@ -21,7 +21,7 @@ const BackgroundContainer = styled("div")({
 });
 
 const FormContainer = styled(Container)({
-  background: "rgba(253, 252, 230, 0.4)",
+  background: "rgba(253, 252, 230, 0.6)",
   padding: "90px",
   borderRadius: "10px",
   boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.8)",
