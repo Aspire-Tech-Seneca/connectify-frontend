@@ -7,6 +7,38 @@ import john from '../image/John.jpg';
 import behzad from '../image/Behzad.jpg';
 import zahrah from '../image/Zahrah.jpg';
 
+// Load environment variables
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost";
+const BASE_PATH = process.env.REACT_APP_BASE_PATH || "/api";
+// Azure Blob Storage Base URL for images
+const BLOB_STORAGE_BASE_URL = process.env.REACT_APP_BLOB_STORAGE_BASE_URL || "https://yourpublicblobstorage.com/";
+// SAS token used to authorize the upload. Ensure it starts with "?".
+const BLOB_SAS_TOKEN = process.env.REACT_APP_BLOB_SAS_TOKEN || "";
+// Azure Blob Connection String
+const AZURE_BLOB_CONNECTION_STRING = process.env.REACT_APP_AZURE_BLOB_CONNECTION_STRING || "DefaultEndpointsProtocol=https;AccountName=atcdevstorageaccount;AccountKey=T+85cg3NlucicdAWrvXmenqd7/chsh0jZH/x2e12wvKyRt1xCF/RAs6tLSxuKfPZQ/4eFBevFWOu+AStzTfoFw==;EndpointSuffix=core.windows.net";
+
+/**
+ * Upload a file to Azure Blob Storage using the SAS token.
+ * Returns  Promise that resolves with the public URL of the uploaded file.
+ */
+async function uploadFileToBlob(file) {
+  const uniqueFileName = `${Date.now()}_${file.name}`;
+  // Construct the upload URL: base URL + file name + SAS token
+  const uploadUrl = `${BLOB_STORAGE_BASE_URL}${uniqueFileName}${BLOB_SAS_TOKEN}`;
+  const response = await fetch(uploadUrl, {
+    method: "PUT",
+    headers: {
+      "x-ms-blob-type": "BlockBlob",
+      "Content-Type": file.type,
+    },
+    body: file,
+  });
+  if (!response.ok) {
+    throw new Error("Upload failed");
+  }
+  // Assuming the container is public, return the URL without the SAS token
+  return `${BLOB_STORAGE_BASE_URL}${uniqueFileName}`;
+}
 // Navbar component (you can adjust the navbar styling as needed)
 function Navbar({navigate}){
   const navItems = [
@@ -102,8 +134,6 @@ const AboutPage = () => {
       </div>
     </div>
   );
-
-
 }
 
 const styles = {

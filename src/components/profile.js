@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { IconButton, Badge, Popover, List, ListItem, ListItemText } from "@mui/material";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 
 // Load environment variables
-const BASE_URL = process.env.REACT_APP_BASE_URL || "http://74.235.209.82:8000";
-const BASE_PATH = process.env.REACT_APP_BASE_PATH || "/api";
-const BLOB_STORAGE_BASE_URL =
-  process.env.REACT_APP_BLOB_STORAGE_BASE_URL || "https://yourpublicblobstorage.com/";
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost";
+const BLOB_STORAGE_BASE_URL = process.env.REACT_APP_BLOB_STORAGE_BASE_URL || "https://yourpublicblobstorage.com/";
 const BLOB_SAS_TOKEN = process.env.REACT_APP_BLOB_SAS_TOKEN || "";
 
 /**
@@ -15,7 +15,6 @@ const BLOB_SAS_TOKEN = process.env.REACT_APP_BLOB_SAS_TOKEN || "";
 async function uploadFileToBlob(file) {
   const uniqueFileName = `${Date.now()}_${file.name}`;
   const uploadUrl = `${BLOB_STORAGE_BASE_URL}${uniqueFileName}${BLOB_SAS_TOKEN}`;
-  console.log("Uploading file to:", uploadUrl);
   const response = await fetch(uploadUrl, {
     method: "PUT",
     headers: {
@@ -25,25 +24,37 @@ async function uploadFileToBlob(file) {
     body: file,
   });
   if (!response.ok) {
-    throw new Error("Upload failed: " + response.statusText);
+    throw new Error("Upload failed");
   }
   return `${BLOB_STORAGE_BASE_URL}${uniqueFileName}`;
 }
 
-// Navigation Bar Component – basic version (notification icon optional)
+// NavBar Component with Notification Icon and Popover
 const NavBar = ({ navigate, notificationCount, notifications }) => {
-  const navItems = [
-    { label: "Home", path: "/home" },
-    { label: "Chat", path: "/ChatPage" },
-    { label: "My Profile", path: "/profile" },
-    { label: "About Us", path: "/about" },
-    { label: "My Matches", path: "/matches" },
-    { label: "Logout", path: "/login" },
-  ];
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleNotificationIconClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClosePopover = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
+  const popoverId = open ? "notification-popover" : undefined;
+
   return (
     <nav style={styles.navbar}>
       <div style={styles.navItems}>
-        {navItems.map((item) => (
+        {[
+          { label: "Home", path: "/home" },
+          { label: "Chat", path: "/ChatPage" },
+          { label: "My Profile", path: "/profile" },
+          { label: "About Us", path: "/about" },
+          { label: "My Matches", path: "/matches" },
+          { label: "Logout", path: "/login" },
+        ].map((item) => (
           <button
             key={item.label}
             style={styles.navButton}
@@ -52,26 +63,63 @@ const NavBar = ({ navigate, notificationCount, notifications }) => {
             {item.label}
           </button>
         ))}
-        {/* Optionally add a notification icon here */}
+        <IconButton onClick={handleNotificationIconClick}>
+          <Badge badgeContent={notificationCount} color="error">
+            <NotificationsIcon style={{ color: "white" }} />
+          </Badge>
+        </IconButton>
+        <Popover
+          id={popoverId}
+          open={open}
+          anchorEl={anchorEl}
+          onClose={handleClosePopover}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "center",
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "center",
+          }}
+        >
+          <List>
+            {notifications.length === 0 ? (
+              <ListItem>
+                <ListItemText primary="No new notifications" />
+              </ListItem>
+            ) : (
+              notifications.map((notif, index) => (
+                <ListItem
+                  button
+                  key={index}
+                  onClick={() => {
+                    handleClosePopover();
+                    navigate("/notifications");
+                  }}
+                >
+                  <ListItemText primary={notif} />
+                </ListItem>
+              ))
+            )}
+          </List>
+        </Popover>
       </div>
     </nav>
   );
 };
 
-// ProfileCard Component: displays & edits profile data
+// ProfileCard Component with Categories (location removed)
 const ProfileCard = ({
   profilePic,
   isEditing,
   name,
   age,
   bio,
-  location,
   categories,
   availableCategories,
   setName,
   setAge,
   setBio,
-  setLocation,
   setCategories,
   setIsEditing,
   handleProfilePicChange,
@@ -90,16 +138,20 @@ const ProfileCard = ({
       <div style={styles.profileInfo}>
         {isEditing ? (
           <div style={styles.editContainer}>
-            <label style={styles.uploadLabel}>
+            {/* Button triggers file input via ref */}
+            <button
+              style={styles.uploadLabel}
+              onClick={() => hiddenFileInputRef.current && hiddenFileInputRef.current.click()}
+            >
               Change Profile Picture
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleProfilePicChange}
-                style={styles.hiddenFileInput}
-                ref={hiddenFileInputRef}
-              />
-            </label>
+            </button>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleProfilePicChange}
+              style={{ display: "none" }}
+              ref={hiddenFileInputRef}
+            />
             <input
               type="text"
               value={name}
@@ -120,31 +172,24 @@ const ProfileCard = ({
               style={styles.textarea}
               placeholder="Bio"
             />
-            <input
-              type="text"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              style={styles.input}
-              placeholder="Enter your city (e.g., Toronto)"
-            />
             <div style={styles.categoriesContainer}>
               <p style={styles.categoryTitle}>Choose Categories (max 3):</p>
               <div style={styles.checkboxGroup}>
                 {availableCategories.map((cat) => (
-                  <label key={cat} style={styles.checkboxLabel}>
+                  <label key={cat.value} style={styles.checkboxLabel}>
                     <input
                       type="checkbox"
-                      checked={categories.includes(cat)}
-                      disabled={!categories.includes(cat) && categories.length >= 3}
+                      checked={categories.includes(cat.value)}
+                      disabled={!categories.includes(cat.value) && categories.length >= 3}
                       onChange={() => {
-                        if (categories.includes(cat)) {
-                          setCategories(categories.filter((c) => c !== cat));
+                        if (categories.includes(cat.value)) {
+                          setCategories(categories.filter((c) => c !== cat.value));
                         } else if (categories.length < 3) {
-                          setCategories([...categories, cat]);
+                          setCategories([...categories, cat.value]);
                         }
                       }}
                     />
-                    {cat}
+                    {cat.label}
                   </label>
                 ))}
               </div>
@@ -156,13 +201,15 @@ const ProfileCard = ({
         ) : (
           <div>
             <h3 style={styles.profileName}>{name}</h3>
-            <p style={styles.profileDetail}><strong>Age:</strong> {age}</p>
-            <p style={styles.profileDetail}><strong>Bio:</strong> {bio}</p>
             <p style={styles.profileDetail}>
-              <strong>Location:</strong> {location ? location : "Not set"}
+              <strong>Age:</strong> {age}
             </p>
             <p style={styles.profileDetail}>
-              <strong>Categories:</strong> {categories.length ? categories.join(", ") : "None selected"}
+              <strong>Bio:</strong> {bio}
+            </p>
+            <p style={styles.profileDetail}>
+              <strong>Categories:</strong>{" "}
+              {categories.length ? categories.join(", ") : "None selected"}
             </p>
             <button onClick={() => setIsEditing(true)} style={styles.editButton}>
               Edit Profile
@@ -174,7 +221,7 @@ const ProfileCard = ({
   </div>
 );
 
-// Gallery Component: displays uploaded gallery images
+// Gallery Component
 const Gallery = ({ galleryImages, handleGalleryImageUpload, removeGalleryImage }) => (
   <div style={styles.gallerySection}>
     <h2 style={styles.sectionTitle}>My Gallery</h2>
@@ -192,8 +239,15 @@ const Gallery = ({ galleryImages, handleGalleryImageUpload, removeGalleryImage }
       ) : (
         galleryImages.map((image) => (
           <div key={image.id} style={styles.galleryItem}>
-            <img src={image.url} alt={`Gallery ${image.id}`} style={styles.galleryImage} />
-            <button style={styles.deleteButton} onClick={() => removeGalleryImage(image.id)}>
+            <img
+              src={image.url}
+              alt={`Gallery ${image.id}`}
+              style={styles.galleryImage}
+            />
+            <button
+              style={styles.deleteButton}
+              onClick={() => removeGalleryImage(image.id)}
+            >
               X
             </button>
           </div>
@@ -203,88 +257,125 @@ const Gallery = ({ galleryImages, handleGalleryImageUpload, removeGalleryImage }
   </div>
 );
 
-// Matches Component for Suggested Matches (unchanged for now)
+// Matches Component for Suggested Matches
 const Matches = ({ suggestedMatches, handleApproveMatch }) => (
   <div>
     <h2 style={styles.sectionTitle}>Suggested Matches</h2>
-    {suggestedMatches.map((match) => (
-      <div key={match.id} style={styles.matchedUserCard}>
-        <div style={styles.matchContent}>
-          <img src={match.photo} alt={match.name} style={styles.matchPhoto} />
-          <div style={styles.matchDetails}>
-            <p style={styles.matchName}>
-              <strong>{match.name}, {match.age}</strong>
-            </p>
-            <p style={styles.matchInterests}>
-              Interests: {match.interests.join(", ")}
-            </p>
+    {suggestedMatches.length === 0 ? (
+      <p style={styles.emptyGalleryText}>No suggested matches available.</p>
+    ) : (
+      suggestedMatches.map((match) => (
+        <div key={match.id} style={styles.matchedUserCard}>
+          <div style={styles.matchContent}>
+            <img src={match.photo} alt={match.name} style={styles.matchPhoto} />
+            <div style={styles.matchDetails}>
+              <p style={styles.matchName}>
+                <strong>{match.name}, {match.age}</strong>
+              </p>
+              <p style={styles.matchInterests}>
+                Interests: {match.interests.join(", ")}
+              </p>
+            </div>
+          </div>
+          <div style={styles.buttonRow}>
+            <button onClick={() => handleApproveMatch(match.id)} style={styles.removeButton}>
+              ❌ Remove
+            </button>
+            <button onClick={() => handleApproveMatch(match.id)} style={styles.matchButton}>
+              ✅ Match
+            </button>
           </div>
         </div>
-        <div style={styles.buttonRow}>
-          <button onClick={() => handleApproveMatch(match.id)} style={styles.removeButton}>
-            ❌ Remove
-          </button>
-          <button onClick={() => handleApproveMatch(match.id)} style={styles.matchButton}>
-            ✅ Match
-          </button>
-        </div>
-      </div>
-    ))}
+      ))
+    )}
   </div>
 );
 
 const Profile = () => {
   const navigate = useNavigate();
-
-  // State for profile fields; initially empty, will be loaded from backend
-  const [name, setName] = useState("");
-  const [bio, setBio] = useState("");
-  const [age, setAge] = useState("");
-  const [location, setLocation] = useState("");
+  const [name, setName] = useState("Eni Zeqo");
+  const [bio, setBio] = useState("I am new in Canada and I want to make more friends that have the same interests as me");
+  const [age, setAge] = useState(25);
   const [profilePic, setProfilePic] = useState(`${BLOB_STORAGE_BASE_URL}defaultProfilePic.jpg`);
   const [isEditing, setIsEditing] = useState(false);
   const [categories, setCategories] = useState([]);
   const [availableCategories, setAvailableCategories] = useState([]);
+  // Start with an empty array for suggested matches.
   const [suggestedMatches, setSuggestedMatches] = useState([]);
   const [galleryImages, setGalleryImages] = useState([]);
   const profilePicInputRef = useRef(null);
   const [notifications, setNotifications] = useState([]);
   const notificationCount = notifications.length;
 
-  // Load profile data from backend on mount
-  useEffect(() => {
-    fetch(`${BASE_URL}/users/profile/`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setName(data.fullname || "");
-        setAge(data.age || "");
-        setBio(data.bio || "");
-        setLocation(data.location || "");
-        setCategories(data.categories || []);
-        if (data.profilePic) {
-          setProfilePic(data.profilePic);
-        }
-      })
-      .catch((err) => console.error("Failed to load profile:", err));
-  }, []);
-
-  // Fetch available categories (interest list) from the backend
+  // Fetch available interests from backend with fallback dummy data.
   useEffect(() => {
     fetch(`${BASE_URL}/users/get-interest-list/`)
-      .then((res) => res.json())
+      .then((response) => response.json())
       .then((data) => {
-        setAvailableCategories(data.map((item) => item.label));
+        if (data && data.length) {
+          setAvailableCategories(data);
+        } else {
+          setAvailableCategories([
+            { value: "sports", label: "Sports" },
+            { value: "music", label: "Music" },
+            { value: "tech", label: "Technology" },
+            { value: "art", label: "Art" },
+            { value: "travel", label: "Travel" },
+          ]);
+        }
       })
-      .catch((err) => console.error("Failed to fetch interest list:", err));
+      .catch((error) => {
+        console.error("Error fetching interest list:", error);
+        setAvailableCategories([
+          { value: "sports", label: "Sports" },
+          { value: "music", label: "Music" },
+          { value: "tech", label: "Technology" },
+          { value: "art", label: "Art" },
+          { value: "travel", label: "Travel" },
+        ]);
+      });
   }, []);
 
-  // Handle profile picture upload
+  // Optionally, fetch user profile details to prefill the form.
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    fetch(`${BASE_URL}/users/profile/`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setName(data.fullname || name);
+        setAge(data.age || age);
+        setBio(data.bio || bio);
+        setCategories(data.interests || []);
+        setProfilePic(data.profile_image || `${BLOB_STORAGE_BASE_URL}defaultProfilePic.jpg`);
+        if (data.gallery_images) {
+          setGalleryImages(data.gallery_images.map((url) => ({ id: Date.now(), url })));
+        }
+      })
+      .catch((err) => console.error("Error fetching profile details:", err));
+  }, []);
+
+  // Whenever categories change, fetch suggested matches.
+  useEffect(() => {
+    if (categories.length > 0) {
+      // For simplicity, we use the first interest to fetch matches.
+      const interest = categories[0];
+      fetch(`${BASE_URL}/users/get-recommend-matchups/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ interest }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          setSuggestedMatches(data);
+        })
+        .catch((error) => console.error("Error fetching suggested matches:", error));
+    }
+  }, [categories]);
+
+  // Update profile picture by uploading to Azure Blob Storage.
   const handleProfilePicChange = async (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -297,7 +388,7 @@ const Profile = () => {
     }
   };
 
-  // Handle gallery image upload
+  // Upload gallery image and add it to the gallery.
   const handleGalleryImageUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -313,41 +404,39 @@ const Profile = () => {
   const removeGalleryImage = (id) =>
     setGalleryImages((prev) => prev.filter((img) => img.id !== id));
 
-  // Save updated profile data to backend
-  const handleSaveProfile = () => {
-    const payload = {
-      fullname: name,
-      age: parseInt(age, 10),
-      bio: bio,
-      location: location,
-      categories: categories,
-      profilePic: profilePic,
-    };
-    console.log("Saving profile with payload:", payload);
-    fetch(`${BASE_URL}/users/update/`, {
-      method: "POST", // Change to PUT if your API expects that
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-      },
-      body: JSON.stringify(payload),
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Profile update failed: " + res.statusText);
-        }
-        return res.json();
-      })
-      .then((data) => {
-        console.log("Profile updated successfully:", data);
-        setIsEditing(false);
-      })
-      .catch((err) => console.error("Failed to update profile:", err));
+  const handleApproveMatch = (id) => {
+    // For now, simply remove the match from the list.
+    setSuggestedMatches((prev) => prev.filter((match) => match.id !== id));
   };
 
-  // Dummy handleApproveMatch for Suggested Matches
-  const handleApproveMatch = (id) => {
-    setSuggestedMatches((prev) => prev.filter((match) => match.id !== id));
+  // Function to save the profile data to the backend (location removed from payload).
+  const handleSaveProfile = async () => {
+    const token = localStorage.getItem("token");
+    const payload = {
+      fullname: name,
+      age: age,
+      bio: bio,
+      interests: categories,
+      profile_image: profilePic,
+      gallery_images: galleryImages.map((image) => image.url),
+    };
+
+    try {
+      const response = await fetch(`${BASE_URL}/users/update/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) {
+        throw new Error("Profile update failed");
+      }
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Error saving profile:", error);
+    }
   };
 
   return (
@@ -355,7 +444,6 @@ const Profile = () => {
       <NavBar navigate={navigate} notificationCount={notificationCount} notifications={notifications} />
       <div style={styles.contentWrapper}>
         <div style={styles.contentContainer}>
-          {/* Left Column: Profile Info & Gallery */}
           <div style={styles.column}>
             <h2 style={styles.sectionTitle}>My Profile</h2>
             <ProfileCard
@@ -364,13 +452,11 @@ const Profile = () => {
               name={name}
               age={age}
               bio={bio}
-              location={location}
               categories={categories}
               availableCategories={availableCategories}
               setName={setName}
               setAge={setAge}
               setBio={setBio}
-              setLocation={setLocation}
               setCategories={setCategories}
               setIsEditing={setIsEditing}
               handleProfilePicChange={handleProfilePicChange}
@@ -383,7 +469,6 @@ const Profile = () => {
               removeGalleryImage={removeGalleryImage}
             />
           </div>
-          {/* Right Column: Suggested Matches */}
           <div style={styles.column}>
             <Matches suggestedMatches={suggestedMatches} handleApproveMatch={handleApproveMatch} />
           </div>
@@ -450,9 +535,6 @@ const styles = {
     height: "100%",
     objectFit: "cover",
   },
-  hiddenFileInput: {
-    display: "none",
-  },
   uploadLabel: {
     background: "#8B4513",
     color: "white",
@@ -461,6 +543,7 @@ const styles = {
     cursor: "pointer",
     display: "inline-block",
     marginBottom: "10px",
+    border: "none",
   },
   fileInput: {
     margin: "10px 0",
