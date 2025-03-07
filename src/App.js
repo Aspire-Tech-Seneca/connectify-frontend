@@ -13,6 +13,8 @@ import CreateEvent from "./components/CreateEvent";
 import MyMatches from "./components/MyMatches";
 import UserSettings from "./components/UserSettings";
 import ViewEvents from "./components/ViewEvents";
+import PolicyCompliance from "./components/PolicyCompliance";
+
 
 
 const App = () => {
@@ -42,6 +44,7 @@ const App = () => {
 		  <Route path="/UserSettings" element={<UserSettings />} />
 		  <Route path="/ViewEvents" element={<ViewEvents />} />
 		  <Route path="/createevent" element={<CreateEvent />} /> 
+      <Route path="/PolicyCompliance" element={<PolicyCompliance />} /> 
         </Routes>
       </div>
     </Router>
