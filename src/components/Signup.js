@@ -136,7 +136,7 @@ const Signup = () => {
     if (validateForm()) {
       try {
         const response = await axios.post(
-          "http://localhost:8000/users/create",
+          "http://127.0.0.1:8000/users/create/",
           formData
         );
         alert("Signup successful! Please log in.");
