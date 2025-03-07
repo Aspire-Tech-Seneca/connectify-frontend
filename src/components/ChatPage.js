@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link} from "react-router-dom";
+import { IconButton, Badge } from "@mui/material";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 
 // Load environment variables
 const BLOB_STORAGE_BASE_URL = process.env.REACT_APP_BLOB_STORAGE_BASE_URL || "https://yourpublicblobstorage.com/";
@@ -30,6 +32,8 @@ async function uploadFileToBlob(file) {
 
 // NavBar component
 const NavBar = () => {
+    const [notifications, setNotifications] = useState([/* Add notification objects here */]);
+  
   const navigate = useNavigate();
   const navItems = [
     { label: "Home", path: "/home" },
@@ -56,6 +60,12 @@ const NavBar = () => {
             {item.label}
           </button>
         ))}
+           {/* Bell Icon with Notifications */}
+                <IconButton color="inherit" component={Link} to="/notifications">
+                  <Badge badgeContent={notifications.length} color="error">
+                    <NotificationsIcon />
+                  </Badge>
+                </IconButton>
       </div>
     </nav>
   );
