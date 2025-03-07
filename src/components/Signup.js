@@ -75,9 +75,9 @@ const Navbar = () => {
         <img
           src={logo}
           alt="Logo"
-          style={{ height: "90px", marginRight: "20px" }}
+          style={{ height: "20px", marginRight: "20px" }}
         />
-        <Typography variant="h6" sx={{ flexGrow: 1 }}>
+        <Typography variant="h9" sx={{ flexGrow: 1 }}>
           Connectify, Find Your People Today
         </Typography>
         <Button color="inherit" onClick={() => navigate("/")}>
@@ -97,7 +97,7 @@ const Navbar = () => {
 const Signup = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    fullName: "",
+    fullname: "",
     email: "",
     age: "",
     password: "",
@@ -113,8 +113,8 @@ const Signup = () => {
 
   const validateForm = () => {
     let newErrors = {};
-    if (!formData.fullName.trim())
-      newErrors.fullName = "Full name is required";
+    if (!formData.fullname.trim())
+      newErrors.fullname = "Full name is required";
     if (!formData.email.includes("@"))
       newErrors.email = "Invalid email format";
     if (!formData.age || isNaN(formData.age) || formData.age < 18) {
@@ -169,11 +169,11 @@ const Signup = () => {
         >
           <StyledTextField
             label="Full Name"
-            name="fullName"
-            value={formData.fullName}
+            name="fullname"
+            value={formData.fullname}
             onChange={handleChange}
-            error={!!errors.fullName}
-            helperText={errors.fullName}
+            error={!!errors.fullname}
+            helperText={errors.fullname}
             required
             fullWidth
             InputProps={{
