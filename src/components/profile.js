@@ -59,18 +59,20 @@ const NavBar = ({ navigate }) => {
   );
 };
 
-// Profile Card Component with Categories Option (max 3)
+// Profile Card Component with Categories Option (max 3) and Location field
 const ProfileCard = ({
   profilePic,
   isEditing,
   name,
   age,
   bio,
+  location,
   categories,
   availableCategories,
   setName,
   setAge,
   setBio,
+  setLocation,
   setCategories,
   setIsEditing,
   handleProfilePicChange,
@@ -119,6 +121,14 @@ const ProfileCard = ({
               style={styles.textarea}
               placeholder="Bio"
             />
+            {/* New Location Input */}
+            <input
+              type="text"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              style={styles.input}
+              placeholder="Enter your city (e.g., Toronto)"
+            />
             {/* Categories selection with max 3 selections */}
             <div style={styles.categoriesContainer}>
               <p style={styles.categoryTitle}>Choose Categories (max 3):</p>
@@ -149,12 +159,9 @@ const ProfileCard = ({
         ) : (
           <div>
             <h3 style={styles.profileName}>{name}</h3>
-            <p style={styles.profileDetail}>
-              <strong>Age:</strong> {age}
-            </p>
-            <p style={styles.profileDetail}>
-              <strong>Bio:</strong> {bio}
-            </p>
+            <p style={styles.profileDetail}><strong>Age:</strong> {age}</p>
+            <p style={styles.profileDetail}><strong>Bio:</strong> {bio}</p>
+            <p style={styles.profileDetail}><strong>Location:</strong> {location ? location : "Not set"}</p>
             <p style={styles.profileDetail}>
               <strong>Categories:</strong>{" "}
               {categories.length ? categories.join(", ") : "None selected"}
@@ -205,7 +212,7 @@ const Gallery = ({ galleryImages, handleGalleryImageUpload, removeGalleryImage }
   </div>
 );
 
-// Matches Component
+// Matches Component for Suggested Matches
 const Matches = ({ suggestedMatches, handleApproveMatch }) => (
   <div>
     <h2 style={styles.sectionTitle}>Suggested Matches</h2>
@@ -215,9 +222,7 @@ const Matches = ({ suggestedMatches, handleApproveMatch }) => (
           <img src={match.photo} alt={match.name} style={styles.matchPhoto} />
           <div style={styles.matchDetails}>
             <p style={styles.matchName}>
-              <strong>
-                {match.name}, {match.age}
-              </strong>
+              <strong>{match.name}, {match.age}</strong>
             </p>
             <p style={styles.matchInterests}>
               Interests: {match.interests.join(", ")}
@@ -240,10 +245,9 @@ const Matches = ({ suggestedMatches, handleApproveMatch }) => (
 const Profile = () => {
   const navigate = useNavigate();
   const [name, setName] = useState("Eni Zeqo");
-  const [bio, setBio] = useState(
-    "I am new in Canada and I want to make more friends that have the same interests as me"
-  );
+  const [bio, setBio] = useState("I am new in Canada and I want to make more friends that have the same interests as me");
   const [age, setAge] = useState(25);
+  const [location, setLocation] = useState("");
   // Default profile picture uses the Azure Blob Storage URL if not set
   const [profilePic, setProfilePic] = useState(`${BLOB_STORAGE_BASE_URL}defaultProfilePic.jpg`);
   const [isEditing, setIsEditing] = useState(false);
@@ -261,16 +265,11 @@ const Profile = () => {
   const profilePicInputRef = useRef(null);
 
   // The API call for categories is omitted for now.
-  // Once your backend API is ready, integrate it here.
   // useEffect(() => {
   //   fetch(`${BASE_URL}${BASE_PATH}/categories`)
   //     .then((res) => res.json())
-  //     .then((data) => {
-  //       setAvailableCategories(data);
-  //     })
-  //     .catch((err) => {
-  //       console.error("Failed to fetch categories:", err);
-  //     });
+  //     .then((data) => setAvailableCategories(data))
+  //     .catch((err) => console.error("Failed to fetch categories:", err));
   // }, []);
 
   // Update profile picture by uploading to Azure Blob Storage
@@ -330,11 +329,13 @@ const Profile = () => {
               name={name}
               age={age}
               bio={bio}
+              location={location}
               categories={categories}
               availableCategories={availableCategories}
               setName={setName}
               setAge={setAge}
               setBio={setBio}
+              setLocation={setLocation}
               setCategories={setCategories}
               setIsEditing={setIsEditing}
               handleProfilePicChange={handleProfilePicChange}
