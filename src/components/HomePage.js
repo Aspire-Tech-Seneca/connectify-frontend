@@ -1,5 +1,8 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { IconButton, Badge } from "@mui/material";
+import NotificationsIcon from "@mui/icons-material/Notifications";
+
 // Import images directly (Option 1)
 import eni from '../image/Eni.jpg';
 import shailendra from '../image/shailendra.jpg';
@@ -13,20 +16,20 @@ const dummyMatches = [
     name: "Eni Zeqo",
     age: 25,
     interests: ["Reading", "Traveling", "Music"],
-    // Use local import for now, replace with Azure path when ready
     imgUrl: eni,
   },
   {
     name: "Shailendra Kushwaha",
     age: 25,
     interests: ["Sports", "Technology", "Movies"],
-    // Use local import for now, replace with Azure path when ready
     imgUrl: shailendra,
   },
 ];
 
 // Navigation Bar Component – menu items centered
 const NavBar = ({ navigate }) => {
+  const [notifications, setNotifications] = useState([/* Add notification objects here */]);
+
   const navItems = [
     { label: "Home", path: "/home" },
     { label: "Chat", path: "/ChatPage" },
@@ -35,6 +38,7 @@ const NavBar = ({ navigate }) => {
     { label: "My Matches", path: "/matches" },
     { label: "Logout", path: "/login" },
   ];
+
   return (
     <nav style={styles.navbar}>
       <div style={styles.navItems}>
@@ -47,6 +51,13 @@ const NavBar = ({ navigate }) => {
             {item.label}
           </button>
         ))}
+        
+        {/* Bell Icon with Notifications */}
+        <IconButton color="inherit" component={Link} to="/notifications">
+          <Badge badgeContent={notifications.length} color="error">
+            <NotificationsIcon />
+          </Badge>
+        </IconButton>
       </div>
     </nav>
   );
