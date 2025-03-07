@@ -1,19 +1,26 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+// Import images directly (Option 1)
 import eni from '../image/Eni.jpg';
 import shailendra from '../image/shailendra.jpg';
+
+// Load environment variables
+const BLOB_STORAGE_BASE_URL = process.env.REACT_APP_BLOB_STORAGE_BASE_URL || "https://yourpublicblobstorage.com/";
+const BLOB_SAS_TOKEN = process.env.REACT_APP_BLOB_SAS_TOKEN || "";
 
 const dummyMatches = [
   {
     name: "Eni Zeqo",
     age: 25,
     interests: ["Reading", "Traveling", "Music"],
+    // Use local import for now, replace with Azure path when ready
     imgUrl: eni,
   },
   {
     name: "Shailendra Kushwaha",
     age: 25,
     interests: ["Sports", "Technology", "Movies"],
+    // Use local import for now, replace with Azure path when ready
     imgUrl: shailendra,
   },
 ];
@@ -45,6 +52,29 @@ const NavBar = ({ navigate }) => {
   );
 };
 
+/**
+ * Upload a file to Azure Blob Storage using the SAS token.
+ * Returns a Promise that resolves with the public URL of the uploaded file.
+ */
+async function uploadFileToBlob(file) {
+  const uniqueFileName = `${Date.now()}_${file.name}`;
+  // Construct the upload URL: base URL + file name + SAS token
+  const uploadUrl = `${BLOB_STORAGE_BASE_URL}${uniqueFileName}${BLOB_SAS_TOKEN}`;
+  const response = await fetch(uploadUrl, {
+    method: "PUT",
+    headers: {
+      "x-ms-blob-type": "BlockBlob",
+      "Content-Type": file.type,
+    },
+    body: file,
+  });
+  if (!response.ok) {
+    throw new Error("Upload failed");
+  }
+  // Assuming the container is public, return the URL without the SAS token
+  return `${BLOB_STORAGE_BASE_URL}${uniqueFileName}`;
+}
+
 // Default export of HomePage component
 const HomePage = () => {
   const navigate = useNavigate();
@@ -66,6 +96,9 @@ const HomePage = () => {
                     src={match.imgUrl}
                     alt={match.name}
                     style={styles.matchImg}
+                    onError={(e) => {
+                      e.target.src = `${BLOB_STORAGE_BASE_URL}defaultProfilePic.jpg`;
+                    }}
                   />
                   <div style={styles.matchInfo}>
                     <h3 style={styles.matchName}>
@@ -225,7 +258,6 @@ contentWrapper: {
     boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
     transition: "background 0.3s, transform 0.3s",
   },
-  
 };
 
 export default HomePage;
