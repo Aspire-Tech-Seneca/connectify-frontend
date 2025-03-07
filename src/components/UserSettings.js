@@ -33,7 +33,7 @@ const FormContainer = styled(Container)({
   background: "rgba(253, 252, 230, 0.6)",
   padding: "50px",
   borderRadius: "20px",
-  boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.2)",
+  boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.9)",
   width: "90%",
   maxWidth: "500px",
   textAlign: "center",
