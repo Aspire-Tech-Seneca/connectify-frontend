@@ -7,7 +7,7 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost";
 const BASE_PATH = process.env.REACT_APP_BASE_PATH || "/api";
 
-// Modified NavBar that includes a notification icon with a popover list
+// NavBar Component with a notification icon and popover list
 const NavBar = ({ navigate, notificationCount, notifications }) => {
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -41,13 +41,11 @@ const NavBar = ({ navigate, notificationCount, notifications }) => {
             {item.label}
           </button>
         ))}
-        {/* Notification Icon */}
         <IconButton onClick={handleNotificationIconClick}>
           <Badge badgeContent={notificationCount} color="error">
             <NotificationsIcon style={{ color: "white" }} />
           </Badge>
         </IconButton>
-        {/* Popover with list of notifications */}
         <Popover
           id={popoverId}
           open={open}
@@ -191,16 +189,10 @@ const SuggestedMatches = ({ suggestedMatches, handleSendRequest, handleDeclineSu
               </div>
             </div>
             <div style={styles.buttonRow}>
-              <button
-                onClick={() => handleDeclineSuggested(match.id)}
-                style={styles.removeButton}
-              >
+              <button onClick={() => handleDeclineSuggested(match.id)} style={styles.removeButton}>
                 ❌ Decline
               </button>
-              <button
-                onClick={() => handleSendRequest(match.id)}
-                style={styles.matchButton}
-              >
+              <button onClick={() => handleSendRequest(match.id)} style={styles.matchButton}>
                 ➤ Send Request
               </button>
             </div>
@@ -220,16 +212,21 @@ const MatchesPage = () => {
   const [suggestedMatches, setSuggestedMatches] = useState([]);
   // State for top bar notifications (a list of string messages)
   const [notificationList, setNotificationList] = useState([]);
-  // Notification state for Snackbar
+  // State for Snackbar notifications
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
     severity: "success", // "success", "error", "info", "warning"
   });
 
+  // Get token for authenticated requests
+  const token = localStorage.getItem("token");
+
   // Fetch current matches from backend API
   useEffect(() => {
-    fetch(`${BASE_URL}${BASE_PATH}/matches/current`)
+    fetch(`${BASE_URL}${BASE_PATH}/matches/current`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
       .then((res) => res.json())
       .then((data) => setCurrentMatches(data))
       .catch((err) => {
@@ -263,11 +260,13 @@ const MatchesPage = () => {
           },
         ]);
       });
-  }, []);
+  }, [token]);
 
   // Fetch incoming match requests from backend API
   useEffect(() => {
-    fetch(`${BASE_URL}${BASE_PATH}/matches/incoming`)
+    fetch(`${BASE_URL}${BASE_PATH}/matches/incoming`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
       .then((res) => res.json())
       .then((data) => setIncomingRequests(data))
       .catch((err) => {
@@ -283,11 +282,13 @@ const MatchesPage = () => {
           },
         ]);
       });
-  }, []);
+  }, [token]);
 
   // Fetch suggested matches from backend API
   useEffect(() => {
-    fetch(`${BASE_URL}${BASE_PATH}/matches/suggested`)
+    fetch(`${BASE_URL}${BASE_PATH}/matches/suggested`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
       .then((res) => res.json())
       .then((data) => setSuggestedMatches(data))
       .catch((err) => {
@@ -317,7 +318,7 @@ const MatchesPage = () => {
           },
         ]);
       });
-  }, []);
+  }, [token]);
 
   // Snackbar close handler
   const handleSnackbarClose = (event, reason) => {
@@ -325,12 +326,12 @@ const MatchesPage = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
-  // Navigate to ChatPage
+  // Navigation to ChatPage
   const handleChat = (id) => {
     navigate("/ChatPage");
   };
 
-  // Outgoing: Send a match request (move from suggested to current as pending)
+  // Outgoing: Send a match request (simulate by moving match from suggested to current as pending)
   const handleSendRequest = (id) => {
     const match = suggestedMatches.find((m) => m.id === id);
     if (match) {
@@ -374,15 +375,24 @@ const MatchesPage = () => {
     setNotificationList([...notificationList, message]);
   };
 
-  // For the top bar notification badge, we'll use the length of incomingRequests as a simple count.
+  // For top bar notification badge, we'll use the length of incomingRequests.
   const notificationCount = incomingRequests.length;
+
+  // Suggested matches: Decline action (removes match and shows notification)
+  const handleDeclineSuggested = (id) => {
+    const match = suggestedMatches.find((m) => m.id === id);
+    setSuggestedMatches(suggestedMatches.filter((m) => m.id !== id));
+    const message = `${match ? match.name : "Match"} declined.`;
+    setSnackbar({ open: true, message, severity: "info" });
+    setNotificationList([...notificationList, message]);
+  };
 
   return (
     <div style={styles.outerContainer}>
       <NavBar navigate={navigate} notificationCount={notificationCount} notifications={notificationList} />
       <div style={styles.contentWrapper}>
         <div style={styles.contentContainer}>
-          {/* Left Column: Current Matches (approved & pending outgoing) */}
+          {/* Left Column: Current Matches */}
           <div style={styles.column}>
             <CurrentMatches
               currentMatches={currentMatches}
@@ -400,18 +410,12 @@ const MatchesPage = () => {
             <SuggestedMatches
               suggestedMatches={suggestedMatches}
               handleSendRequest={handleSendRequest}
-              handleDeclineSuggested={(id) => {
-                const match = suggestedMatches.find((m) => m.id === id);
-                setSuggestedMatches(suggestedMatches.filter((m) => m.id !== id));
-                const message = `${match ? match.name : "Match"} declined.`;
-                setSnackbar({ open: true, message, severity: "info" });
-                setNotificationList([...notificationList, message]);
-              }}
+              handleDeclineSuggested={handleDeclineSuggested}
             />
           </div>
         </div>
       </div>
-      {/* Snackbar for action notifications */}
+      {/* Snackbar for notifications */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
