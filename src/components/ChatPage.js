@@ -1,6 +1,33 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
+// Load environment variables
+const BLOB_STORAGE_BASE_URL = process.env.REACT_APP_BLOB_STORAGE_BASE_URL || "https://yourpublicblobstorage.com/";
+const BLOB_SAS_TOKEN = process.env.REACT_APP_BLOB_SAS_TOKEN || "";
+
+/**
+ * Upload a file to Azure Blob Storage using the SAS token.
+ * Returns a Promise that resolves with the public URL of the uploaded file.
+ */
+async function uploadFileToBlob(file) {
+  const uniqueFileName = `${Date.now()}_${file.name}`;
+  // Construct the upload URL: base URL + file name + SAS token
+  const uploadUrl = `${BLOB_STORAGE_BASE_URL}${uniqueFileName}${BLOB_SAS_TOKEN}`;
+  const response = await fetch(uploadUrl, {
+    method: "PUT",
+    headers: {
+      "x-ms-blob-type": "BlockBlob",
+      "Content-Type": file.type,
+    },
+    body: file,
+  });
+  if (!response.ok) {
+    throw new Error("Upload failed");
+  }
+  // Assuming the container is public, return the URL without the SAS token
+  return `${BLOB_STORAGE_BASE_URL}${uniqueFileName}`;
+}
+
 // NavBar component
 const NavBar = () => {
   const navigate = useNavigate();
@@ -49,7 +76,14 @@ const ChatMatches = ({ matches, selectedMatch, setSelectedMatch }) => {
           className={`match-card ${selectedMatch?.id === match.id ? "selected" : ""}`}
           onClick={() => handleSelectMatch(match)}
         >
-          <img src={match.photo} alt={match.name} className="match-photo" />
+          <img 
+            src={match.photo} 
+            alt={match.name} 
+            className="match-photo" 
+            onError={(e) => {
+              e.target.src = `${BLOB_STORAGE_BASE_URL}defaultProfilePic.jpg`;
+            }}
+          />
           <div className="match-info">
             <p className="match-name">{match.name}</p>
             <p className="match-last-msg">{match.lastMessage}</p>
@@ -128,19 +162,19 @@ const ChatConversation = ({
 const ChatPage = () => {
   const navigate = useNavigate();
 
+  // Updated to use Azure Blob Storage URLs when appropriate
   const [matches] = useState([
-    { id: 1, name: "Alice", photo: "https://via.placeholder.com/100", lastMessage: "Hey! How have you been?" },
-    { id: 2, name: "Bob", photo: "https://via.placeholder.com/100", lastMessage: "Did you check out that new movie?" },
-    { id: 3, name: "Charlie", photo: "https://via.placeholder.com/100", lastMessage: "How was your weekend?" },
-    { id: 4, name: "Eni Zeqo", photo: "https://via.placeholder.com/100", lastMessage: "Are we still on for dinner?" },
-    { id: 5, name: "Kunal", photo: "https://via.placeholder.com/100", lastMessage: "Let's plan a trip soon!" },
-    { id: 6, name: "Atif", photo: "https://via.placeholder.com/100", lastMessage: "Hope you're having a great day!" },
-    { id: 7, name: "Swagat", photo: "https://via.placeholder.com/100", lastMessage: "When are you free to catch up?" },
-    { id: 8, name: "Faizal", photo: "https://via.placeholder.com/100", lastMessage: "Let’s grab a coffee sometime!" },
-    { id: 9, name: "Arjoo", photo: "https://via.placeholder.com/100", lastMessage: "I have some exciting news to share!" },
+    { id: 1, name: "Alice", photo: `${BLOB_STORAGE_BASE_URL}alice.jpg`, lastMessage: "Hey! How have you been?" },
+    { id: 2, name: "Bob", photo: `${BLOB_STORAGE_BASE_URL}bob.jpg`, lastMessage: "Did you check out that new movie?" },
+    { id: 3, name: "Charlie", photo: `${BLOB_STORAGE_BASE_URL}charlie.jpg`, lastMessage: "How was your weekend?" },
+    { id: 4, name: "Eni Zeqo", photo: `${BLOB_STORAGE_BASE_URL}eni.jpg`, lastMessage: "Are we still on for dinner?" },
+    { id: 5, name: "Kunal", photo: `${BLOB_STORAGE_BASE_URL}kunal.jpg`, lastMessage: "Let's plan a trip soon!" },
+    { id: 6, name: "Atif", photo: `${BLOB_STORAGE_BASE_URL}atif.jpg`, lastMessage: "Hope you're having a great day!" },
+    { id: 7, name: "Swagat", photo: `${BLOB_STORAGE_BASE_URL}swagat.jpg`, lastMessage: "When are you free to catch up?" },
+    { id: 8, name: "Faizal", photo: `${BLOB_STORAGE_BASE_URL}faizal.jpg`, lastMessage: "Let's grab a coffee sometime!" },
+    { id: 9, name: "Arjoo", photo: `${BLOB_STORAGE_BASE_URL}arjoo.jpg`, lastMessage: "I have some exciting news to share!" },
   ]);
   
-
   const [selectedMatch, setSelectedMatch] = useState(null);
   const [messages, setMessages] = useState([]);
   const [messageInput, setMessageInput] = useState("");
@@ -199,4 +233,5 @@ const ChatPage = () => {
     </div>
   );
 };
+
 export default ChatPage;
