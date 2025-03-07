@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { IconButton, Badge, Popover, List, ListItem, ListItemText } from "@mui/material";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 
 // Load environment variables
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost";
@@ -32,20 +34,32 @@ async function uploadFileToBlob(file) {
   return `${BLOB_STORAGE_BASE_URL}${uniqueFileName}`;
 }
 
-// Navigation Bar Component – menu items centered
-const NavBar = ({ navigate }) => {
-  const navItems = [
-    { label: "Home", path: "/home" },
-    { label: "Chat", path: "/ChatPage" },
-    { label: "My Profile", path: "/profile" },
-    { label: "About Us", path: "/about" },
-    { label: "My Matches", path: "/matches" },
-    { label: "Logout", path: "/login" },
-  ];
+// Modified NavBar with Notification Icon and Popover
+const NavBar = ({ navigate, notificationCount, notifications }) => {
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleNotificationIconClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClosePopover = () => {
+    setAnchorEl(null);
+  };
+
+  const open = Boolean(anchorEl);
+  const popoverId = open ? "notification-popover" : undefined;
+
   return (
     <nav style={styles.navbar}>
       <div style={styles.navItems}>
-        {navItems.map((item) => (
+        {[
+          { label: "Home", path: "/home" },
+          { label: "Chat", path: "/ChatPage" },
+          { label: "My Profile", path: "/profile" },
+          { label: "About Us", path: "/about" },
+          { label: "My Matches", path: "/matches" },
+          { label: "Logout", path: "/login" },
+        ].map((item) => (
           <button
             key={item.label}
             style={styles.navButton}
@@ -54,23 +68,66 @@ const NavBar = ({ navigate }) => {
             {item.label}
           </button>
         ))}
+        {/* Notification Icon */}
+        <IconButton onClick={handleNotificationIconClick}>
+          <Badge badgeContent={notificationCount} color="error">
+            <NotificationsIcon style={{ color: "white" }} />
+          </Badge>
+        </IconButton>
+        <Popover
+          id={popoverId}
+          open={open}
+          anchorEl={anchorEl}
+          onClose={handleClosePopover}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "center",
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "center",
+          }}
+        >
+          <List>
+            {notifications.length === 0 ? (
+              <ListItem>
+                <ListItemText primary="No new notifications" />
+              </ListItem>
+            ) : (
+              notifications.map((notif, index) => (
+                <ListItem
+                  button
+                  key={index}
+                  onClick={() => {
+                    handleClosePopover();
+                    navigate("/notifications");
+                  }}
+                >
+                  <ListItemText primary={notif} />
+                </ListItem>
+              ))
+            )}
+          </List>
+        </Popover>
       </div>
     </nav>
   );
 };
 
-// Profile Card Component with Categories Option (max 3)
+// Profile Card Component with Categories Option (max 3) and Location field
 const ProfileCard = ({
   profilePic,
   isEditing,
   name,
   age,
   bio,
+  location,
   categories,
   availableCategories,
   setName,
   setAge,
   setBio,
+  setLocation,
   setCategories,
   setIsEditing,
   handleProfilePicChange,
@@ -119,6 +176,14 @@ const ProfileCard = ({
               style={styles.textarea}
               placeholder="Bio"
             />
+            {/* New Location Input */}
+            <input
+              type="text"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              style={styles.input}
+              placeholder="Enter your city (e.g., Toronto)"
+            />
             {/* Categories selection with max 3 selections */}
             <div style={styles.categoriesContainer}>
               <p style={styles.categoryTitle}>Choose Categories (max 3):</p>
@@ -154,6 +219,9 @@ const ProfileCard = ({
             </p>
             <p style={styles.profileDetail}>
               <strong>Bio:</strong> {bio}
+            </p>
+            <p style={styles.profileDetail}>
+              <strong>Location:</strong> {location ? location : "Not set"}
             </p>
             <p style={styles.profileDetail}>
               <strong>Categories:</strong>{" "}
@@ -205,7 +273,7 @@ const Gallery = ({ galleryImages, handleGalleryImageUpload, removeGalleryImage }
   </div>
 );
 
-// Matches Component
+// Matches Component for Suggested Matches
 const Matches = ({ suggestedMatches, handleApproveMatch }) => (
   <div>
     <h2 style={styles.sectionTitle}>Suggested Matches</h2>
@@ -215,9 +283,7 @@ const Matches = ({ suggestedMatches, handleApproveMatch }) => (
           <img src={match.photo} alt={match.name} style={styles.matchPhoto} />
           <div style={styles.matchDetails}>
             <p style={styles.matchName}>
-              <strong>
-                {match.name}, {match.age}
-              </strong>
+              <strong>{match.name}, {match.age}</strong>
             </p>
             <p style={styles.matchInterests}>
               Interests: {match.interests.join(", ")}
@@ -240,10 +306,9 @@ const Matches = ({ suggestedMatches, handleApproveMatch }) => (
 const Profile = () => {
   const navigate = useNavigate();
   const [name, setName] = useState("Eni Zeqo");
-  const [bio, setBio] = useState(
-    "I am new in Canada and I want to make more friends that have the same interests as me"
-  );
+  const [bio, setBio] = useState("I am new in Canada and I want to make more friends that have the same interests as me");
   const [age, setAge] = useState(25);
+  const [location, setLocation] = useState("");
   // Default profile picture uses the Azure Blob Storage URL if not set
   const [profilePic, setProfilePic] = useState(`${BLOB_STORAGE_BASE_URL}defaultProfilePic.jpg`);
   const [isEditing, setIsEditing] = useState(false);
@@ -261,16 +326,11 @@ const Profile = () => {
   const profilePicInputRef = useRef(null);
 
   // The API call for categories is omitted for now.
-  // Once your backend API is ready, integrate it here.
   // useEffect(() => {
   //   fetch(`${BASE_URL}${BASE_PATH}/categories`)
   //     .then((res) => res.json())
-  //     .then((data) => {
-  //       setAvailableCategories(data);
-  //     })
-  //     .catch((err) => {
-  //       console.error("Failed to fetch categories:", err);
-  //     });
+  //     .then((data) => setAvailableCategories(data))
+  //     .catch((err) => console.error("Failed to fetch categories:", err));
   // }, []);
 
   // Update profile picture by uploading to Azure Blob Storage
@@ -299,8 +359,7 @@ const Profile = () => {
     }
   };
 
-  const removeGalleryImage = (id) =>
-    setGalleryImages((prev) => prev.filter((img) => img.id !== id));
+  const removeGalleryImage = (id) => setGalleryImages((prev) => prev.filter((img) => img.id !== id));
 
   const handleApproveMatch = (id) => {
     setSuggestedMatches((prev) => {
@@ -316,9 +375,15 @@ const Profile = () => {
     });
   };
 
+  // Dummy notifications state for the NavBar; later will be fetched from backend
+  const [notifications, setNotifications] = useState([]);
+
+  // For notification count, you can simply use notifications.length
+  const notificationCount = notifications.length;
+
   return (
     <div style={styles.outerContainer}>
-      <NavBar navigate={navigate} />
+      <NavBar navigate={navigate} notificationCount={notificationCount} notifications={notifications} />
       <div style={styles.contentWrapper}>
         <div style={styles.contentContainer}>
           {/* Left Column: Profile Info & Gallery */}
@@ -330,11 +395,13 @@ const Profile = () => {
               name={name}
               age={age}
               bio={bio}
+              location={location}
               categories={categories}
               availableCategories={availableCategories}
               setName={setName}
               setAge={setAge}
               setBio={setBio}
+              setLocation={setLocation}
               setCategories={setCategories}
               setIsEditing={setIsEditing}
               handleProfilePicChange={handleProfilePicChange}
