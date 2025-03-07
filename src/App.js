@@ -14,7 +14,7 @@ import MyMatches from "./components/MyMatches";
 import UserSettings from "./components/UserSettings";
 import ViewEvents from "./components/ViewEvents";
 import PolicyCompliance from "./components/PolicyCompliance";
-
+import NotificationPage from "./components/NotificationPage";
 
 
 const App = () => {
@@ -35,6 +35,7 @@ const App = () => {
         <Routes>
           <Route path="/login" element={<LoginForm />} />
           <Route path="/Home" element={<HomePage />} /> 
+          <Route path="/notifications" element={<NotificationPage />} />
           <Route path="/about" element={<AboutPage />} /> 
           <Route path="/profile" element={<Profile />} />
           <Route path="/signup" element={<Signup />} />
