@@ -33,7 +33,7 @@ const FormContainer = styled(Container)({
   background: "rgba(253, 252, 230, 0.6)",
   padding: "50px",
   borderRadius: "20px",
-  boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.9)",
+  boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.2)",
   width: "90%",
   maxWidth: "500px",
   textAlign: "center",
@@ -81,7 +81,7 @@ const Navbar = () => {
 
 
 const UserSettings = () => {
-  const [formData, setFormData] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
+  const [formData, setFormData] = useState({ old_password: "", new_password: "", confirm_new_password: "" });
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
@@ -91,9 +91,9 @@ const UserSettings = () => {
 
   const validateForm = () => {
     let newErrors = {};
-    if (!formData.currentPassword) newErrors.currentPassword = "Current password is required";
-    if (formData.newPassword.length < 6) newErrors.newPassword = "New password must be at least 6 characters";
-    if (formData.newPassword !== formData.confirmPassword) newErrors.confirmPassword = "Passwords do not match";
+    if (!formData.old_password) newErrors.old_password = "Current password is required";
+    if (formData.new_password.length < 6) newErrors.new_password = "New password must be at least 6 characters";
+    if (formData.new_password !== formData.confirm_new_password) newErrors.confirm_new_password = "Passwords do not match";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -103,7 +103,7 @@ const UserSettings = () => {
     e.preventDefault();
     if (validateForm()) {
       try {
-        const response = await axios.post("http://localhost:8000/users/update-password/", formData);
+        const response = await axios.post("http://127.0.0.1:8000/users/change-password/", formData);
         alert("Password updated successfully!");
         navigate("/");
       } catch (error) {
@@ -125,11 +125,11 @@ const UserSettings = () => {
             <StyledTextField
               label="Current Password"
               type="password"
-              name="currentPassword"
-              value={formData.currentPassword}
+              name="old_password"
+              value={formData.old_password}
               onChange={handleChange}
-              error={!!errors.currentPassword}
-              helperText={errors.currentPassword}
+              error={!!errors.old_password}
+              helperText={errors.old_password}
               required fullWidth
               InputProps={{
                 startAdornment: (
@@ -142,11 +142,11 @@ const UserSettings = () => {
             <StyledTextField
               label="New Password"
               type="password"
-              name="newPassword"
-              value={formData.newPassword}
+              name="new_password"
+              value={formData.new_password}
               onChange={handleChange}
-              error={!!errors.newPassword}
-              helperText={errors.newPassword}
+              error={!!errors.new_password}
+              helperText={errors.new_password}
               required fullWidth
               InputProps={{
                 startAdornment: (
@@ -159,11 +159,11 @@ const UserSettings = () => {
             <StyledTextField
               label="Confirm New Password"
               type="password"
-              name="confirmPassword"
-              value={formData.confirmPassword}
+              name="confirm_new_password"
+              value={formData.confirm_new_password}
               onChange={handleChange}
-              error={!!errors.confirmPassword}
-              helperText={errors.confirmPassword}
+              error={!!errors.confirm_new_password}
+              helperText={errors.confirm_new_password}
               required fullWidth
               InputProps={{
                 startAdornment: (
