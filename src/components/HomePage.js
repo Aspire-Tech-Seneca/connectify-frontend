@@ -173,7 +173,7 @@ contentWrapper: {
   navButton: {
     background: "none",
     border: "none",
-    color: "white", // white text for nav links
+    color: "white", // white text  nav links
     fontSize: "20px",
     fontWeight: "bold",
     cursor: "pointer",
