@@ -7,6 +7,8 @@ import axios from "axios";
 import peachImage from "../peach.jpg"; // Same background
 import logo from "../logo.jpg"; // Ensure correct path
 
+// Load base URL from environment variables
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://127.0.0.1:8000";
 
 // Background Styling
 const BackgroundContainer = styled("div")({
@@ -67,7 +69,12 @@ const Navbar = () => {
   return (
     <AppBar position="fixed" sx={{ background: "#89574c" }}>
       <Toolbar>
-        <img src={logo} alt="Logo" style={{ height: "60px", marginRight: "15px", cursor: "pointer" }} onClick={() => navigate("/")}/>
+        <img 
+          src={logo} 
+          alt="Logo" 
+          style={{ height: "60px", marginRight: "15px", cursor: "pointer" }} 
+          onClick={() => navigate("/")}
+        />
         <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: "bold", color: "white" }}>
           Connectify
         </Typography>
@@ -78,7 +85,6 @@ const Navbar = () => {
     </AppBar>
   );
 };
-
 
 const UserSettings = () => {
   const [formData, setFormData] = useState({ old_password: "", new_password: "", confirm_new_password: "" });
@@ -103,7 +109,9 @@ const UserSettings = () => {
     e.preventDefault();
     if (validateForm()) {
       try {
-        const response = await axios.post("http://127.0.0.1:8000/users/change-password/", formData);
+        // Build API URL using environment variable
+        const apiUrl = `${BASE_URL}/users/change-password/`;
+        const response = await axios.post(apiUrl, formData);
         alert("Password updated successfully!");
         navigate("/");
       } catch (error) {
@@ -130,7 +138,8 @@ const UserSettings = () => {
               onChange={handleChange}
               error={!!errors.old_password}
               helperText={errors.old_password}
-              required fullWidth
+              required
+              fullWidth
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -147,7 +156,8 @@ const UserSettings = () => {
               onChange={handleChange}
               error={!!errors.new_password}
               helperText={errors.new_password}
-              required fullWidth
+              required
+              fullWidth
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -164,7 +174,8 @@ const UserSettings = () => {
               onChange={handleChange}
               error={!!errors.confirm_new_password}
               helperText={errors.confirm_new_password}
-              required fullWidth
+              required
+              fullWidth
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
