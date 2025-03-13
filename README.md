@@ -125,68 +125,49 @@ Navigation and Routing:
 The application uses React Router for client-side navigation. Below is an outline of the available routes and the corresponding components:
 
 
-Homepage (Welcome):
+App Navigation
+Here are the routes and corresponding pages in the Connectify app:
+
+Welcome Page: /
 
 
-URL: /
-
-Component: Login:
+Login: /login
 
 
-URL: /login
+Home (after login): /Home
 
 
-Component: Home (Post-login)
+Notifications: /notifications
 
 
-URL: /Home
+About Us: /about
 
 
-Component: Notifications
+Profile: /profile
 
 
-URL: /notifications
+Signup: /signup
 
 
-Component: About Us 
-
-URL: /about
-
-Component: Profile
+Matches: /matches
 
 
-URL: /profile
-
-Component: Signup
+Chat: /ChatPage
 
 
-URL: /signup
-
-Component Matches
-
-URL: /matches
-
-Component: Chat
-
-URL: /ChatPage
-
-Component: User Settings
+User Settings: /UserSettings
 
 
-URL: /UserSettings
+View Events: /ViewEvents
 
 
-Component: View Events 
+Create Event: /createevent
 
 
-URL: /ViewEvents
-
-Component: Create Event
+Policy Compliance: /PolicyCompliance
 
 
-URL: /createevent
-
-Component: Policy Compliance
+Just follow these URLs after running the app, and you’ll land on the respective pages!
 
 
-URL: /PolicyCompliance
+Enjoy using COnnectify!
