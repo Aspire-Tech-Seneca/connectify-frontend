@@ -130,30 +130,95 @@ const HomePage = () => {
           </div>
         </div>
       </div>
+
+      {/* Footer Section */}
+      <footer style={styles.footer}>
+  <div style={styles.footerLinks}>
+    {/* Legal and Policies */}
+    <div style={styles.footerSection}>
+      <h4 style={styles.footerHeading}>Legal</h4>
+      <a href="/legal" style={styles.footerLink}>Legal</a>
+      <a href="/privacy" style={styles.footerLink}>Privacy</a>
+      <a href="/consumer-health" style={styles.footerLink}>Consumer Health Data Privacy Policy</a>
+      <a href="/terms" style={styles.footerLink}>Terms</a>
+      <a href="/cookie-policy" style={styles.footerLink}>Cookie Policy</a>
+      <a href="/intellectual-property" style={styles.footerLink}>Intellectual Property</a>
+    </div>
+
+    {/* Careers and Tech */}
+    <div style={styles.footerSection}>
+      <h4 style={styles.footerHeading}>Careers</h4>
+      <a href="/careers" style={styles.footerLink}>Careers</a>
+      <a href="/careers-portal" style={styles.footerLink}>Careers Portal</a>
+      <a href="/tech-blog" style={styles.footerLink}>Tech Blog</a>
+    </div>
+
+    {/* Social and Community */}
+    <div style={styles.footerSection}>
+      <h4 style={styles.footerHeading}>Social</h4>
+      <a href="/social" style={styles.footerLink}>Social</a>
+      <a href="/community" style={styles.footerLink}>Community</a>
+    </div>
+
+    {/* Help and Support */}
+    <div style={styles.footerSection}>
+      <h4 style={styles.footerHeading}>Help</h4>
+      <a href="/faq" style={styles.footerLink}>FAQ</a>
+      <a href="/destinations" style={styles.footerLink}>Destinations</a>
+      <a href="/press-room" style={styles.footerLink}>Press Room</a>
+      <a href="/contact" style={styles.footerLink}>Contact</a>
+      <a href="/promo-code" style={styles.footerLink}>Promo Code</a>
+    </div>
+  </div>
+
+  {/* App Download Section */}
+  <div style={styles.appDownload}>
+    <p style={styles.getAppText}>Get the Connectify app!</p>
+    <div style={styles.downloadButtons}>
+      <a href="https://apps.apple.com" style={styles.downloadButton}>
+        <img src="https://via.placeholder.com/150x50" alt="Download on the App Store" style={styles.downloadImage} />
+      </a>
+      <a href="https://play.google.com" style={styles.downloadButton}>
+        <img src="https://via.placeholder.com/150x50" alt="GET IT ON Google Play" style={styles.downloadImage} />
+      </a>
+    </div>
+  </div>
+
+  {/* Footer Bottom Section */}
+  <div style={styles.footerBottom}>
+    <p style={styles.footerText}>
+      Connectify is the place to meet your next best match. Whether you're looking for love, friendship, or casual connections, Connectify brings people together. With millions of users, you're sure to find someone who shares your interests.
+    </p>
+    <p style={styles.footerText}>
+      FAQ / Safety Tips / Terms / Cookie Policy / Privacy Settings
+    </p>
+    <p style={styles.footerText}>© 2025 Connectify LLC, All Rights Reserved.</p>
+  </div>
+</footer>
     </div>
   );
 };
 
 const styles = {
- // Outer container now takes the full viewport width
- outerContainer: {
-  background: "transparent",
-  minHeight: "100vh",
-  fontFamily: "'Roboto', sans-serif",
-  width: "100vw",
-},
-// Content wrapper remains the same for the inner content
-contentWrapper: {
-  background: "rgba(245,236,227,0.4)",
-  backgroundImage: "url('./peach.jpg')",
-  backgroundRepeat: "no-repeat",
-  backgroundSize: "cover",
-  margin: "20px auto",
-  padding: "2rem",
-  boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
-  borderRadius: "8px",
-  maxWidth: "1200px",
-},
+  // Outer container now takes the full viewport width
+  outerContainer: {
+    background: "transparent",
+    minHeight: "100vh",
+    fontFamily: "'Roboto', sans-serif",
+    width: "100vw",
+  },
+  // Content wrapper remains the same for the inner content
+  contentWrapper: {
+    background: "rgba(245,236,227,0.4)",
+    backgroundImage: "url('./peach.jpg')",
+    backgroundRepeat: "no-repeat",
+    backgroundSize: "cover",
+    margin: "20px auto",
+    padding: "2rem",
+    boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+    borderRadius: "8px",
+    maxWidth: "1200px",
+  },
   contentContainer: {
     display: "grid",
     gap: "20px",
@@ -184,7 +249,7 @@ contentWrapper: {
   navButton: {
     background: "none",
     border: "none",
-    color: "white", // white text  nav links
+    color: "white", // white text for nav links
     fontSize: "20px",
     fontWeight: "bold",
     cursor: "pointer",
@@ -268,6 +333,59 @@ contentWrapper: {
     cursor: "pointer",
     boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
     transition: "background 0.3s, transform 0.3s",
+  },
+  footer: {
+    backgroundColor: "#C38282", // Match the navbar color
+    padding: "20px",
+    textAlign: "center",
+    borderTop: "1px solid #e9ecef",
+    color: "white", // White text for footer
+  },
+  footerLinks: {
+    display: "flex",
+    flexWrap: "wrap",
+    justifyContent: "space-around",
+    gap: "20px",
+    marginBottom: "20px",
+  },
+  footerSection: {
+    textAlign: "left",
+  },
+  footerHeading: {
+    fontSize: "16px",
+    fontWeight: "bold",
+    marginBottom: "10px",
+  },
+  footerLink: {
+    color: "white", // White text for links
+    textDecoration: "none",
+    fontSize: "14px",
+    display: "block",
+    margin: "5px 0",
+  },
+  appDownload: {
+    marginBottom: "20px",
+  },
+  getAppText: {
+    fontSize: "16px",
+    marginBottom: "10px",
+    color: "white", // White text
+  },
+  downloadButtons: {
+    display: "flex",
+    justifyContent: "center",
+    gap: "10px",
+  },
+  downloadImage: {
+    width: "150px",
+    height: "50px",
+  },
+  footerBottom: {
+    fontSize: "14px",
+    color: "white", // White text
+  },
+  footerText: {
+    margin: "5px 0",
   },
 };
 
