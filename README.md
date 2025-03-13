@@ -117,3 +117,101 @@ npm start
 
 
 Upon successful execution of this command, a browser window will automatically open at http://localhost:3000. This URL displays the homepage of the application, which serves as the entry point before a user logs in to the interest matchmaking web app, Connectify.
+
+
+Navigation and Routing:
+
+
+The application uses React Router for client-side navigation. Below is an outline of the available routes and the corresponding components:
+
+
+Homepage (Welcome):
+
+
+URL: /
+
+Component: <WelcomePage />
+
+Login:
+
+
+URL: /login
+
+Component: <LoginForm />
+
+Home (Post-login):
+
+
+URL: /Home
+
+Component: <HomePage />
+
+Notifications:
+
+
+
+URL: /notifications
+
+Component: <NotificationPage />
+
+About:
+
+
+
+URL: /about
+
+Component: <AboutPage />
+
+Profile:
+
+
+URL: /profile
+
+Component: <Profile />
+
+Signup:
+
+
+URL: /signup
+
+Component: <Signup />
+
+Matches:
+
+URL: /matches
+
+Component: <MyMatches />
+
+Chat:
+
+URL: /ChatPage
+
+Component: <ChatPage />
+
+User Settings:
+
+
+URL: /UserSettings
+
+Component: <UserSettings />
+
+View Events:
+
+
+URL: /ViewEvents
+
+Component: <ViewEvents />
+
+Create Event:
+
+
+URL: /createevent
+
+Component: <CreateEvent />
+
+Policy Compliance:
+
+
+URL: /PolicyCompliance
+
+Component: <PolicyCompliance />
