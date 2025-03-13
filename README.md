@@ -49,3 +49,59 @@ After cloning, change into the project directory:
 cd connectify-frontend
 
 
+Install Dependencies
+
+Run the following command to install all required Node.js packages:
+
+
+
+npm install
+
+
+Install Additional Material UI Icons
+
+
+In addition to the primary dependencies, install the Material UI icons package:
+
+
+npm install @mui/icons-material
+
+
+React Dependencies
+
+
+The project utilizes the following dependencies with specified versions:
+
+
+@emotion/react==11.14.0
+
+
+@emotion/styled==11.14.0
+
+
+@mui/material==6.4.3
+
+
+axios==1.7.9
+
+
+cra-template==1.2.0
+
+
+react==19.0.0
+
+
+react-dom==19.0.0
+
+
+react-router-dom==7.1.5
+
+
+react-scripts==5.0.1
+
+
+sass==1.84.0
+
+
+web-vitals==4.2.4
+
