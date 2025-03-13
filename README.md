@@ -105,3 +105,15 @@ sass==1.84.0
 
 web-vitals==4.2.4
 
+
+
+Running the Application:
+
+
+To start the application in development mode, run:
+
+
+npm start
+
+
+Upon successful execution of this command, a browser window will automatically open at http://localhost:3000. This URL displays the homepage of the application, which serves as the entry point before a user logs in to the interest matchmaking web app, Connectify.
