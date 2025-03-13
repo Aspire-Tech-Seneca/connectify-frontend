@@ -1,11 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Snackbar, Alert, IconButton, Badge, Popover, List, ListItem, ListItemText } from "@mui/material";
+import {
+  Snackbar,
+  Alert,
+  IconButton,
+  Badge,
+  Popover,
+  List,
+  ListItem,
+  ListItemText,
+} from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 
 // Load environment variables for API endpoints
-const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost";
-const BASE_PATH = process.env.REACT_APP_BASE_PATH || "/api";
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:8000";
 
 // NavBar Component with a notification icon and popover list
 const NavBar = ({ navigate, notificationCount, notifications }) => {
@@ -119,7 +127,10 @@ const CurrentMatches = ({ currentMatches, handleChat, handleCancelRequest }) => 
                 Chat
               </button>
               {match.status === "pending" && (
-                <button onClick={() => handleCancelRequest(match.id)} style={styles.removeButton}>
+                <button
+                  onClick={() => handleCancelRequest(match.id)}
+                  style={styles.removeButton}
+                >
                   Cancel Request
                 </button>
               )}
@@ -132,7 +143,11 @@ const CurrentMatches = ({ currentMatches, handleChat, handleCancelRequest }) => 
 };
 
 // Component for displaying incoming match requests.
-const IncomingRequests = ({ incomingRequests, handleApproveIncoming, handleDeclineIncoming }) => {
+const IncomingRequests = ({
+  incomingRequests,
+  handleApproveIncoming,
+  handleDeclineIncoming,
+}) => {
   return (
     <div>
       <h2 style={styles.sectionTitle}>Incoming Requests</h2>
@@ -145,7 +160,9 @@ const IncomingRequests = ({ incomingRequests, handleApproveIncoming, handleDecli
               <img src={match.photo} alt={match.name} style={styles.matchPhoto} />
               <div style={styles.matchDetails}>
                 <p style={styles.matchName}>
-                  <strong>{match.name}, {match.age}</strong>
+                  <strong>
+                    {match.name}, {match.age}
+                  </strong>
                 </p>
                 <p style={styles.matchInterests}>
                   Interests: {match.interests.join(", ")}
@@ -153,10 +170,16 @@ const IncomingRequests = ({ incomingRequests, handleApproveIncoming, handleDecli
               </div>
             </div>
             <div style={styles.buttonRow}>
-              <button onClick={() => handleDeclineIncoming(match.id)} style={styles.removeButton}>
+              <button
+                onClick={() => handleDeclineIncoming(match.id)}
+                style={styles.removeButton}
+              >
                 ❌ Decline
               </button>
-              <button onClick={() => handleApproveIncoming(match.id)} style={styles.matchButton}>
+              <button
+                onClick={() => handleApproveIncoming(match.id)}
+                style={styles.matchButton}
+              >
                 ✅ Approve
               </button>
             </div>
@@ -181,7 +204,9 @@ const SuggestedMatches = ({ suggestedMatches, handleSendRequest, handleDeclineSu
               <img src={match.photo} alt={match.name} style={styles.matchPhoto} />
               <div style={styles.matchDetails}>
                 <p style={styles.matchName}>
-                  <strong>{match.name}, {match.age}</strong>
+                  <strong>
+                    {match.name}, {match.age}
+                  </strong>
                 </p>
                 <p style={styles.matchInterests}>
                   Interests: {match.interests.join(", ")}
@@ -189,7 +214,10 @@ const SuggestedMatches = ({ suggestedMatches, handleSendRequest, handleDeclineSu
               </div>
             </div>
             <div style={styles.buttonRow}>
-              <button onClick={() => handleDeclineSuggested(match.id)} style={styles.removeButton}>
+              <button
+                onClick={() => handleDeclineSuggested(match.id)}
+                style={styles.removeButton}
+              >
                 ❌ Decline
               </button>
               <button onClick={() => handleSendRequest(match.id)} style={styles.matchButton}>
@@ -210,8 +238,10 @@ const MatchesPage = () => {
   const [currentMatches, setCurrentMatches] = useState([]);
   const [incomingRequests, setIncomingRequests] = useState([]);
   const [suggestedMatches, setSuggestedMatches] = useState([]);
+
   // State for top bar notifications (a list of string messages)
   const [notificationList, setNotificationList] = useState([]);
+
   // State for Snackbar notifications
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -224,7 +254,7 @@ const MatchesPage = () => {
 
   // Fetch current matches from backend API
   useEffect(() => {
-    fetch(`${BASE_URL}${BASE_PATH}/matches/current`, {
+    fetch(`${BASE_URL}/matches/current`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
@@ -264,7 +294,7 @@ const MatchesPage = () => {
 
   // Fetch incoming match requests from backend API
   useEffect(() => {
-    fetch(`${BASE_URL}${BASE_PATH}/matches/incoming`, {
+    fetch(`${BASE_URL}/matches/incoming`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
@@ -286,7 +316,7 @@ const MatchesPage = () => {
 
   // Fetch suggested matches from backend API
   useEffect(() => {
-    fetch(`${BASE_URL}${BASE_PATH}/matches/suggested`, {
+    fetch(`${BASE_URL}/matches/suggested`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
@@ -389,7 +419,11 @@ const MatchesPage = () => {
 
   return (
     <div style={styles.outerContainer}>
-      <NavBar navigate={navigate} notificationCount={notificationCount} notifications={notificationList} />
+      <NavBar
+        navigate={navigate}
+        notificationCount={notificationCount}
+        notifications={notificationList}
+      />
       <div style={styles.contentWrapper}>
         <div style={styles.contentContainer}>
           {/* Left Column: Current Matches */}
@@ -400,6 +434,7 @@ const MatchesPage = () => {
               handleCancelRequest={handleCancelRequest}
             />
           </div>
+
           {/* Right Column: Incoming Requests and Suggested Matches */}
           <div style={styles.column}>
             <IncomingRequests
@@ -415,6 +450,7 @@ const MatchesPage = () => {
           </div>
         </div>
       </div>
+
       {/* Snackbar for notifications */}
       <Snackbar
         open={snackbar.open}
@@ -422,7 +458,11 @@ const MatchesPage = () => {
         onClose={handleSnackbarClose}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
-        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: "100%" }}>
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>
