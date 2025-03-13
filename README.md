@@ -27,3 +27,25 @@ NPM (Node Package Manager)
 
 You can download Node.js (which includes npm) from https://nodejs.org/.
 
+
+Setup Instructions
+
+
+Clone the Repository
+
+
+Open a terminal and execute the following command to clone the repository:
+
+
+git clone https://github.com/Aspire-Tech-Seneca/connectify-frontend.git
+
+
+Navigate to the Repository Directory
+
+
+After cloning, change into the project directory:
+
+
+cd connectify-frontend
+
+
