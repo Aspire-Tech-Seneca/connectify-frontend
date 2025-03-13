@@ -15,6 +15,9 @@ import { styled } from "@mui/material/styles";
 import peachImage from "../peach.jpg"; // Ensure correct path
 import logo from "../logo.jpg"; // Replace with actual logo path
 
+// Load the base URL from the environment variable
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://127.0.0.1:8000";
+
 const BackgroundContainer = styled("div")({
   backgroundImage: `url(${peachImage})`,
   backgroundRepeat: "no-repeat",
@@ -115,8 +118,11 @@ const LoginForm = () => {
       return;
     }
 
+    // Constructed the API URL using the environment variable
+    const apiUrl = `${BASE_URL}/users/login/`;
+
     try {
-      const response = await fetch("http://127.0.0.1:8000/users/login/", {
+      const response = await fetch(apiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
