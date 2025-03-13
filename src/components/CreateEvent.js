@@ -1,13 +1,29 @@
 import React, { useState } from "react";
-import { AppBar, Toolbar, Typography, Button, TextField, MenuItem, Container, Box, InputAdornment, Modal } from "@mui/material";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  TextField,
+  MenuItem,
+  Container,
+  Box,
+  InputAdornment,
+  Modal,
+} from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { Event, CalendarToday, AccessTime, LocationOn, Description, Category } from "@mui/icons-material";
 import peachImage from "../peach.jpg";
 import logo from "../logo.jpg";
 import axios from "axios";
 
+// Load base URL from environment variable
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:8000";
+
+// Base image URL (if needed for uploads to your blob storage)
 const BASE_IMAGE_URL = "https://atcdevstorageaccount.blob.core.windows.net/atcdevstoragecontainer/";
 
+// Background Styling
 const BackgroundContainer = styled("div")({
   backgroundImage: `url(${peachImage})`,
   backgroundRepeat: "no-repeat",
@@ -20,6 +36,7 @@ const BackgroundContainer = styled("div")({
   position: "relative",
 });
 
+// Form Container Styling
 const FormContainer = styled(Container)({
   background: "rgba(253, 252, 230, 0.6)",
   padding: "90px",
@@ -33,6 +50,7 @@ const FormContainer = styled(Container)({
   marginTop: "100px",
 });
 
+// Styled Button
 const StyledButton = styled(Button)({
   background: "linear-gradient(to right, #893d3d, #958f8f)",
   color: "white",
@@ -45,17 +63,29 @@ const StyledButton = styled(Button)({
   },
 });
 
+// Navbar Component
 const Navbar = () => (
   <AppBar position="fixed" sx={{ background: "#89574c" }}>
     <Toolbar>
       <img src={logo} alt="Logo" style={{ height: "90px", marginRight: "20px" }} />
-      <Typography variant="h6" sx={{ flexGrow: 1 }}>Create an Event</Typography>
+      <Typography variant="h6" sx={{ flexGrow: 1 }}>
+        Create an Event
+      </Typography>
       <Button color="inherit" href="/">Home</Button>
       <Button color="inherit" href="/events">Events</Button>
       <Button color="inherit" href="/profile">Profile</Button>
     </Toolbar>
   </AppBar>
 );
+
+// Styled TextField
+const StyledTextField = styled(TextField)({
+  "& .MuiOutlinedInput-root": {
+    "& fieldset": { borderColor: "#89574c" },
+    "&:hover fieldset": { borderColor: "#89574c" },
+    "&.Mui-focused fieldset": { borderColor: "#89574c", borderWidth: "5px" },
+  },
+});
 
 const CreateEvent = () => {
   const [eventData, setEventData] = useState({
@@ -67,7 +97,6 @@ const CreateEvent = () => {
     category: "",
     imageUrl: "",
   });
-
   const [previewOpen, setPreviewOpen] = useState(false);
 
   const categories = ["Outdoor", "Tech", "Arts & Crafts", "Food & Drinks", "Networking", "Other"];
@@ -76,18 +105,20 @@ const CreateEvent = () => {
     setEventData({ ...eventData, [e.target.name]: e.target.value });
   };
 
+  // Modified to use URL.createObjectURL for local preview
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const imageUrl = `${BASE_IMAGE_URL}${file.name}`;
-      setEventData({ ...eventData, imageUrl });
+      const localImageUrl = URL.createObjectURL(file);
+      setEventData({ ...eventData, imageUrl: localImageUrl });
+      // Optionally: if you plan to upload the file to your server, you might want to store the file as well.
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:8000/events/create/", eventData);
+      const response = await axios.post(`${BASE_URL}/events/create/`, eventData);
       console.log("Event Created Successfully:", response.data);
       alert("Event created successfully!");
     } catch (error) {
@@ -112,7 +143,7 @@ const CreateEvent = () => {
           Host an Event
         </Typography>
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-          <TextField
+          <StyledTextField
             label="Event Name"
             name="name"
             value={eventData.name}
@@ -127,7 +158,7 @@ const CreateEvent = () => {
               ),
             }}
           />
-          <TextField
+          <StyledTextField
             type="date"
             name="date"
             value={eventData.date}
@@ -142,7 +173,7 @@ const CreateEvent = () => {
               ),
             }}
           />
-          <TextField
+          <StyledTextField
             type="time"
             name="time"
             value={eventData.time}
@@ -157,7 +188,7 @@ const CreateEvent = () => {
               ),
             }}
           />
-          <TextField
+          <StyledTextField
             label="Location"
             name="location"
             value={eventData.location}
@@ -172,7 +203,7 @@ const CreateEvent = () => {
               ),
             }}
           />
-          <TextField
+          <StyledTextField
             label="Description"
             name="description"
             value={eventData.description}
@@ -189,7 +220,7 @@ const CreateEvent = () => {
               ),
             }}
           />
-          <TextField
+          <StyledTextField
             select
             label="Category"
             name="category"
@@ -206,16 +237,41 @@ const CreateEvent = () => {
             }}
           >
             {categories.map((option) => (
-              <MenuItem key={option} value={option}>{option}</MenuItem>
+              <MenuItem key={option} value={option}>
+                {option}
+              </MenuItem>
             ))}
-          </TextField>
+          </StyledTextField>
 
           <input type="file" accept="image/*" onChange={handleImageChange} style={{ marginBottom: "15px" }} />
-          {eventData.imageUrl && <img src={eventData.imageUrl} alt="Preview" style={{ maxWidth: "100%", marginBottom: "15px" }} />} 
+          {/* Show image preview if available */}
+          {eventData.imageUrl && (
+            <img src={eventData.imageUrl} alt="Preview" style={{ maxWidth: "100%", marginBottom: "15px" }} />
+          )}
           <StyledButton variant="contained" onClick={handlePreview}>Preview</StyledButton>
           <StyledButton variant="contained" type="submit">Create Event</StyledButton>
         </form>
       </FormContainer>
+      {/* Preview Modal */}
+      <Modal
+        open={previewOpen}
+        onClose={handleClosePreview}
+        sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+      >
+        <Box sx={{ bgcolor: "background.paper", p: 4, borderRadius: 2, maxWidth: "600px", width: "90%" }}>
+          <Typography variant="h5" gutterBottom>Event Preview</Typography>
+          <Typography variant="subtitle1">Name: {eventData.name}</Typography>
+          <Typography variant="subtitle1">Date: {eventData.date}</Typography>
+          <Typography variant="subtitle1">Time: {eventData.time}</Typography>
+          <Typography variant="subtitle1">Location: {eventData.location}</Typography>
+          <Typography variant="subtitle1">Description: {eventData.description}</Typography>
+          <Typography variant="subtitle1">Category: {eventData.category}</Typography>
+          {eventData.imageUrl && (
+            <Box component="img" src={eventData.imageUrl} alt="Event Preview" sx={{ width: "100%", mt: 2 }} />
+          )}
+          <StyledButton variant="contained" onClick={handleClosePreview} sx={{ mt: 2 }}>Close Preview</StyledButton>
+        </Box>
+      </Modal>
     </BackgroundContainer>
   );
 };
