@@ -2,7 +2,7 @@ name: Connectify - Front
 
 on:
   push:
-    branches: [ "dev_test" ]
+    branches: [ "dev" ]
 
   workflow_dispatch:
 
