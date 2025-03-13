@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { styled } from "@mui/material/styles";
 import peachImage from "../peach.jpg"; // Ensure correct path
 import logo from "../logo.jpg"; // Replace with actual logo path
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:8000";
 
 const events = [
   {
