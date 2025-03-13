@@ -130,88 +130,63 @@ Homepage (Welcome):
 
 URL: /
 
-Component: <WelcomePage />
-
-Login:
+Component: Login:
 
 
 URL: /login
 
-Component: <LoginForm />
 
-Home (Post-login):
+Component: Home (Post-login)
 
 
 URL: /Home
 
-Component: <HomePage />
 
-Notifications:
-
+Component: Notifications
 
 
 URL: /notifications
 
-Component: <NotificationPage />
 
-About:
-
-
+Component: About Us 
 
 URL: /about
 
-Component: <AboutPage />
-
-Profile:
+Component: Profile
 
 
 URL: /profile
 
-Component: <Profile />
-
-Signup:
+Component: Signup
 
 
 URL: /signup
 
-Component: <Signup />
-
-Matches:
+Component Matches
 
 URL: /matches
 
-Component: <MyMatches />
-
-Chat:
+Component: Chat
 
 URL: /ChatPage
 
-Component: <ChatPage />
-
-User Settings:
+Component: User Settings
 
 
 URL: /UserSettings
 
-Component: <UserSettings />
 
-View Events:
+Component: View Events 
 
 
 URL: /ViewEvents
 
-Component: <ViewEvents />
-
-Create Event:
+Component: Create Event
 
 
 URL: /createevent
 
-Component: <CreateEvent />
-
-Policy Compliance:
+Component: Policy Compliance
 
 
 URL: /PolicyCompliance
-
-Component: <PolicyCompliance />
