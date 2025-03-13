@@ -16,6 +16,9 @@ import peachImage from "../peach.jpg"; // Ensure correct path
 import logo from "../logo.jpg"; // Replace with actual logo path
 import axios from "axios";
 
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://127.0.0.1:8000";
+
+
 const BackgroundContainer = styled("div")({
   backgroundImage: `url(${peachImage})`,
   backgroundRepeat: "no-repeat",
@@ -129,26 +132,23 @@ const Signup = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setServerError("");
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setServerError("");
 
-    if (validateForm()) {
-      try {
-        const response = await axios.post(
-          "http://127.0.0.1:8000/users/create/",
-          formData
-        );
-        alert("Signup successful! Please log in.");
-        navigate("/login");
-      } catch (error) {
-        const errorMessage =
-          error.response?.data?.message ||
-          "Signup failed. Please try again.";
-        setServerError(errorMessage);
-      }
+  if (validateForm()) {
+    try {
+      const apiUrl = `${BASE_URL}/users/create/`;
+
+      await axios.post(apiUrl, formData);
+      navigate("/login"); // Navigate directly after successful signup
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message || "Signup failed. Please try again.";
+      setServerError(errorMessage);
     }
-  };
+  }
+};
 
   return (
     <BackgroundContainer>
