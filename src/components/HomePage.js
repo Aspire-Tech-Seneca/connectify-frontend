@@ -15,13 +15,13 @@ const dummyMatches = [
   {
     name: "Eni Zeqo",
     age: 25,
-    interests: ["Reading", "Traveling", "Music"],
+    interests: ["Sports", "Music", "Travel", "Technology", "Art"],
     imgUrl: eni,
   },
   {
     name: "Shailendra Kushwaha",
     age: 25,
-    interests: ["Sports", "Technology", "Movies"],
+    interests: ["Sports", "Music", "Travel", "Technology", "Art"],
     imgUrl: shailendra,
   },
 ];
