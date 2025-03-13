@@ -122,7 +122,7 @@ const HomePage = () => {
                         </span>
                       ))}
                     </div>
-                    <button style={styles.messageBtn}>Match</button>
+                    <button style={styles.messageBtn} onClick={() => navigate("/matches#incoming-requests")}>Match</button>
                   </div>
                 </div>
               ))}
