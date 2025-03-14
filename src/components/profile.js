@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react"; 
 import { useNavigate } from "react-router-dom";
 import { IconButton, Badge, Popover, List, ListItem, ListItemText } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
@@ -178,22 +178,15 @@ const ProfileCard = ({
             />
             <div style={styles.categoriesContainer}>
               <p style={styles.categoryTitle}>Choose The interest (max 1):</p>
-              <div style={styles.checkboxGroup}>
+              <div style={styles.radioGroup}>
                 {availableCategories.map((cat) => (
-                  <label key={cat.value} style={styles.checkboxLabel}>
+                  <label key={cat.value} style={styles.radioLabel}>
                     <input
-                      type="checkbox"
-                      checked={categories.includes(cat.value)}
-                      disabled={
-                        !categories.includes(cat.value) && categories.length >= 3
-                      }
-                      onChange={() => {
-                        if (categories.includes(cat.value)) {
-                          setCategories(categories.filter((c) => c !== cat.value));
-                        } else if (categories.length < 3) {
-                          setCategories([...categories, cat.value]);
-                        }
-                      }}
+                      type="radio"
+                      name="interest"
+                      value={cat.value}
+                      checked={categories[0] === cat.value}
+                      onChange={() => setCategories([cat.value])}
                     />
                     {cat.label}
                   </label>
@@ -418,7 +411,7 @@ const Profile = () => {
     if (categories.length > 0) {
       fetch(`${BASE_URL}/users/get-recommend-matchups/`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer${authToken}` },
         body: JSON.stringify({ interest: categories[0] }),
       })
         .then((response) => response.json())
@@ -482,11 +475,7 @@ const Profile = () => {
   // Save profile details and update interest
   const handleSaveProfile = async () => {
     const payload = {
-     // fullname: name,
-      //age: age,
       bio: bio,
-      //profile_image: profilePic,
-     // gallery_images: galleryImages.map((image) => image.url),
     };
 
     try {
@@ -806,6 +795,16 @@ const styles = {
     textAlign: "center",
     color: "#A0522D",
     fontStyle: "italic",
+  },
+  // New styles for radio buttons
+  radioGroup: {
+    display: "flex",
+    gap: "10px",
+  },
+  radioLabel: {
+    display: "flex",
+    alignItems: "center",
+    gap: "5px",
   },
 };
 
