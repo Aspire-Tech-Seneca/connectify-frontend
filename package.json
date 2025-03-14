@@ -9,6 +9,7 @@
     "@mui/material": "^6.4.3",
     "axios": "^1.7.9",
     "cra-template": "1.2.0",
+    "emoji-picker-react": "^4.12.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.1.5",
