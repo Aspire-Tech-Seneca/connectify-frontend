@@ -12,6 +12,7 @@ import ChatPage from "./components/ChatPage";
 import CreateEvent from "./components/CreateEvent";
 import MyMatches from "./components/MyMatches";
 import UserSettings from "./components/UserSettings";
+import CommunityChat from "./components/CommunityChat.js";
 import ViewEvents from "./components/ViewEvents";
 import PolicyCompliance from "./components/PolicyCompliance";
 import NotificationPage from "./components/NotificationPage";
@@ -44,7 +45,8 @@ const App = () => {
           <Route path="/ChatPage" element={<ChatPage/>} />
 		  <Route path="/UserSettings" element={<UserSettings />} />
 		  <Route path="/ViewEvents" element={<ViewEvents />} />
-		  <Route path="/createevent" element={<CreateEvent />} /> 
+		  <Route path="/createevent" element={<CreateEvent />} />
+      <Route path="/CommunityChat" element={<CommunityChat />} />  
       <Route path="/PolicyCompliance" element={<PolicyCompliance />} /> 
         </Routes>
       </div>
