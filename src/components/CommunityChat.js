@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { TextField, Button, List, ListItem, ListItemText } from "@mui/material";
-import Picker from "emoji-picker-react"; // Make sure you've installed emoji-picker-react
-import peachImage from "./peach.jpg"; // Ensure peach.jpg is in the same folder
 import MenuIcon from "@mui/icons-material/Menu";
+import Picker from "emoji-picker-react"; // Install with npm or yarn
+import peachImage from "./peach.jpg"; // Ensure peach.jpg is in the same folder
 
-// A NavBar component that mimics your profile page styling
+// Replicates your Profile page's NavBar style
 const NavBar = ({ navigate }) => {
   return (
     <nav style={styles.navbar}>
@@ -25,7 +25,7 @@ const NavBar = ({ navigate }) => {
             {item.label}
           </button>
         ))}
-        <MenuIcon style={{ color: "white" }} />
+        <MenuIcon style={{ color: "white", fontSize: "24px" }} />
       </div>
     </nav>
   );
@@ -37,12 +37,10 @@ const CommunityChat = () => {
     { user: "Bob", message: "Hi Alice! How are you?", timestamp: "10:02 AM" },
   ]);
   const [inputMessage, setInputMessage] = useState("");
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const chatEndRef = useRef(null);
 
-  // Emoji picker visibility
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-
-  // Scroll to bottom when messages update
+  // Auto-scroll to bottom when messages update
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -61,15 +59,15 @@ const CommunityChat = () => {
 
   // Handle emoji selection
   const onEmojiClick = (emojiData) => {
-    setInputMessage(inputMessage + emojiData.emoji);
+    setInputMessage((prev) => prev + emojiData.emoji);
   };
 
   return (
     <div style={styles.outerContainer}>
-      {/* Full-Width NavBar */}
+      {/* Full-width NavBar at the top */}
       <NavBar />
 
-      {/* Main Chat Section with Glassmorphism */}
+      {/* Main Chat Section */}
       <div style={styles.chatSection}>
         <div style={styles.chatContainer}>
           <List style={styles.messagesList}>
@@ -84,6 +82,7 @@ const CommunityChat = () => {
             <div ref={chatEndRef} />
           </List>
 
+          {/* Input Row */}
           <div style={styles.inputRow}>
             <div style={{ position: "relative" }}>
               {/* Emoji Picker Toggle Button */}
@@ -113,6 +112,7 @@ const CommunityChat = () => {
                 if (e.key === "Enter") sendMessage();
               }}
             />
+
             <Button variant="contained" onClick={sendMessage} style={styles.sendButton}>
               Send
             </Button>
@@ -123,9 +123,11 @@ const CommunityChat = () => {
   );
 };
 
+// Styles
 const styles = {
-  // Outer container with peach background
+  // Outer container: single peach background, 100% width & height
   outerContainer: {
+    width: "100%",
     minHeight: "100vh",
     backgroundImage: `url(${peachImage})`,
     backgroundSize: "cover",
@@ -135,7 +137,7 @@ const styles = {
     flexDirection: "column",
   },
 
-  // NavBar styles (from your profile page)
+  // NavBar from your profile page
   navbar: {
     backgroundColor: "#C38282",
     padding: "25px",
@@ -160,30 +162,25 @@ const styles = {
     whiteSpace: "nowrap",
   },
 
-  // Chat section container
+  // Chat section: centers the chat container
   chatSection: {
     flex: 1,
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    padding: "20px",
+    padding: "20px 0",
   },
 
-  // Glassmorphism chat container
+  // Single-layer chat container (wider and taller)
   chatContainer: {
-    width: "95%",
-    maxWidth: "600px",
-    height: "80vh", // bigger height
+    width: "60%",         // Wider container
+    minHeight: "75vh",    // Taller container
     display: "flex",
     flexDirection: "column",
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    borderRadius: "8px",
     padding: "20px",
-    borderRadius: "16px",
-    // Glass effect
-    backgroundColor: "rgba(255, 255, 255, 0.25)",
-    backdropFilter: "blur(12px)",
-    WebkitBackdropFilter: "blur(12px)",
-    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
-    border: "1px solid rgba(255, 255, 255, 0.18)",
+    boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
   },
 
   messagesList: {
@@ -193,7 +190,7 @@ const styles = {
   },
   messageItem: {
     marginBottom: "10px",
-    background: "rgba(255,255,255,0.8)",
+    background: "#f5f5f5",
     borderRadius: "8px",
     padding: "8px 12px",
   },
@@ -220,11 +217,10 @@ const styles = {
     textTransform: "none",
   },
 
-  // Emoji Picker popup styling
+  // Emoji picker popup
   emojiPickerPopup: {
     position: "absolute",
     bottom: "50px",
-    // Adjust left or right as needed
     left: 0,
     zIndex: 9999,
   },
