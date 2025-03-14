@@ -3,8 +3,10 @@ import { Container, List, ListItem, ListItemText, Typography, CircularProgress, 
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { useNavigate, Link } from "react-router-dom";
 
-const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost";
-const BASE_PATH = process.env.REACT_APP_BASE_PATH || "/api";
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://127.0.0.1:8000";
+const BASE_PATH = process.env.REACT_APP_BASE_PATH || "/api/v1"; 
+const BLOB_STORAGE_BASE_URL = process.env.REACT_APP_BLOB_STORAGE_BASE_URL || "https://yourpublicblobstorage.com/";
+const BLOB_SAS_TOKEN = process.env.REACT_APP_BLOB_SAS_TOKEN || "";
 
 const NotificationPage = () => {
   const [notifications, setNotifications] = useState([]);
