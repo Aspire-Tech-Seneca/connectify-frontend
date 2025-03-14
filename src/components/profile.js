@@ -316,13 +316,9 @@ const Matches = ({ suggestedMatches, handleApproveMatch }) => {
 const Profile = () => {
   const navigate = useNavigate();
   const [name, setName] = useState("Eni Zeqo");
-  const [bio, setBio] = useState(
-    "I am new in Canada and I want to make more friends that have the same interests as me"
-  );
+  const [bio, setBio] = useState("I am new in Canada and I want to make more friends that have the same interests as me");
   const [age, setAge] = useState(25);
-  const [profilePic, setProfilePic] = useState(
-    `${BLOB_STORAGE_BASE_URL}defaultProfilePic.jpg`
-  );
+  const [profilePic, setProfilePic] = useState(`${BLOB_STORAGE_BASE_URL}defaultProfilePic.jpg`);
   const [isEditing, setIsEditing] = useState(false);
   const [categories, setCategories] = useState([]);
   const [availableCategories, setAvailableCategories] = useState([]);
@@ -332,12 +328,14 @@ const Profile = () => {
   const [notifications, setNotifications] = useState([]);
   const notificationCount = notifications.length;
 
-  // Fetch available interests from backend
+  // Use authToken instead of token
+  const authToken = localStorage.getItem("authToken");
+
+  // Fetch available interests
   useEffect(() => {
     fetch(`${BASE_URL}/users/get-interest-list/`)
       .then((response) => response.json())
       .then((data) => {
-        console.log("Interest list data:", data);
         if (data && data.length) {
           setAvailableCategories(data);
         } else {
@@ -362,110 +360,93 @@ const Profile = () => {
       });
   }, []);
 
-  // Fetch profile details (name, age, bio, gallery images)
+  // Fetch profile details using the new endpoint /users/get-user-info/
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    fetch(`${BASE_URL}/users/profile/`, {
+    fetch(`${BASE_URL}/users/get-user-info/`, {
       method: "GET",
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${authToken}` },
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log("Profile details:", data);
         setName(data.fullname || name);
         setAge(data.age || age);
         setBio(data.bio || bio);
         if (data.gallery_images) {
-          setGalleryImages(
-            data.gallery_images.map((url, index) => ({ id: index, url }))
-          );
+          setGalleryImages(data.gallery_images.map((url, index) => ({ id: index, url })));
         }
       })
       .catch((err) => console.error("Error fetching profile details:", err));
-  }, []);
+  }, [authToken]);
 
-  // Retrieve profile image (note the new field "profile_image_name")
+  // Retrieve profile image (expecting "profile_image_name")
   useEffect(() => {
-    const token = localStorage.getItem("token");
     fetch(`${BASE_URL}/users/retrieve-profile-image/`, {
       method: "GET",
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${authToken}` },
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log("Retrieved profile image:", data);
-        // According to the new endpoint, we expect "profile_image_name"
         if (data.profile_image_name) {
-          // Build the full URL from the filename
           setProfilePic(`${BLOB_STORAGE_BASE_URL}${data.profile_image_name}`);
         } else {
           console.warn("No profile_image_name in response");
         }
       })
       .catch((err) => console.error("Error retrieving profile image:", err));
-  }, []);
+  }, [authToken]);
 
   // Retrieve user's interest
   useEffect(() => {
-    const token = localStorage.getItem("token");
     fetch(`${BASE_URL}/users/retrieve-interest/`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${authToken}`,
       },
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log("Retrieved interest:", data);
         if (data.interest) {
           setCategories([data.interest]);
         }
       })
       .catch((err) => console.error("Error retrieving interest:", err));
-  }, []);
+  }, [authToken]);
 
   // Fetch suggested matches based on the first interest
   useEffect(() => {
     if (categories.length > 0) {
-      const interest = categories[0];
       fetch(`${BASE_URL}/users/get-recommend-matchups/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ interest }),
+        body: JSON.stringify({ interest: categories[0] }),
       })
         .then((response) => response.json())
-        .then((data) => {
-          console.log("Suggested matches:", data);
-          setSuggestedMatches(data);
-        })
-        .catch((error) =>
-          console.error("Error fetching suggested matches:", error)
-        );
+        .then((data) => setSuggestedMatches(data))
+        .catch((error) => console.error("Error fetching suggested matches:", error));
     }
   }, [categories]);
 
-  // Update profile picture using backend endpoint
+  // Update profile picture using backend endpoint.
   const handleProfilePicChange = async (event) => {
     const file = event.target.files[0];
     if (file) {
-      const token = localStorage.getItem("token");
-      const formData = new FormData();
-      formData.append("profile_image", file);
       try {
         const response = await fetch(`${BASE_URL}/users/upload-profile-image/`, {
           method: "PUT",
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${authToken}`,
           },
-          body: formData,
+          body: (() => {
+            const formData = new FormData();
+            formData.append("profile_image", file);
+            return formData;
+          })(),
         });
         if (!response.ok) {
           throw new Error("Profile image upload failed");
         }
         const data = await response.json();
-        console.log("Profile image uploaded:", data);
-        // If the backend still returns profile_image_name, update accordingly
         if (data.profile_image_name) {
           setProfilePic(`${BLOB_STORAGE_BASE_URL}${data.profile_image_name}`);
         }
@@ -475,13 +456,12 @@ const Profile = () => {
     }
   };
 
-  // Upload gallery image using direct Azure Blob Storage upload
+  // Upload gallery image using direct Azure Blob Storage upload.
   const handleGalleryImageUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
       try {
         const uploadedUrl = await uploadFileToBlob(file);
-        console.log("Gallery image uploaded:", uploadedUrl);
         setGalleryImages((prev) => [
           ...prev,
           { id: Date.now() + Math.random(), url: uploadedUrl },
@@ -501,8 +481,6 @@ const Profile = () => {
 
   // Save profile details and update interest
   const handleSaveProfile = async () => {
-    console.log("Saving profile...");
-    const token = localStorage.getItem("token");
     const payload = {
       fullname: name,
       age: age,
@@ -516,26 +494,23 @@ const Profile = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify(payload),
       });
       if (!response.ok) {
-        console.error("Profile update response:", response);
         throw new Error("Profile update failed");
       }
-      // Update interest separately
       if (categories.length > 0) {
         const interestResponse = await fetch(`${BASE_URL}/users/update-interest/`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${authToken}`,
           },
           body: JSON.stringify({ interest: categories[0] }),
         });
         if (!interestResponse.ok) {
-          console.error("Interest update response:", interestResponse);
           throw new Error("Interest update failed");
         }
       }
@@ -827,22 +802,10 @@ const styles = {
     transition: "color 0.3s",
     whiteSpace: "nowrap",
   },
-  categoriesContainer: {
-    margin: "10px 0",
-  },
-  categoryTitle: {
-    marginBottom: "5px",
-    fontWeight: "bold",
-  },
-  checkboxGroup: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: "10px",
-  },
-  checkboxLabel: {
-    display: "flex",
-    alignItems: "center",
-    gap: "5px",
+  emptyText: {
+    textAlign: "center",
+    color: "#A0522D",
+    fontStyle: "italic",
   },
 };
 
