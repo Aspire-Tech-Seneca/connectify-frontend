@@ -1,16 +1,16 @@
-import React, { useState, useRef, useEffect } from "react"; 
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { IconButton, Badge, Popover, List, ListItem, ListItemText } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 
-// Load environment variables (ensure these are correctly set in your environment)
-const BASE_URL = process.env.REACT_APP_BASE_URL || "http://127.0.0.1:8000";
-const BLOB_STORAGE_BASE_URL = process.env.REACT_APP_BLOB_STORAGE_BASE_URL || "https://yourpublicblobstorage.com/";
+// Adjust to your actual backend URLs
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:8000";
+const BLOB_STORAGE_BASE_URL =
+  process.env.REACT_APP_BLOB_STORAGE_BASE_URL || "https://yourpublicblobstorage.com/";
 const BLOB_SAS_TOKEN = process.env.REACT_APP_BLOB_SAS_TOKEN || "";
 
 /**
- * Upload a file to Azure Blob Storage using the SAS token.
- * Returns a Promise that resolves with the public URL of the uploaded file.
+ * Example function for uploading files to Azure Blob (if needed).
  */
 async function uploadFileToBlob(file) {
   const uniqueFileName = `${Date.now()}_${file.name}`;
@@ -29,14 +29,12 @@ async function uploadFileToBlob(file) {
   return `${BLOB_STORAGE_BASE_URL}${uniqueFileName}`;
 }
 
-// NavBar Component with Notification Icon and Popover
 const NavBar = ({ navigate, notificationCount, notifications }) => {
   const [anchorEl, setAnchorEl] = useState(null);
 
   const handleNotificationIconClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
-
   const handleClosePopover = () => {
     setAnchorEl(null);
   };
@@ -137,8 +135,7 @@ const ProfileCard = ({
       </div>
       <div style={styles.profileInfo}>
         {isEditing ? (
-          <div style={styles.editContainer}>
-            {/* Trigger file input */}
+          <div>
             <button
               style={styles.uploadLabel}
               onClick={() => {
@@ -211,10 +208,7 @@ const ProfileCard = ({
               {categories.length ? categories.join(", ") : "None selected"}
             </p>
             <button
-              onClick={() => {
-                console.log("Editing mode enabled");
-                setIsEditing(true);
-              }}
+              onClick={() => setIsEditing(true)}
               style={styles.editButton}
             >
               Edit Profile
@@ -263,7 +257,11 @@ const Gallery = ({ galleryImages, handleGalleryImageUpload, removeGalleryImage }
 );
 
 // Matches Component
-const Matches = ({ suggestedMatches, handleApproveMatch }) => {
+const Matches = ({
+  suggestedMatches,
+  handleRemoveMatch,
+  handleMatchRequest,
+}) => {
   return (
     <div>
       <h2 style={styles.sectionTitle}>Suggested Matches</h2>
@@ -286,14 +284,16 @@ const Matches = ({ suggestedMatches, handleApproveMatch }) => {
               </div>
             </div>
             <div style={styles.buttonRow}>
+              {/* ❌ => block-matchup-request */}
               <button
-                onClick={() => handleApproveMatch(match.id)}
+                onClick={() => handleRemoveMatch(match.id)}
                 style={styles.removeButton}
               >
                 ❌ Remove
               </button>
+              {/* ✅ => request-matchup (same logic as "Send Request" in MatchesPage) */}
               <button
-                onClick={() => handleApproveMatch(match.id)}
+                onClick={() => handleMatchRequest(match.id)}
                 style={styles.matchButton}
               >
                 ✅ Match
@@ -309,86 +309,76 @@ const Matches = ({ suggestedMatches, handleApproveMatch }) => {
 const Profile = () => {
   const navigate = useNavigate();
   const [name, setName] = useState("Eni Zeqo");
-  const [bio, setBio] = useState("I am new in Canada and I want to make more friends that have the same interests as me");
+  const [bio, setBio] = useState("I am new in Canada and I want to make more friends...");
   const [age, setAge] = useState(25);
   const [profilePic, setProfilePic] = useState(`${BLOB_STORAGE_BASE_URL}defaultProfilePic.jpg`);
   const [isEditing, setIsEditing] = useState(false);
   const [categories, setCategories] = useState([]);
   const [availableCategories, setAvailableCategories] = useState([]);
+
+  // Only "suggestedMatches" here
   const [suggestedMatches, setSuggestedMatches] = useState([]);
+
+  // If you want to show pending matches on the Profile page itself,
+  // you could add something like:
+  // const [pendingMatches, setPendingMatches] = useState([]);
+
   const [galleryImages, setGalleryImages] = useState([]);
   const profilePicInputRef = useRef(null);
   const [notifications, setNotifications] = useState([]);
   const notificationCount = notifications.length;
 
-  // Use authToken instead of token
+  // Use authToken
   const authToken = localStorage.getItem("authToken");
 
-  // Fetch available interests
+  // 1) Fetch available interests
   useEffect(() => {
     fetch(`${BASE_URL}/users/get-interest-list/`)
-      .then((response) => response.json())
+      .then((res) => res.json())
       .then((data) => {
         if (data && data.length) {
           setAvailableCategories(data);
-        } else {
-          setAvailableCategories([
-            { value: "sports", label: "Sports" },
-            { value: "music", label: "Music" },
-            { value: "tech", label: "Technology" },
-            { value: "art", label: "Art" },
-            { value: "travel", label: "Travel" },
-          ]);
         }
       })
-      .catch((error) => {
-        console.error("Error fetching interest list:", error);
-        setAvailableCategories([
-          { value: "sports", label: "Sports" },
-          { value: "music", label: "Music" },
-          { value: "tech", label: "Technology" },
-          { value: "art", label: "Art" },
-          { value: "travel", label: "Travel" },
-        ]);
-      });
+      .catch((err) => console.error("Error fetching interest list:", err));
   }, []);
 
-  // Fetch profile details using the new endpoint /users/get-user-info/
+  // 2) Fetch user info
   useEffect(() => {
     fetch(`${BASE_URL}/users/get-user-info/`, {
       method: "GET",
       headers: { Authorization: `Bearer ${authToken}` },
     })
-      .then((response) => response.json())
+      .then((res) => res.json())
       .then((data) => {
         setName(data.fullname || name);
         setAge(data.age || age);
         setBio(data.bio || bio);
         if (data.gallery_images) {
-          setGalleryImages(data.gallery_images.map((url, index) => ({ id: index, url })));
+          setGalleryImages(
+            data.gallery_images.map((url, index) => ({ id: index, url }))
+          );
         }
       })
       .catch((err) => console.error("Error fetching profile details:", err));
   }, [authToken]);
 
-  // Retrieve profile image (expecting "profile_image_name")
+  // 3) Retrieve profile image
   useEffect(() => {
     fetch(`${BASE_URL}/users/retrieve-profile-image/`, {
       method: "GET",
       headers: { Authorization: `Bearer ${authToken}` },
     })
-      .then((response) => response.json())
+      .then((res) => res.json())
       .then((data) => {
         if (data.profile_image_name) {
           setProfilePic(`${BLOB_STORAGE_BASE_URL}${data.profile_image_name}`);
-        } else {
-          console.warn("No profile_image_name in response");
         }
       })
       .catch((err) => console.error("Error retrieving profile image:", err));
   }, [authToken]);
 
-  // Retrieve user's interest
+  // 4) Retrieve user's interest
   useEffect(() => {
     fetch(`${BASE_URL}/users/retrieve-interest/`, {
       method: "GET",
@@ -397,39 +387,50 @@ const Profile = () => {
         Authorization: `Bearer ${authToken}`,
       },
     })
-      .then((response) => response.json())
+      .then((res) => res.json())
       .then((data) => {
-        if (data.interest) {
-          setCategories([data.interest]);
+        if (data && data.name) {
+          setCategories([data.name]);
         }
       })
       .catch((err) => console.error("Error retrieving interest:", err));
   }, [authToken]);
 
-  // Fetch suggested matches based on the first interest
+  // 5) Fetch suggested matches
   useEffect(() => {
     if (categories.length > 0) {
       fetch(`${BASE_URL}/users/get-recommend-matchups/`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer${authToken}` },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
         body: JSON.stringify({ interest: categories[0] }),
       })
-        .then((response) => response.json())
-        .then((data) => setSuggestedMatches(data))
-        .catch((error) => console.error("Error fetching suggested matches:", error));
+        .then((res) => res.json())
+        .then((data) => {
+          // Transform data to have { id, name, age, interests, photo } if needed
+          const transformed = data.map((u) => ({
+            id: u.id,
+            name: u.fullname,
+            age: u.age,
+            interests: u.interest ? u.interest.name : "",
+            photo: u.profile_image_url || "https://via.placeholder.com/150",
+          }));
+          setSuggestedMatches(transformed);
+        })
+        .catch((err) => console.error("Error fetching suggested matches:", err));
     }
   }, [categories]);
 
-  // Update profile picture using backend endpoint.
+  // Handle profile picture upload
   const handleProfilePicChange = async (event) => {
     const file = event.target.files[0];
     if (file) {
       try {
         const response = await fetch(`${BASE_URL}/users/upload-profile-image/`, {
           method: "PUT",
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-          },
+          headers: { Authorization: `Bearer ${authToken}` },
           body: (() => {
             const formData = new FormData();
             formData.append("profile_image", file);
@@ -449,7 +450,7 @@ const Profile = () => {
     }
   };
 
-  // Upload gallery image using direct Azure Blob Storage upload.
+  // Handle gallery uploads
   const handleGalleryImageUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -465,20 +466,67 @@ const Profile = () => {
     }
   };
 
-  const removeGalleryImage = (id) =>
+  const removeGalleryImage = (id) => {
     setGalleryImages((prev) => prev.filter((img) => img.id !== id));
-
-  const handleApproveMatch = (id) => {
-    setSuggestedMatches((prev) => prev.filter((match) => match.id !== id));
   };
 
-  // Save profile details and update interest
-  const handleSaveProfile = async () => {
-    const payload = {
-      bio: bio,
-    };
-
+  // ❌ => block-matchup-request
+  const handleRemoveMatch = async (userId) => {
     try {
+      const response = await fetch(`${BASE_URL}/users/block-matchup-request/`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({ "requester-user-id": userId }),
+      });
+      if (!response.ok) {
+        throw new Error("Block matchup request failed");
+      }
+      // Remove from suggested
+      setSuggestedMatches((prev) => prev.filter((match) => match.id !== userId));
+    } catch (error) {
+      console.error("Error blocking matchup request:", error);
+    }
+  };
+
+  // ✅ => request-matchup (like "Send Request" in MatchesPage)
+  const handleMatchRequest = async (userId) => {
+    try {
+      // (Optional) find the user object for a success message, etc.
+      const match = suggestedMatches.find((m) => m.id === userId);
+
+      const response = await fetch(`${BASE_URL}/users/request-matchup/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({ "receiver-user-id": userId }),
+      });
+      if (!response.ok) {
+        throw new Error("Request matchup failed");
+      }
+
+      // Remove from suggested
+      setSuggestedMatches((prev) => prev.filter((m) => m.id !== userId));
+
+      // Optionally show a local message or Snackbar
+      console.log(`Match request sent to ${match ? match.name : "user"}.`);
+
+      // Now the MyMatches page, when re-fetched, will see this as "pending"
+      // because your backend marks it that way.
+    } catch (error) {
+      console.error("Error requesting matchup:", error);
+    }
+  };
+
+  // Save profile
+  const handleSaveProfile = async () => {
+    const payload = { bio };
+    try {
+      // 1) Update user info
       const response = await fetch(`${BASE_URL}/users/update/`, {
         method: "PATCH",
         headers: {
@@ -490,6 +538,8 @@ const Profile = () => {
       if (!response.ok) {
         throw new Error("Profile update failed");
       }
+
+      // 2) Update interest if needed
       if (categories.length > 0) {
         const interestResponse = await fetch(`${BASE_URL}/users/update-interest/`, {
           method: "POST",
@@ -544,10 +594,13 @@ const Profile = () => {
               removeGalleryImage={removeGalleryImage}
             />
           </div>
+
+          {/* Column with suggested matches */}
           <div style={styles.column}>
             <Matches
               suggestedMatches={suggestedMatches}
-              handleApproveMatch={handleApproveMatch}
+              handleRemoveMatch={handleRemoveMatch}
+              handleMatchRequest={handleMatchRequest}
             />
           </div>
         </div>
@@ -796,7 +849,6 @@ const styles = {
     color: "#A0522D",
     fontStyle: "italic",
   },
-  // New styles for radio buttons
   radioGroup: {
     display: "flex",
     gap: "10px",
