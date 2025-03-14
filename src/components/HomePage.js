@@ -1,35 +1,16 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { IconButton, Badge } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 
-// Import images directly (Option 1)
-import eni from '../image/Eni.jpg';
-import shailendra from '../image/shailendra.jpg';
-
-// Load environment variables
+// Environment variables
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://127.0.0.1:8000";
 const BLOB_STORAGE_BASE_URL = process.env.REACT_APP_BLOB_STORAGE_BASE_URL || "https://yourpublicblobstorage.com/";
 const BLOB_SAS_TOKEN = process.env.REACT_APP_BLOB_SAS_TOKEN || "";
 
-const dummyMatches = [
-  {
-    name: "Eni Zeqo",
-    age: 25,
-    interests: ["Sports", "Music", "Travel", "Technology", "Art"],
-    imgUrl: eni,
-  },
-  {
-    name: "Shailendra Kushwaha",
-    age: 25,
-    interests: ["Sports", "Music", "Travel", "Technology", "Art"],
-    imgUrl: shailendra,
-  },
-];
-
-// Navigation Bar Component – menu items centered
+// NavBar component
 const NavBar = ({ navigate }) => {
-  const [notifications, setNotifications] = useState([/* Add notification objects here */]);
+  const [notifications, setNotifications] = useState([]);
 
   const navItems = [
     { label: "Home", path: "/home" },
@@ -52,8 +33,6 @@ const NavBar = ({ navigate }) => {
             {item.label}
           </button>
         ))}
-        
-        {/* Bell Icon with Notifications */}
         <IconButton color="inherit" component={Link} to="/notifications">
           <Badge badgeContent={notifications.length} color="error">
             <NotificationsIcon />
@@ -64,53 +43,152 @@ const NavBar = ({ navigate }) => {
   );
 };
 
-/**
- * Upload a file to Azure Blob Storage using the SAS token.
- * Returns a Promise that resolves with the public URL of the uploaded file.
- */
-async function uploadFileToBlob(file) {
-  const uniqueFileName = `${Date.now()}_${file.name}`;
-  // Construct the upload URL: base URL + file name + SAS token
-  const uploadUrl = `${BLOB_STORAGE_BASE_URL}${uniqueFileName}${BLOB_SAS_TOKEN}`;
-  const response = await fetch(uploadUrl, {
-    method: "PUT",
-    headers: {
-      "x-ms-blob-type": "BlockBlob",
-      "Content-Type": file.type,
-    },
-    body: file,
-  });
-  if (!response.ok) {
-    throw new Error("Upload failed");
-  }
-  // Assuming the container is public, return the URL without the SAS token
-  return `${BLOB_STORAGE_BASE_URL}${uniqueFileName}`;
-}
+// Footer component
+const Footer = () => {
+  return (
+    <footer style={styles.footer}>
+      <div style={styles.footerLinks}>
+        <div style={styles.footerSection}>
+          <h4 style={styles.footerHeading}>User</h4>
+          <a href="/profile" style={styles.footerLink}>My Profile</a>
+          <a href="/matches" style={styles.footerLink}>My Matches</a>
+          <a href="/ViewEvents" style={styles.footerLink}>Events</a>
+        </div>
+        <div style={styles.footerSection}>
+          <h4 style={styles.footerHeading}>Connect</h4>
+          <a href="/ChatPage" style={styles.footerLink}>Chat</a>
+          <a href="/CommunityChat" style={styles.footerLink}>Community Chat</a>
+        </div>
+        <div style={styles.footerSection}>
+          <h4 style={styles.footerHeading}>Information</h4>
+          <a href="/PolicyCompliance" style={styles.footerLink}>Policy and Compliance</a>
+          <a href="/about" style={styles.footerLink}>About Us</a>
+          <a href="/UserSettings" style={styles.footerLink}>Contact</a>
+        </div>
+      </div>
+      <div style={styles.appDownload}>
+        <p style={styles.getAppText}>Get the Connectify app!</p>
+        <div style={styles.downloadButtons}>
+          <a href="https://apps.apple.com" style={styles.downloadButton}>
+            <img
+              src="https://via.placeholder.com/150x50"
+              alt="Download on the App Store"
+              style={styles.downloadImage}
+            />
+          </a>
+          <a href="https://play.google.com" style={styles.downloadButton}>
+            <img
+              src="https://via.placeholder.com/150x50"
+              alt="GET IT ON Google Play"
+              style={styles.downloadImage}
+            />
+          </a>
+        </div>
+      </div>
+      <div style={styles.footerBottom}>
+        <p style={styles.footerText}>
+          Connectify is the place to meet your next best match. Whether you're looking for love, friendship, or casual connections, Connectify brings people together.
+        </p>
+        <p style={styles.footerText}>
+          <a href="/profile" style={styles.inlineLink}>My Profile</a> | 
+          <a href="/chat" style={styles.inlineLink}>Chat</a> | 
+          <a href="/CommunityChat" style={styles.inlineLink}>Community</a> | 
+          <a href="/PolicyCompliance" style={styles.inlineLink}>Policy</a> | 
+          <a href="/ViewEvents" style={styles.inlineLink}>Events</a> | 
+          <a href="/matches" style={styles.inlineLink}>Matches</a>
+        </p>
+        <p style={styles.footerText}>© 2025 Connectify LLC, All Rights Reserved.</p>
+      </div>
+    </footer>
+  );
+};
 
-// Default export of HomePage component
 const HomePage = () => {
   const navigate = useNavigate();
-  
-  // State to track current profile index
+  const authToken = localStorage.getItem("authToken");
+
+  const [matches, setMatches] = useState([]);
   const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
-  
-  // Function to go to next profile
+
+  useEffect(() => {
+    if (!authToken) return;
+
+    fetch(`${BASE_URL}/users/retrieve-interest/`, {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => res.json())
+      .then((interestData) => {
+        if (!interestData.name) {
+          console.log("No user interest found. Skipping match recommendations.");
+          return;
+        }
+        return fetch(`${BASE_URL}/users/get-recommend-matchups/`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ interest: interestData.name }),
+        });
+      })
+      .then((res) => (res ? res.json() : []))
+      .then((data) => {
+        if (!data || !Array.isArray(data)) return;
+
+        const transformed = data.map((user) => ({
+          id: user.id,
+          name: user.fullname,
+          age: user.age,
+          interests: user.interest ? [user.interest.name] : [],
+          imgUrl: user.profile_image?.image_url || `${BLOB_STORAGE_BASE_URL}defaultProfilePic.jpg`,
+        }));
+        setMatches(transformed);
+      })
+      .catch((err) => console.error("Failed to fetch matches:", err));
+  }, [authToken]);
+
   const nextProfile = () => {
-    setCurrentProfileIndex((prevIndex) => 
-      prevIndex === dummyMatches.length - 1 ? 0 : prevIndex + 1
+    setCurrentProfileIndex((prevIndex) =>
+      matches.length > 0 ? (prevIndex === matches.length - 1 ? 0 : prevIndex + 1) : 0
     );
   };
-  
-  // Function to go to previous profile
+
   const prevProfile = () => {
-    setCurrentProfileIndex((prevIndex) => 
-      prevIndex === 0 ? dummyMatches.length - 1 : prevIndex - 1
+    setCurrentProfileIndex((prevIndex) =>
+      matches.length > 0 ? (prevIndex === 0 ? matches.length - 1 : prevIndex - 1) : 0
     );
   };
-  
-  // Get current profile to display
-  const currentProfile = dummyMatches[currentProfileIndex];
-  
+
+  const handleSendRequest = async (id) => {
+    const match = matches.find((m) => m.id === id);
+    if (!match) return;
+
+    try {
+      const response = await fetch(`${BASE_URL}/users/request-matchup/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({ "receiver-user-id": id }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to send matchup request");
+      }
+
+      setMatches(matches.filter((m) => m.id !== id));
+      navigate("/matches");
+    } catch (error) {
+      console.error("Error sending matchup request:", error);
+    }
+  };
+
+  const currentProfile = matches[currentProfileIndex];
+
   return (
     <div style={styles.outerContainer}>
       <NavBar navigate={navigate} />
@@ -119,142 +197,82 @@ const HomePage = () => {
           <div style={styles.homePage}>
             <h1 style={styles.welcomeTitle}>Welcome to Connectify</h1>
             <p style={styles.welcomeText}>
-              Find people with similar interests and make meaningful
-              connections.
+              Find people with similar interests and make meaningful connections.
             </p>
-            
-            <div style={styles.profileContainer}>
-              <div style={styles.profileWrapper}>
-                <button 
-                  style={styles.arrowButton}
-                  onClick={prevProfile}
-                  aria-label="Previous profile"
-                >
-                  &#8249;
-                </button>
-                
-                <div style={styles.matchCard}>
-                  <img
-                    src={currentProfile.imgUrl}
-                    alt={currentProfile.name}
-                    style={styles.matchImg}
-                    onError={(e) => {
-                      e.target.src = `${BLOB_STORAGE_BASE_URL}defaultProfilePic.jpg`;
-                    }}
-                  />
-                  <div style={styles.matchInfo}>
-                    <h3 style={styles.matchName}>
-                      {currentProfile.name}, {currentProfile.age}
-                    </h3>
-                    <div style={styles.interests}>
-                      {currentProfile.interests.map((interest, i) => (
-                        <span key={i} style={styles.interestTag}>
-                          {interest}
-                        </span>
-                      ))}
-                    </div>
-                    <div style={styles.actionButtons}>
-                      <button 
-                        style={styles.messageBtn} 
-                        onClick={() => navigate("/matches#incoming-requests")}
-                      >
-                        Match
-                      </button>
-                      <button style={styles.messageBtn}>Unmatch</button>
+
+            {matches.length === 0 ? (
+              <p style={styles.welcomeText}>Loading matches...</p>
+            ) : (
+              <div style={styles.profileContainer}>
+                <div style={styles.profileWrapper}>
+                  <button 
+                    style={styles.arrowButton}
+                    onClick={prevProfile}
+                    aria-label="Previous profile"
+                  >
+                    &#8249;
+                  </button>
+                  <div style={styles.matchCard}>
+                    <img
+                      src={currentProfile.imgUrl}
+                      alt={currentProfile.name}
+                      style={styles.matchImg}
+                      onError={(e) => {
+                        e.target.src = `${BLOB_STORAGE_BASE_URL}defaultProfilePic.jpg`;
+                      }}
+                    />
+                    <div style={styles.matchInfo}>
+                      <h3 style={styles.matchName}>
+                        {currentProfile.name}, {currentProfile.age}
+                      </h3>
+                      <div style={styles.interests}>
+                        {currentProfile.interests.map((interest, i) => (
+                          <span key={i} style={styles.interestTag}>
+                            {interest}
+                          </span>
+                        ))}
+                      </div>
+                      <div style={styles.actionButtons}>
+                        <button 
+                          style={styles.messageBtn}
+                          onClick={() => handleSendRequest(currentProfile.id)}
+                        >
+                          Match
+                        </button>
+                        <button 
+                          style={styles.messageBtn}
+                          onClick={() => console.log("Unmatch functionality to be implemented")}
+                        >
+                          Unmatch
+                        </button>
+                      </div>
                     </div>
                   </div>
+                  <button 
+                    style={styles.arrowButton}
+                    onClick={nextProfile}
+                    aria-label="Next profile"
+                  >
+                    &#8250;
+                  </button>
                 </div>
-                
-                <button 
-                  style={styles.arrowButton}
-                  onClick={nextProfile}
-                  aria-label="Next profile"
-                >
-                  &#8250;
-                </button>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
-
-      {/* Footer Section */}
-      <footer style={styles.footer}>
-        <div style={styles.footerLinks}>
-          {/* Legal and Policies */}
-          <div style={styles.footerSection}>
-            <h4 style={styles.footerHeading}>Legal</h4>
-            <a href="/legal" style={styles.footerLink}>Legal</a>
-            <a href="/privacy" style={styles.footerLink}>Privacy</a>
-            <a href="/consumer-health" style={styles.footerLink}>Consumer Health Data Privacy Policy</a>
-            <a href="/terms" style={styles.footerLink}>Terms</a>
-            <a href="/cookie-policy" style={styles.footerLink}>Cookie Policy</a>
-            <a href="/intellectual-property" style={styles.footerLink}>Intellectual Property</a>
-          </div>
-
-          {/* Careers and Tech */}
-          <div style={styles.footerSection}>
-            <h4 style={styles.footerHeading}>Careers</h4>
-            <a href="/careers" style={styles.footerLink}>Careers</a>
-            <a href="/careers-portal" style={styles.footerLink}>Careers Portal</a>
-            <a href="/tech-blog" style={styles.footerLink}>Tech Blog</a>
-          </div>
-
-          {/* Social and Community */}
-          <div style={styles.footerSection}>
-            <h4 style={styles.footerHeading}>Social</h4>
-            <a href="/social" style={styles.footerLink}>Social</a>
-            <a href="/community" style={styles.footerLink}>Community</a>
-          </div>
-
-          {/* Help and Support */}
-          <div style={styles.footerSection}>
-            <h4 style={styles.footerHeading}>Help</h4>
-            <a href="/faq" style={styles.footerLink}>FAQ</a>
-            <a href="/destinations" style={styles.footerLink}>Destinations</a>
-            <a href="/press-room" style={styles.footerLink}>Press Room</a>
-            <a href="/contact" style={styles.footerLink}>Contact</a>
-            <a href="/promo-code" style={styles.footerLink}>Promo Code</a>
-          </div>
-        </div>
-
-        {/* App Download Section */}
-        <div style={styles.appDownload}>
-          <p style={styles.getAppText}>Get the Connectify app!</p>
-          <div style={styles.downloadButtons}>
-            <a href="https://apps.apple.com" style={styles.downloadButton}>
-              <img src="https://via.placeholder.com/150x50" alt="Download on the App Store" style={styles.downloadImage} />
-            </a>
-            <a href="https://play.google.com" style={styles.downloadButton}>
-              <img src="https://via.placeholder.com/150x50" alt="GET IT ON Google Play" style={styles.downloadImage} />
-            </a>
-          </div>
-        </div>
-
-        {/* Footer Bottom Section */}
-        <div style={styles.footerBottom}>
-          <p style={styles.footerText}>
-            Connectify is the place to meet your next best match. Whether you're looking for love, friendship, or casual connections, Connectify brings people together. With millions of users, you're sure to find someone who shares your interests.
-          </p>
-          <p style={styles.footerText}>
-            FAQ / Safety Tips / Terms / Cookie Policy / Privacy Settings
-          </p>
-          <p style={styles.footerText}>© 2025 Connectify LLC, All Rights Reserved.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };
 
 const styles = {
-  // Outer container now takes the full viewport width
   outerContainer: {
     background: "transparent",
     minHeight: "100vh",
     fontFamily: "'Roboto', sans-serif",
     width: "100vw",
   },
-  // Content wrapper remains the same for the inner content
   contentWrapper: {
     background: "rgba(245,236,227,0.4)",
     backgroundImage: "url('./peach.jpg')",
@@ -270,44 +288,6 @@ const styles = {
     display: "grid",
     gap: "20px",
     alignItems: "stretch",
-  },
-  column: {
-    flex: 1,
-    display: "flex",
-    flexDirection: "column",
-  },
-  navbar: {
-    backgroundColor: "#C38282",
-    padding: "25px",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    color: "white",
-    width: "100%",
-  },
-  logo: {
-    fontSize: "24px",
-    fontWeight: "bold",
-  },
-  navItems: {
-    display: "flex",
-    gap: "20px",
-  },
-  navButton: {
-    background: "none",
-    border: "none",
-    color: "white", // white text for nav links
-    fontSize: "20px",
-    fontWeight: "bold",
-    cursor: "pointer",
-    transition: "color 0.3s",
-    whiteSpace: "nowrap", // Prevents text wrapping
-  },
-  navLink: {
-    color: "white",
-    textDecoration: "none",
-    fontSize: "16px",
-    fontWeight: "bold",
   },
   homePage: {
     textAlign: "center",
@@ -348,7 +328,7 @@ const styles = {
     transition: "background 0.3s, transform 0.3s",
     padding: "0",
     lineHeight: "1",
-    zIndex: "2"
+    zIndex: "2",
   },
   matchCard: {
     background: "#fff",
@@ -357,7 +337,7 @@ const styles = {
     boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
     width: "300px",
     textAlign: "center",
-    zIndex: "1"
+    zIndex: "1",
   },
   matchImg: {
     width: "100%",
@@ -400,12 +380,35 @@ const styles = {
     boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
     transition: "background 0.3s, transform 0.3s",
   },
+  navbar: {
+    backgroundColor: "#C38282",
+    padding: "25px",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    color: "white",
+    width: "100%",
+  },
+  navItems: {
+    display: "flex",
+    gap: "20px",
+  },
+  navButton: {
+    background: "none",
+    border: "none",
+    color: "white",
+    fontSize: "20px",
+    fontWeight: "bold",
+    cursor: "pointer",
+    transition: "color 0.3s",
+    whiteSpace: "nowrap",
+  },
   footer: {
-    backgroundColor: "#C38282", // Match the navbar color
+    backgroundColor: "#C38282",
     padding: "20px",
     textAlign: "center",
     borderTop: "1px solid #e9ecef",
-    color: "white", // White text for footer
+    color: "white",
   },
   footerLinks: {
     display: "flex",
@@ -423,11 +426,17 @@ const styles = {
     marginBottom: "10px",
   },
   footerLink: {
-    color: "white", // White text for links
+    color: "white",
     textDecoration: "none",
     fontSize: "14px",
     display: "block",
     margin: "5px 0",
+  },
+  inlineLink: {
+    color: "white",
+    textDecoration: "none",
+    fontSize: "14px",
+    padding: "0 8px",
   },
   appDownload: {
     marginBottom: "20px",
@@ -435,12 +444,15 @@ const styles = {
   getAppText: {
     fontSize: "16px",
     marginBottom: "10px",
-    color: "white", // White text
+    color: "white",
   },
   downloadButtons: {
     display: "flex",
     justifyContent: "center",
     gap: "10px",
+  },
+  downloadButton: {
+    display: "inline-block",
   },
   downloadImage: {
     width: "150px",
@@ -448,7 +460,7 @@ const styles = {
   },
   footerBottom: {
     fontSize: "14px",
-    color: "white", // White text
+    color: "white",
   },
   footerText: {
     margin: "5px 0",
