@@ -8,6 +8,7 @@ import eni from '../image/Eni.jpg';
 import shailendra from '../image/shailendra.jpg';
 
 // Load environment variables
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://127.0.0.1:8000";
 const BLOB_STORAGE_BASE_URL = process.env.REACT_APP_BLOB_STORAGE_BASE_URL || "https://yourpublicblobstorage.com/";
 const BLOB_SAS_TOKEN = process.env.REACT_APP_BLOB_SAS_TOKEN || "";
 
@@ -123,7 +124,12 @@ const HomePage = () => {
                       ))}
                     </div>
                     <button style={styles.messageBtn} onClick={() => navigate("/matches#incoming-requests")}>Match</button>
+                    &nbsp;&nbsp;&nbsp;
+                    <button style={styles.messageBtn} >Unmatch</button>
+                
+
                   </div>
+                  
                 </div>
               ))}
             </div>
