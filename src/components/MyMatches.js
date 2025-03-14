@@ -251,13 +251,14 @@ const MatchesPage = () => {
     severity: "success", // "success", "error", "info", "warning"
   });
 
-  const token = localStorage.getItem("token");
+  // Use authToken instead of token
+  const authToken = localStorage.getItem("authToken");
 
   // 1) Fetch current matches via GET /users/get-mymatchup-list/
   useEffect(() => {
-    if (!token) return;
+    if (!authToken) return;
     fetch(`${BASE_URL}/users/get-mymatchup-list/`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${authToken}` },
     })
       .then((res) => res.json())
       .then((data) => {
@@ -272,13 +273,13 @@ const MatchesPage = () => {
         setCurrentMatches(transformed);
       })
       .catch((err) => console.error("Failed to fetch my matches:", err));
-  }, [token]);
+  }, [authToken]);
 
   // 2) Fetch incoming requests via GET /users/get-matchup-status/
   useEffect(() => {
-    if (!token) return;
+    if (!authToken) return;
     fetch(`${BASE_URL}/users/get-matchup-status/`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${authToken}` },
     })
       .then((res) => res.json())
       .then((data) => {
@@ -292,13 +293,13 @@ const MatchesPage = () => {
         setIncomingRequests(transformed);
       })
       .catch((err) => console.error("Failed to fetch incoming requests:", err));
-  }, [token]);
+  }, [authToken]);
 
   // 3) Fetch suggested matches: get user's interest then POST /users/get-recommend-matchups/
   useEffect(() => {
-    if (!token) return;
+    if (!authToken) return;
     fetch(`${BASE_URL}/users/retrieve-interest/`, {
-      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      headers: { Authorization: `Bearer ${authToken}`, "Content-Type": "application/json" },
     })
       .then((res) => res.json())
       .then((interestData) => {
@@ -308,7 +309,7 @@ const MatchesPage = () => {
         }
         return fetch(`${BASE_URL}/users/get-recommend-matchups/`, {
           method: "POST",
-          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+          headers: { Authorization: `Bearer ${authToken}`, "Content-Type": "application/json" },
           body: JSON.stringify({ interest: interestData.name }),
         });
       })
@@ -325,7 +326,7 @@ const MatchesPage = () => {
         setSuggestedMatches(transformed);
       })
       .catch((err) => console.error("Failed to fetch suggested matches:", err));
-  }, [token]);
+  }, [authToken]);
 
   // Snackbar close handler
   const handleSnackbarClose = (event, reason) => {
@@ -348,7 +349,7 @@ const MatchesPage = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify({ "receiver-user-id": id }),
       });
@@ -377,7 +378,7 @@ const MatchesPage = () => {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify({ "requester-user-id": id }),
       });
@@ -405,7 +406,7 @@ const MatchesPage = () => {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify({ "requester-user-id": id }),
       });
@@ -434,7 +435,7 @@ const MatchesPage = () => {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify({ "requester-user-id": id }),
       });
@@ -528,7 +529,6 @@ const styles = {
     boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
     borderRadius: "8px",
     maxWidth: "1200px",
-    width: "100%",
   },
   contentContainer: {
     display: "flex",
