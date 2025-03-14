@@ -90,6 +90,27 @@ async function uploadFileToBlob(file) {
 // Default export of HomePage component
 const HomePage = () => {
   const navigate = useNavigate();
+  
+  // State to track current profile index
+  const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
+  
+  // Function to go to next profile
+  const nextProfile = () => {
+    setCurrentProfileIndex((prevIndex) => 
+      prevIndex === dummyMatches.length - 1 ? 0 : prevIndex + 1
+    );
+  };
+  
+  // Function to go to previous profile
+  const prevProfile = () => {
+    setCurrentProfileIndex((prevIndex) => 
+      prevIndex === 0 ? dummyMatches.length - 1 : prevIndex - 1
+    );
+  };
+  
+  // Get current profile to display
+  const currentProfile = dummyMatches[currentProfileIndex];
+  
   return (
     <div style={styles.outerContainer}>
       <NavBar navigate={navigate} />
@@ -101,12 +122,21 @@ const HomePage = () => {
               Find people with similar interests and make meaningful
               connections.
             </p>
-            <div style={styles.matchesList}>
-              {dummyMatches.map((match, index) => (
-                <div key={index} style={styles.matchCard}>
+            
+            <div style={styles.profileContainer}>
+              <div style={styles.profileWrapper}>
+                <button 
+                  style={styles.arrowButton}
+                  onClick={prevProfile}
+                  aria-label="Previous profile"
+                >
+                  &#8249;
+                </button>
+                
+                <div style={styles.matchCard}>
                   <img
-                    src={match.imgUrl}
-                    alt={match.name}
+                    src={currentProfile.imgUrl}
+                    alt={currentProfile.name}
                     style={styles.matchImg}
                     onError={(e) => {
                       e.target.src = `${BLOB_STORAGE_BASE_URL}defaultProfilePic.jpg`;
@@ -114,24 +144,35 @@ const HomePage = () => {
                   />
                   <div style={styles.matchInfo}>
                     <h3 style={styles.matchName}>
-                      {match.name}, {match.age}
+                      {currentProfile.name}, {currentProfile.age}
                     </h3>
                     <div style={styles.interests}>
-                      {match.interests.map((interest, i) => (
+                      {currentProfile.interests.map((interest, i) => (
                         <span key={i} style={styles.interestTag}>
                           {interest}
                         </span>
                       ))}
                     </div>
-                    <button style={styles.messageBtn} onClick={() => navigate("/matches#incoming-requests")}>Match</button>
-                    &nbsp;&nbsp;&nbsp;
-                    <button style={styles.messageBtn} >Unmatch</button>
-                
-
+                    <div style={styles.actionButtons}>
+                      <button 
+                        style={styles.messageBtn} 
+                        onClick={() => navigate("/matches#incoming-requests")}
+                      >
+                        Match
+                      </button>
+                      <button style={styles.messageBtn}>Unmatch</button>
+                    </div>
                   </div>
-                  
                 </div>
-              ))}
+                
+                <button 
+                  style={styles.arrowButton}
+                  onClick={nextProfile}
+                  aria-label="Next profile"
+                >
+                  &#8250;
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -139,68 +180,68 @@ const HomePage = () => {
 
       {/* Footer Section */}
       <footer style={styles.footer}>
-  <div style={styles.footerLinks}>
-    {/* Legal and Policies */}
-    <div style={styles.footerSection}>
-      <h4 style={styles.footerHeading}>Legal</h4>
-      <a href="/legal" style={styles.footerLink}>Legal</a>
-      <a href="/privacy" style={styles.footerLink}>Privacy</a>
-      <a href="/consumer-health" style={styles.footerLink}>Consumer Health Data Privacy Policy</a>
-      <a href="/terms" style={styles.footerLink}>Terms</a>
-      <a href="/cookie-policy" style={styles.footerLink}>Cookie Policy</a>
-      <a href="/intellectual-property" style={styles.footerLink}>Intellectual Property</a>
-    </div>
+        <div style={styles.footerLinks}>
+          {/* Legal and Policies */}
+          <div style={styles.footerSection}>
+            <h4 style={styles.footerHeading}>Legal</h4>
+            <a href="/legal" style={styles.footerLink}>Legal</a>
+            <a href="/privacy" style={styles.footerLink}>Privacy</a>
+            <a href="/consumer-health" style={styles.footerLink}>Consumer Health Data Privacy Policy</a>
+            <a href="/terms" style={styles.footerLink}>Terms</a>
+            <a href="/cookie-policy" style={styles.footerLink}>Cookie Policy</a>
+            <a href="/intellectual-property" style={styles.footerLink}>Intellectual Property</a>
+          </div>
 
-    {/* Careers and Tech */}
-    <div style={styles.footerSection}>
-      <h4 style={styles.footerHeading}>Careers</h4>
-      <a href="/careers" style={styles.footerLink}>Careers</a>
-      <a href="/careers-portal" style={styles.footerLink}>Careers Portal</a>
-      <a href="/tech-blog" style={styles.footerLink}>Tech Blog</a>
-    </div>
+          {/* Careers and Tech */}
+          <div style={styles.footerSection}>
+            <h4 style={styles.footerHeading}>Careers</h4>
+            <a href="/careers" style={styles.footerLink}>Careers</a>
+            <a href="/careers-portal" style={styles.footerLink}>Careers Portal</a>
+            <a href="/tech-blog" style={styles.footerLink}>Tech Blog</a>
+          </div>
 
-    {/* Social and Community */}
-    <div style={styles.footerSection}>
-      <h4 style={styles.footerHeading}>Social</h4>
-      <a href="/social" style={styles.footerLink}>Social</a>
-      <a href="/community" style={styles.footerLink}>Community</a>
-    </div>
+          {/* Social and Community */}
+          <div style={styles.footerSection}>
+            <h4 style={styles.footerHeading}>Social</h4>
+            <a href="/social" style={styles.footerLink}>Social</a>
+            <a href="/community" style={styles.footerLink}>Community</a>
+          </div>
 
-    {/* Help and Support */}
-    <div style={styles.footerSection}>
-      <h4 style={styles.footerHeading}>Help</h4>
-      <a href="/faq" style={styles.footerLink}>FAQ</a>
-      <a href="/destinations" style={styles.footerLink}>Destinations</a>
-      <a href="/press-room" style={styles.footerLink}>Press Room</a>
-      <a href="/contact" style={styles.footerLink}>Contact</a>
-      <a href="/promo-code" style={styles.footerLink}>Promo Code</a>
-    </div>
-  </div>
+          {/* Help and Support */}
+          <div style={styles.footerSection}>
+            <h4 style={styles.footerHeading}>Help</h4>
+            <a href="/faq" style={styles.footerLink}>FAQ</a>
+            <a href="/destinations" style={styles.footerLink}>Destinations</a>
+            <a href="/press-room" style={styles.footerLink}>Press Room</a>
+            <a href="/contact" style={styles.footerLink}>Contact</a>
+            <a href="/promo-code" style={styles.footerLink}>Promo Code</a>
+          </div>
+        </div>
 
-  {/* App Download Section */}
-  <div style={styles.appDownload}>
-    <p style={styles.getAppText}>Get the Connectify app!</p>
-    <div style={styles.downloadButtons}>
-      <a href="https://apps.apple.com" style={styles.downloadButton}>
-        <img src="https://via.placeholder.com/150x50" alt="Download on the App Store" style={styles.downloadImage} />
-      </a>
-      <a href="https://play.google.com" style={styles.downloadButton}>
-        <img src="https://via.placeholder.com/150x50" alt="GET IT ON Google Play" style={styles.downloadImage} />
-      </a>
-    </div>
-  </div>
+        {/* App Download Section */}
+        <div style={styles.appDownload}>
+          <p style={styles.getAppText}>Get the Connectify app!</p>
+          <div style={styles.downloadButtons}>
+            <a href="https://apps.apple.com" style={styles.downloadButton}>
+              <img src="https://via.placeholder.com/150x50" alt="Download on the App Store" style={styles.downloadImage} />
+            </a>
+            <a href="https://play.google.com" style={styles.downloadButton}>
+              <img src="https://via.placeholder.com/150x50" alt="GET IT ON Google Play" style={styles.downloadImage} />
+            </a>
+          </div>
+        </div>
 
-  {/* Footer Bottom Section */}
-  <div style={styles.footerBottom}>
-    <p style={styles.footerText}>
-      Connectify is the place to meet your next best match. Whether you're looking for love, friendship, or casual connections, Connectify brings people together. With millions of users, you're sure to find someone who shares your interests.
-    </p>
-    <p style={styles.footerText}>
-      FAQ / Safety Tips / Terms / Cookie Policy / Privacy Settings
-    </p>
-    <p style={styles.footerText}>© 2025 Connectify LLC, All Rights Reserved.</p>
-  </div>
-</footer>
+        {/* Footer Bottom Section */}
+        <div style={styles.footerBottom}>
+          <p style={styles.footerText}>
+            Connectify is the place to meet your next best match. Whether you're looking for love, friendship, or casual connections, Connectify brings people together. With millions of users, you're sure to find someone who shares your interests.
+          </p>
+          <p style={styles.footerText}>
+            FAQ / Safety Tips / Terms / Cookie Policy / Privacy Settings
+          </p>
+          <p style={styles.footerText}>© 2025 Connectify LLC, All Rights Reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 };
@@ -279,31 +320,44 @@ const styles = {
     marginBottom: "20px",
     color: "#5D4037",
   },
-  ctaSignup: {
-    background: "#C38282",
+  profileContainer: {
+    display: "flex",
+    justifyContent: "center",
+    width: "100%",
+  },
+  profileWrapper: {
+    display: "flex",
+    alignItems: "center",
+    gap: "15px",
+    position: "relative",
+  },
+  arrowButton: {
+    background: "rgba(195, 130, 130, 0.8)",
     color: "white",
-    padding: "10px 20px",
-    width: "20%",
+    fontSize: "28px",
+    fontWeight: "bold",
+    width: "40px",
+    height: "40px",
     border: "none",
-    borderRadius: "4px",
+    borderRadius: "50%",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
     cursor: "pointer",
     boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
     transition: "background 0.3s, transform 0.3s",
-  },
-  matchesList: {
-    display: "flex",
-    flexWrap: "wrap",
-    justifyContent: "center",
-    gap: "20px",
-    marginTop: "20px",
+    padding: "0",
+    lineHeight: "1",
+    zIndex: "2"
   },
   matchCard: {
     background: "#fff",
     padding: "20px",
     borderRadius: "8px",
     boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-    width: "200px",
+    width: "300px",
     textAlign: "center",
+    zIndex: "1"
   },
   matchImg: {
     width: "100%",
@@ -329,6 +383,12 @@ const styles = {
     padding: "5px 10px",
     borderRadius: "20px",
     fontSize: "14px",
+  },
+  actionButtons: {
+    display: "flex",
+    justifyContent: "center",
+    gap: "10px",
+    marginTop: "10px",
   },
   messageBtn: {
     background: "#C38282",
