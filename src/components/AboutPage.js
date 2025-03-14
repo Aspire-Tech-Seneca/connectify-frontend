@@ -10,8 +10,7 @@ import behzad from '../image/Behzad.jpg';
 import zahrah from '../image/Zahrah.jpg';
 
 // Load environment variables
-const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost";
-const BASE_PATH = process.env.REACT_APP_BASE_PATH || "/api";
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://127.0.0.1:8000";
 // Azure Blob Storage Base URL for images
 const BLOB_STORAGE_BASE_URL = process.env.REACT_APP_BLOB_STORAGE_BASE_URL || "https://yourpublicblobstorage.com/";
 // SAS token used to authorize the upload. Ensure it starts with "?".
