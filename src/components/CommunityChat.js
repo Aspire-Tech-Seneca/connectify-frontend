@@ -1,15 +1,16 @@
+// File: src/components/CommunityChat.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { TextField, Button, List, ListItem, ListItemText, IconButton, Badge, Popover } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import MenuIcon from "@mui/icons-material/Menu";
-import Picker from "emoji-picker-react"; // Ensure you've installed emoji-picker-react
-import peachImage from "./peach.jpg";     // Make sure peach.jpg is in the same folder
+import Picker from "emoji-picker-react"; // Make sure to install with: npm install emoji-picker-react
+import peachImage from "./peach.jpg"; // Make sure peach.jpg is in the same folder
 
-// NavBar Component (mirrors Profile.js style, with real routes)
+// NavBar component (mirroring Profile.js)
 const NavBar = ({ navigate, notificationCount, notifications }) => {
   const [anchorEl, setAnchorEl] = useState(null);
-
+  
   const handleNotificationIconClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -21,7 +22,6 @@ const NavBar = ({ navigate, notificationCount, notifications }) => {
   const open = Boolean(anchorEl);
   const popoverId = open ? "notification-popover" : undefined;
 
-  // Navigation items from your profile page
   const navItems = [
     { label: "Home", path: "/home" },
     { label: "Chat", path: "/ChatPage" },
@@ -43,56 +43,44 @@ const NavBar = ({ navigate, notificationCount, notifications }) => {
             {item.label}
           </button>
         ))}
-
-        {/* Notification Icon */}
         <IconButton onClick={handleNotificationIconClick}>
           <Badge badgeContent={notificationCount} color="error">
             <NotificationsIcon style={{ color: "white" }} />
           </Badge>
         </IconButton>
-
-        {/* Popover for notifications */}
-        <Popover
-          id={popoverId}
-          open={open}
-          anchorEl={anchorEl}
-          onClose={handleClosePopover}
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "center",
-          }}
-          transformOrigin={{
-            vertical: "top",
-            horizontal: "center",
-          }}
-        >
-          {notifications.length === 0 ? (
-            <List style={{ padding: "10px" }}>
-              <ListItem>
-                <ListItemText primary="No new notifications" />
-              </ListItem>
-            </List>
-          ) : (
-            <List>
-              {notifications.map((notif, index) => (
-                <ListItem
-                  button
-                  key={index}
-                  onClick={() => {
-                    handleClosePopover();
-                    navigate("/notifications");
-                  }}
-                >
-                  <ListItemText primary={notif} />
-                </ListItem>
-              ))}
-            </List>
-          )}
-        </Popover>
-
-        {/* Optional Menu Icon if you want it (like in Profile) */}
         <MenuIcon style={{ color: "white", fontSize: "24px" }} />
       </div>
+      <Popover
+        id={popoverId}
+        open={open}
+        anchorEl={anchorEl}
+        onClose={handleClosePopover}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        transformOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        {notifications.length === 0 ? (
+          <List style={{ padding: "10px" }}>
+            <ListItem>
+              <ListItemText primary="No new notifications" />
+            </ListItem>
+          </List>
+        ) : (
+          <List>
+            {notifications.map((notif, index) => (
+              <ListItem
+                button
+                key={index}
+                onClick={() => {
+                  handleClosePopover();
+                  navigate("/notifications");
+                }}
+              >
+                <ListItemText primary={notif} />
+              </ListItem>
+            ))}
+          </List>
+        )}
+      </Popover>
     </nav>
   );
 };
@@ -100,11 +88,8 @@ const NavBar = ({ navigate, notificationCount, notifications }) => {
 const CommunityChat = () => {
   const navigate = useNavigate();
 
-  // Dummy notifications for demonstration
-  const [notifications, setNotifications] = useState([
-    // "New friend request",
-    // "Someone liked your post"
-  ]);
+  // Dummy notifications
+  const [notifications] = useState([]);
   const notificationCount = notifications.length;
 
   // Dummy chat messages
@@ -116,24 +101,34 @@ const CommunityChat = () => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const chatEndRef = useRef(null);
 
-  // Scroll to bottom on new messages
+  // Scroll to the bottom when messages change
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Dummy send message
+  // Function to format the timestamp consistently
+  const getFormattedTimestamp = () => {
+    return new Date().toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+    });
+  };
+
+  // Dummy send message function
   const sendMessage = () => {
     if (!inputMessage.trim()) return;
     const newMsg = {
       user: "CurrentUser",
       message: inputMessage.trim(),
-      timestamp: new Date().toLocaleTimeString(),
+      timestamp: getFormattedTimestamp(),
     };
     setMessages((prev) => [...prev, newMsg]);
     setInputMessage("");
   };
 
-  // Append emoji to input
+  // Handle emoji selection
   const onEmojiClick = (emojiData) => {
     setInputMessage((prev) => prev + emojiData.emoji);
   };
@@ -163,7 +158,6 @@ const CommunityChat = () => {
           {/* Input Row */}
           <div style={styles.inputRow}>
             <div style={{ position: "relative" }}>
-              {/* Emoji Picker Toggle */}
               <Button
                 variant="outlined"
                 style={styles.emojiButton}
@@ -171,15 +165,12 @@ const CommunityChat = () => {
               >
                 😊
               </Button>
-
-              {/* Emoji Picker Popup */}
               {showEmojiPicker && (
                 <div style={styles.emojiPickerPopup}>
                   <Picker onEmojiClick={onEmojiClick} />
                 </div>
               )}
             </div>
-
             <TextField
               variant="outlined"
               fullWidth
@@ -190,7 +181,6 @@ const CommunityChat = () => {
                 if (e.key === "Enter") sendMessage();
               }}
             />
-
             <Button variant="contained" onClick={sendMessage} style={styles.sendButton}>
               Send
             </Button>
@@ -203,7 +193,6 @@ const CommunityChat = () => {
 
 // Styles
 const styles = {
-  // Outer container with single peach background
   outerContainer: {
     width: "100%",
     minHeight: "100vh",
@@ -214,8 +203,6 @@ const styles = {
     display: "flex",
     flexDirection: "column",
   },
-
-  // NavBar (from Profile.js)
   navbar: {
     backgroundColor: "#C38282",
     padding: "25px",
@@ -239,8 +226,6 @@ const styles = {
     transition: "color 0.3s",
     whiteSpace: "nowrap",
   },
-
-  // Chat section
   chatSection: {
     flex: 1,
     display: "flex",
@@ -248,8 +233,6 @@ const styles = {
     alignItems: "center",
     padding: "20px 0",
   },
-
-  // Wider & taller chat container
   chatContainer: {
     width: "60%",
     minHeight: "75vh",
@@ -260,8 +243,6 @@ const styles = {
     padding: "20px",
     boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
   },
-
-  // Messages list
   messagesList: {
     flex: 1,
     overflowY: "auto",
@@ -275,8 +256,6 @@ const styles = {
     borderRadius: "8px",
     padding: "8px 12px",
   },
-
-  // Input row
   inputRow: {
     display: "flex",
     gap: "10px",
@@ -297,8 +276,6 @@ const styles = {
     fontWeight: "bold",
     textTransform: "none",
   },
-
-  // Emoji picker popup
   emojiPickerPopup: {
     position: "absolute",
     bottom: "50px",
