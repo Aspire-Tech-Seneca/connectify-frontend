@@ -177,7 +177,7 @@ const ProfileCard = ({
               placeholder="Bio"
             />
             <div style={styles.categoriesContainer}>
-              <p style={styles.categoryTitle}>Choose Categories (max 3):</p>
+              <p style={styles.categoryTitle}>Choose The interest (max 1):</p>
               <div style={styles.checkboxGroup}>
                 {availableCategories.map((cat) => (
                   <label key={cat.value} style={styles.checkboxLabel}>
@@ -288,7 +288,7 @@ const Matches = ({ suggestedMatches, handleApproveMatch }) => {
                   </strong>
                 </p>
                 <p style={styles.matchInterests}>
-                  Interests: {match.interests.join(", ")}
+                  Interests: {match.interests}
                 </p>
               </div>
             </div>
@@ -482,16 +482,16 @@ const Profile = () => {
   // Save profile details and update interest
   const handleSaveProfile = async () => {
     const payload = {
-      fullname: name,
-      age: age,
+     // fullname: name,
+      //age: age,
       bio: bio,
-      profile_image: profilePic,
-      gallery_images: galleryImages.map((image) => image.url),
+      //profile_image: profilePic,
+     // gallery_images: galleryImages.map((image) => image.url),
     };
 
     try {
       const response = await fetch(`${BASE_URL}/users/update/`, {
-        method: "POST",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${authToken}`,
