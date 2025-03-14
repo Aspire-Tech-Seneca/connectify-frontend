@@ -1,3 +1,4 @@
+// File: src/components/MatchesPage.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -12,7 +13,6 @@ import {
 } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 
-// Load environment variables for API endpoints
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:8000";
 
 // NavBar Component with a notification icon and popover list
@@ -30,17 +30,19 @@ const NavBar = ({ navigate, notificationCount, notifications }) => {
   const open = Boolean(anchorEl);
   const popoverId = open ? "notification-popover" : undefined;
 
+  const navItems = [
+    { label: "Home", path: "/home" },
+    { label: "Chat", path: "/ChatPage" },
+    { label: "My Profile", path: "/profile" },
+    { label: "About Us", path: "/about" },
+    { label: "My Matches", path: "/matches" },
+    { label: "Logout", path: "/login" },
+  ];
+
   return (
     <nav style={styles.navbar}>
       <div style={styles.navItems}>
-        {[
-          { label: "Home", path: "/home" },
-          { label: "Chat", path: "/ChatPage" },
-          { label: "My Profile", path: "/profile" },
-          { label: "About Us", path: "/about" },
-          { label: "My Matches", path: "/matches" },
-          { label: "Logout", path: "/login" },
-        ].map((item) => (
+        {navItems.map((item) => (
           <button
             key={item.label}
             style={styles.navButton}
@@ -109,10 +111,9 @@ const CurrentMatches = ({ currentMatches, handleChat, handleCancelRequest }) => 
               <div style={styles.matchDetails}>
                 <p style={styles.matchName}>
                   <strong>
-                    {match.name}, {match.age}
+                    {match.name}, {match.age}{" "}
                     {match.status === "pending" && (
                       <span style={{ fontStyle: "italic", color: "#ae4040" }}>
-                        {" "}
                         (Pending)
                       </span>
                     )}
@@ -127,7 +128,6 @@ const CurrentMatches = ({ currentMatches, handleChat, handleCancelRequest }) => 
               <button onClick={() => handleChat(match.id)} style={styles.matchButton}>
                 Chat
               </button>
-              {/* "Cancel request" has no official API in your docs, so we remove it locally */}
               {match.status === "pending" && (
                 <button
                   onClick={() => handleCancelRequest(match.id)}
@@ -193,11 +193,7 @@ const IncomingRequests = ({
 };
 
 // Component for displaying suggested matches with an option to send a match request
-const SuggestedMatches = ({
-  suggestedMatches,
-  handleSendRequest,
-  handleDeclineSuggested,
-}) => {
+const SuggestedMatches = ({ suggestedMatches, handleSendRequest, handleDeclineSuggested }) => {
   return (
     <div>
       <h2 style={styles.sectionTitle}>Suggested Matches</h2>
@@ -241,9 +237,9 @@ const MatchesPage = () => {
   const navigate = useNavigate();
 
   // States for matches
-  const [currentMatches, setCurrentMatches] = useState([]);      // Confirmed or pending
-  const [incomingRequests, setIncomingRequests] = useState([]);  // Pending from others
-  const [suggestedMatches, setSuggestedMatches] = useState([]);  // Potential new matches
+  const [currentMatches, setCurrentMatches] = useState([]); // Approved or pending outgoing
+  const [incomingRequests, setIncomingRequests] = useState([]); // Pending from others
+  const [suggestedMatches, setSuggestedMatches] = useState([]); // New potential matches
 
   // State for top bar notifications (a list of string messages)
   const [notificationList, setNotificationList] = useState([]);
@@ -255,10 +251,9 @@ const MatchesPage = () => {
     severity: "success", // "success", "error", "info", "warning"
   });
 
-  // Token for authenticated requests
   const token = localStorage.getItem("token");
 
-  // 1) Fetch current matches (already friends) => GET /users/get-mymatchup-list/
+  // 1) Fetch current matches via GET /users/get-mymatchup-list/
   useEffect(() => {
     if (!token) return;
     fetch(`${BASE_URL}/users/get-mymatchup-list/`, {
@@ -266,8 +261,6 @@ const MatchesPage = () => {
     })
       .then((res) => res.json())
       .then((data) => {
-        // Transform data to match your local "currentMatches" shape
-        // Mark them as "approved" by default
         const transformed = data.map((user) => ({
           id: user.id,
           name: user.fullname,
@@ -281,7 +274,7 @@ const MatchesPage = () => {
       .catch((err) => console.error("Failed to fetch my matches:", err));
   }, [token]);
 
-  // 2) Fetch incoming requests => GET /users/get-matchup-status/ (pending requests to me)
+  // 2) Fetch incoming requests via GET /users/get-matchup-status/
   useEffect(() => {
     if (!token) return;
     fetch(`${BASE_URL}/users/get-matchup-status/`, {
@@ -289,7 +282,6 @@ const MatchesPage = () => {
     })
       .then((res) => res.json())
       .then((data) => {
-        // Each user is someone who requested me => we consider them "pending from others"
         const transformed = data.map((user) => ({
           id: user.id,
           name: user.fullname,
@@ -302,20 +294,18 @@ const MatchesPage = () => {
       .catch((err) => console.error("Failed to fetch incoming requests:", err));
   }, [token]);
 
-  // 3) Fetch suggested matches => need user's interest => /users/retrieve-interest/, then /users/get-recommend-matchups/
+  // 3) Fetch suggested matches: get user's interest then POST /users/get-recommend-matchups/
   useEffect(() => {
     if (!token) return;
-    // First, get user's interest
     fetch(`${BASE_URL}/users/retrieve-interest/`, {
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     })
       .then((res) => res.json())
       .then((interestData) => {
         if (!interestData.name) {
-          console.log("No user interest found. No suggested matches will be fetched.");
+          console.log("No user interest found. Skipping suggested matches.");
           return;
         }
-        // Then, fetch recommended matchups with that interest
         return fetch(`${BASE_URL}/users/get-recommend-matchups/`, {
           method: "POST",
           headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
@@ -325,7 +315,6 @@ const MatchesPage = () => {
       .then((res) => (res ? res.json() : []))
       .then((data) => {
         if (!data || !Array.isArray(data)) return;
-        // Transform data to your local shape
         const transformed = data.map((user) => ({
           id: user.id,
           name: user.fullname,
@@ -349,7 +338,7 @@ const MatchesPage = () => {
     navigate("/ChatPage");
   };
 
-  // 4) Send a match request => POST /users/request-matchup/
+  // 4) Send a match request via POST /users/request-matchup/
   const handleSendRequest = async (id) => {
     const match = suggestedMatches.find((m) => m.id === id);
     if (!match) return;
@@ -367,39 +356,46 @@ const MatchesPage = () => {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to send matchup request");
       }
-
-      // If successful, move from suggestedMatches to currentMatches with status "pending"
       setSuggestedMatches(suggestedMatches.filter((m) => m.id !== id));
       setCurrentMatches([...currentMatches, { ...match, status: "pending" }]);
-
       const message = `Match request sent to ${match.name}.`;
       setSnackbar({ open: true, message, severity: "info" });
       setNotificationList([...notificationList, message]);
     } catch (err) {
       console.error("Error sending matchup request:", err);
-      setSnackbar({
-        open: true,
-        message: err.message,
-        severity: "error",
-      });
+      setSnackbar({ open: true, message: err.message, severity: "error" });
     }
   };
 
-  // "Cancel" a pending request (no official API for the requester in docs)
-  // We'll just remove it from local state
-  const handleCancelRequest = (id) => {
+  // 5) Cancel a pending request using the Deny matchup request API
+  const handleCancelRequest = async (id) => {
     const match = currentMatches.find((m) => m.id === id && m.status === "pending");
     if (!match) return;
 
-    // Remove from local state
-    setCurrentMatches(currentMatches.filter((m) => m.id !== id));
-
-    const message = `Request to ${match.name} cancelled (locally).`;
-    setSnackbar({ open: true, message, severity: "info" });
-    setNotificationList([...notificationList, message]);
+    try {
+      const response = await fetch(`${BASE_URL}/users/deny-matchup-request/`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ "requester-user-id": id }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to cancel matchup request");
+      }
+      setCurrentMatches(currentMatches.filter((m) => m.id !== id));
+      const message = `Match request to ${match.name} cancelled successfully.`;
+      setSnackbar({ open: true, message, severity: "info" });
+      setNotificationList([...notificationList, message]);
+    } catch (err) {
+      console.error("Error cancelling matchup request:", err);
+      setSnackbar({ open: true, message: err.message, severity: "error" });
+    }
   };
 
-  // 5) Approve a received match request => PUT /users/confirm-matchup-request/
+  // 6) Approve an incoming match request via PUT /users/confirm-matchup-request/
   const handleApproveIncoming = async (id) => {
     const match = incomingRequests.find((m) => m.id === id);
     if (!match) return;
@@ -417,25 +413,18 @@ const MatchesPage = () => {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to confirm matchup request");
       }
-
-      // Remove from incomingRequests, add to currentMatches as "approved"
       setIncomingRequests(incomingRequests.filter((m) => m.id !== id));
       setCurrentMatches([...currentMatches, { ...match, status: "approved" }]);
-
       const message = `You approved the match with ${match.name}.`;
       setSnackbar({ open: true, message, severity: "success" });
       setNotificationList([...notificationList, message]);
     } catch (err) {
       console.error("Error confirming matchup request:", err);
-      setSnackbar({
-        open: true,
-        message: err.message,
-        severity: "error",
-      });
+      setSnackbar({ open: true, message: err.message, severity: "error" });
     }
   };
 
-  // 6) Decline a received match request => PUT /users/deny-matchup-request/
+  // 7) Decline an incoming match request via PUT /users/deny-matchup-request/
   const handleDeclineIncoming = async (id) => {
     const match = incomingRequests.find((m) => m.id === id);
     if (!match) return;
@@ -453,30 +442,21 @@ const MatchesPage = () => {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to deny matchup request");
       }
-
-      // Remove from incomingRequests
       setIncomingRequests(incomingRequests.filter((m) => m.id !== id));
-
       const message = `${match.name}'s request declined.`;
       setSnackbar({ open: true, message, severity: "info" });
       setNotificationList([...notificationList, message]);
     } catch (err) {
       console.error("Error denying matchup request:", err);
-      setSnackbar({
-        open: true,
-        message: err.message,
-        severity: "error",
-      });
+      setSnackbar({ open: true, message: err.message, severity: "error" });
     }
   };
 
-  // Decline a suggested match (no official API, so we remove from local state)
+  // 8) Decline a suggested match (remove from local state)
   const handleDeclineSuggested = (id) => {
     const match = suggestedMatches.find((m) => m.id === id);
     if (!match) return;
-
     setSuggestedMatches(suggestedMatches.filter((m) => m.id !== id));
-
     const message = `${match.name} declined.`;
     setSnackbar({ open: true, message, severity: "info" });
     setNotificationList([...notificationList, message]);
@@ -498,11 +478,10 @@ const MatchesPage = () => {
           <div style={styles.column}>
             <CurrentMatches
               currentMatches={currentMatches}
-              handleChat={handleChat}
+              handleChat={(id) => navigate("/ChatPage")}
               handleCancelRequest={handleCancelRequest}
             />
           </div>
-
           {/* Right Column: Incoming Requests and Suggested Matches */}
           <div style={styles.column}>
             <IncomingRequests
@@ -518,19 +497,13 @@ const MatchesPage = () => {
           </div>
         </div>
       </div>
-
-      {/* Snackbar for notifications */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
         onClose={handleSnackbarClose}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
-        <Alert
-          onClose={handleSnackbarClose}
-          severity={snackbar.severity}
-          sx={{ width: "100%" }}
-        >
+        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: "100%" }}>
           {snackbar.message}
         </Alert>
       </Snackbar>
