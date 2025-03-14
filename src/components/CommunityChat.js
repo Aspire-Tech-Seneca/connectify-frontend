@@ -1,4 +1,3 @@
-// File: src/components/CommunityChat.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { TextField, Button, List, ListItem, ListItemText, IconButton, Badge, Popover } from "@mui/material";
@@ -6,6 +5,8 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import MenuIcon from "@mui/icons-material/Menu";
 import Picker from "emoji-picker-react"; // Make sure to install with: npm install emoji-picker-react
 import peachImage from "./peach.jpg"; // Make sure peach.jpg is in the same folder
+
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:8000";
 
 // NavBar component (mirroring Profile.js)
 const NavBar = ({ navigate, notificationCount, notifications }) => {
@@ -88,6 +89,28 @@ const NavBar = ({ navigate, notificationCount, notifications }) => {
 const CommunityChat = () => {
   const navigate = useNavigate();
 
+  // State for the logged-in user's name
+  const [currentUser, setCurrentUser] = useState("Anonymous");
+  
+  // Retrieve auth token from localStorage
+  const authToken = localStorage.getItem("authToken");
+
+  // Fetch the current user's info on mount (similar to the profile page)
+  useEffect(() => {
+    if (authToken) {
+      fetch(`${BASE_URL}/users/get-user-info/`, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && data.fullname) {
+            setCurrentUser(data.fullname);
+          }
+        })
+        .catch((err) => console.error("Error fetching user info:", err));
+    }
+  }, [authToken]);
+
   // Dummy notifications
   const [notifications] = useState([]);
   const notificationCount = notifications.length;
@@ -116,11 +139,11 @@ const CommunityChat = () => {
     });
   };
 
-  // Dummy send message function
+  // Send message using the logged-in user's name
   const sendMessage = () => {
     if (!inputMessage.trim()) return;
     const newMsg = {
-      user: "CurrentUser",
+      user: currentUser, // dynamically set from the logged-in user info
       message: inputMessage.trim(),
       timestamp: getFormattedTimestamp(),
     };
