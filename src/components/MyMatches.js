@@ -1,4 +1,3 @@
-// File: src/components/MatchesPage.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -145,6 +144,7 @@ const CurrentMatches = ({ currentMatches, handleChat, handleCancelRequest }) => 
 };
 
 // Component for displaying incoming match requests (pending from others)
+// Here we implement the endpoint GET /users/get-matchup-status/
 const IncomingRequests = ({
   incomingRequests,
   handleApproveIncoming,
@@ -251,7 +251,7 @@ const MatchesPage = () => {
     severity: "success", // "success", "error", "info", "warning"
   });
 
-  // Use authToken instead of token
+  // Use authToken
   const authToken = localStorage.getItem("authToken");
 
   // 1) Fetch current matches via GET /users/get-mymatchup-list/
@@ -283,6 +283,7 @@ const MatchesPage = () => {
     })
       .then((res) => res.json())
       .then((data) => {
+        // Transform the data as needed
         const transformed = data.map((user) => ({
           id: user.id,
           name: user.fullname,
@@ -361,7 +362,7 @@ const MatchesPage = () => {
       setCurrentMatches([...currentMatches, { ...match, status: "pending" }]);
       const message = `Match request sent to ${match.name}.`;
       setSnackbar({ open: true, message, severity: "info" });
-      setNotificationList([...notificationList, message]);
+      // Optionally update notificationList here if you use one.
     } catch (err) {
       console.error("Error sending matchup request:", err);
       setSnackbar({ open: true, message: err.message, severity: "error" });
@@ -389,7 +390,6 @@ const MatchesPage = () => {
       setCurrentMatches(currentMatches.filter((m) => m.id !== id));
       const message = `Match request to ${match.name} cancelled successfully.`;
       setSnackbar({ open: true, message, severity: "info" });
-      setNotificationList([...notificationList, message]);
     } catch (err) {
       console.error("Error cancelling matchup request:", err);
       setSnackbar({ open: true, message: err.message, severity: "error" });
@@ -418,7 +418,6 @@ const MatchesPage = () => {
       setCurrentMatches([...currentMatches, { ...match, status: "approved" }]);
       const message = `You approved the match with ${match.name}.`;
       setSnackbar({ open: true, message, severity: "success" });
-      setNotificationList([...notificationList, message]);
     } catch (err) {
       console.error("Error confirming matchup request:", err);
       setSnackbar({ open: true, message: err.message, severity: "error" });
@@ -446,7 +445,6 @@ const MatchesPage = () => {
       setIncomingRequests(incomingRequests.filter((m) => m.id !== id));
       const message = `${match.name}'s request declined.`;
       setSnackbar({ open: true, message, severity: "info" });
-      setNotificationList([...notificationList, message]);
     } catch (err) {
       console.error("Error denying matchup request:", err);
       setSnackbar({ open: true, message: err.message, severity: "error" });
@@ -460,7 +458,6 @@ const MatchesPage = () => {
     setSuggestedMatches(suggestedMatches.filter((m) => m.id !== id));
     const message = `${match.name} declined.`;
     setSnackbar({ open: true, message, severity: "info" });
-    setNotificationList([...notificationList, message]);
   };
 
   // For top bar notification badge, we'll use the length of incomingRequests.
