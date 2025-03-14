@@ -384,7 +384,7 @@ const Profile = () => {
       .catch((err) => console.error("Error fetching profile details:", err));
   }, []);
 
-  // Retrieve profile image
+  // Retrieve profile image (note the new field "profile_image_name")
   useEffect(() => {
     const token = localStorage.getItem("token");
     fetch(`${BASE_URL}/users/retrieve-profile-image/`, {
@@ -394,10 +394,12 @@ const Profile = () => {
       .then((response) => response.json())
       .then((data) => {
         console.log("Retrieved profile image:", data);
-        if (data.image_url) {
-          setProfilePic(data.image_url);
+        // According to the new endpoint, we expect "profile_image_name"
+        if (data.profile_image_name) {
+          // Build the full URL from the filename
+          setProfilePic(`${BLOB_STORAGE_BASE_URL}${data.profile_image_name}`);
         } else {
-          console.warn("No image_url in response");
+          console.warn("No profile_image_name in response");
         }
       })
       .catch((err) => console.error("Error retrieving profile image:", err));
@@ -443,7 +445,7 @@ const Profile = () => {
     }
   }, [categories]);
 
-  // Update profile picture using backend endpoint.
+  // Update profile picture using backend endpoint
   const handleProfilePicChange = async (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -463,14 +465,17 @@ const Profile = () => {
         }
         const data = await response.json();
         console.log("Profile image uploaded:", data);
-        setProfilePic(data.image_url);
+        // If the backend still returns profile_image_name, update accordingly
+        if (data.profile_image_name) {
+          setProfilePic(`${BLOB_STORAGE_BASE_URL}${data.profile_image_name}`);
+        }
       } catch (error) {
         console.error("Profile image upload failed:", error);
       }
     }
   };
 
-  // Upload gallery image using direct Azure Blob Storage upload.
+  // Upload gallery image using direct Azure Blob Storage upload
   const handleGalleryImageUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
