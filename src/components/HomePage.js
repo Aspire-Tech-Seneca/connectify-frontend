@@ -43,65 +43,42 @@ const NavBar = ({ navigate }) => {
   );
 };
 
-// Footer component
-const Footer = () => {
+// User Reviews Section
+const UserReviews = () => {
+  const reviews = [
+    {
+      id: 1,
+      text: "Connectify is the app to connect people with different interests, just to connect and share thoughts.",
+      author: "John Doe",
+    },
+    {
+      id: 2,
+      text: "I've met so many interesting people through Connectify. It's a great way to expand your social circle!",
+      author: "Jane Smith",
+    },
+    {
+      id: 3,
+      text: "The app is easy to use and has a great interface. I highly recommend it to anyone looking to meet new people.",
+      author: "Alice Johnson",
+    },
+  ];
+
   return (
-    <footer style={styles.footer}>
-      <div style={styles.footerLinks}>
-        <div style={styles.footerSection}>
-          <h4 style={styles.footerHeading}>User</h4>
-          <a href="/profile" style={styles.footerLink}>My Profile</a>
-          <a href="/matches" style={styles.footerLink}>My Matches</a>
-          <a href="/ViewEvents" style={styles.footerLink}>Events</a>
-        </div>
-        <div style={styles.footerSection}>
-          <h4 style={styles.footerHeading}>Connect</h4>
-          <a href="/ChatPage" style={styles.footerLink}>Chat</a>
-          <a href="/CommunityChat" style={styles.footerLink}>Community Chat</a>
-        </div>
-        <div style={styles.footerSection}>
-          <h4 style={styles.footerHeading}>Information</h4>
-          <a href="/PolicyCompliance" style={styles.footerLink}>Policy and Compliance</a>
-          <a href="/about" style={styles.footerLink}>About Us</a>
-          <a href="/UserSettings" style={styles.footerLink}>Contact</a>
-        </div>
+    <div style={styles.reviewsContainer}>
+      <h2 style={styles.reviewsTitle}>What Our Users Say</h2>
+      <div style={styles.reviewsList}>
+        {reviews.map((review) => (
+          <div key={review.id} style={styles.reviewItem}>
+            <p style={styles.reviewText}>"{review.text}"</p>
+            <p style={styles.reviewAuthor}>- {review.author}</p>
+          </div>
+        ))}
       </div>
-      <div style={styles.appDownload}>
-        <p style={styles.getAppText}>Get the Connectify app!</p>
-        <div style={styles.downloadButtons}>
-          <a href="https://apps.apple.com" style={styles.downloadButton}>
-            <img
-              src="https://via.placeholder.com/150x50"
-              alt="Download on the App Store"
-              style={styles.downloadImage}
-            />
-          </a>
-          <a href="https://play.google.com" style={styles.downloadButton}>
-            <img
-              src="https://via.placeholder.com/150x50"
-              alt="GET IT ON Google Play"
-              style={styles.downloadImage}
-            />
-          </a>
-        </div>
-      </div>
-      <div style={styles.footerBottom}>
-        <p style={styles.footerText}>
-          Connectify is the place to meet your next best match. Whether you're looking for love, friendship, or casual connections, Connectify brings people together.
-        </p>
-        <p style={styles.footerText}>
-          <a href="/profile" style={styles.inlineLink}>My Profile</a> | 
-          <a href="/chat" style={styles.inlineLink}>Chat</a> | 
-          <a href="/CommunityChat" style={styles.inlineLink}>Community</a> | 
-          <a href="/PolicyCompliance" style={styles.inlineLink}>Policy</a> | 
-          <a href="/ViewEvents" style={styles.inlineLink}>Events</a> | 
-          <a href="/matches" style={styles.inlineLink}>Matches</a>
-        </p>
-        <p style={styles.footerText}>© 2025 Connectify LLC, All Rights Reserved.</p>
-      </div>
-    </footer>
+    </div>
   );
 };
+
+
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -261,7 +238,8 @@ const HomePage = () => {
           </div>
         </div>
       </div>
-      <Footer />
+      <UserReviews />
+      {/* <Footer /> */}
     </div>
   );
 };
@@ -403,68 +381,97 @@ const styles = {
     transition: "color 0.3s",
     whiteSpace: "nowrap",
   },
-  footer: {
-    backgroundColor: "#C38282",
-    padding: "20px",
+  reviewsContainer: {
+    backgroundColor: "#f8f9fa",
+    padding: "40px 20px",
     textAlign: "center",
-    borderTop: "1px solid #e9ecef",
-    color: "white",
   },
-  footerLinks: {
-    display: "flex",
-    flexWrap: "wrap",
-    justifyContent: "space-around",
-    gap: "20px",
+  reviewsTitle: {
+    fontSize: "24px",
     marginBottom: "20px",
+    color: "#5D4037",
   },
-  footerSection: {
-    textAlign: "left",
+  reviewsList: {
+    display: "flex",
+    justifyContent: "center",
+    gap: "20px",
+    flexWrap: "wrap",
   },
-  footerHeading: {
+  reviewItem: {
+    background: "#fff",
+    padding: "20px",
+    borderRadius: "8px",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+    width: "300px",
+    textAlign: "center",
+  },
+  reviewText: {
     fontSize: "16px",
-    fontWeight: "bold",
+    color: "#5D4037",
     marginBottom: "10px",
   },
-  footerLink: {
+  reviewAuthor: {
+    fontSize: "14px",
+    color: "#6c757d",
+  },
+  // footer: {
+  //   backgroundColor: "#C38282",
+  //   padding: "40px 20px",
+  //   color: "white",
+  // },
+  // footerContent: {
+  //   display: "flex",
+  //   justifyContent: "space-between",
+  //   maxWidth: "1200px",
+  //   margin: "0 auto",
+  //   gap: "40px",
+  //   flexWrap: "wrap",
+  // },
+  aboutSection: {
+    flex: 1,
+    minWidth: "250px",
+  },
+  quickLinksSection: {
+    flex: 1,
+    minWidth: "150px",
+  },
+  contactSection: {
+    flex: 1,
+    minWidth: "250px",
+  },
+  sectionTitle: {
+    fontSize: "20px",
+    marginBottom: "20px",
+  },
+  aboutText: {
+    fontSize: "14px",
+    lineHeight: "1.6",
+  },
+  shortcutsList: {
+    listStyle: "none",
+    padding: "0",
+  },
+  shortcutLink: {
     color: "white",
     textDecoration: "none",
     fontSize: "14px",
     display: "block",
-    margin: "5px 0",
+    margin: "10px 0",
   },
-  inlineLink: {
-    color: "white",
-    textDecoration: "none",
-    fontSize: "14px",
-    padding: "0 8px",
-  },
-  appDownload: {
+  mapContainer: {
     marginBottom: "20px",
   },
-  getAppText: {
-    fontSize: "16px",
-    marginBottom: "10px",
-    color: "white",
-  },
-  downloadButtons: {
-    display: "flex",
-    justifyContent: "center",
-    gap: "10px",
-  },
-  downloadButton: {
-    display: "inline-block",
-  },
-  downloadImage: {
-    width: "150px",
-    height: "50px",
-  },
-  footerBottom: {
+  contactText: {
     fontSize: "14px",
-    color: "white",
+    lineHeight: "1.6",
   },
-  footerText: {
-    margin: "5px 0",
-  },
+  // footerBottom: {
+  //   textAlign: "center",
+  //   marginTop: "40px",
+  // },
+  // footerText: {
+  //   fontSize: "14px",
+  // },
 };
 
 export default HomePage;
