@@ -78,7 +78,63 @@ const UserReviews = () => {
   );
 };
 
+// Footer component
+const Footer = () => {
+  return (
+    <footer style={styles.footer}>
+      <div style={styles.footerContent}>
+        {/* About Connectify Section */}
+        <div style={styles.aboutSection}>
+          <h4 style={styles.sectionTitle}>About Connectify</h4>
+          <p style={styles.aboutText}>
+            Connectify is a platform designed to bring people together based on shared interests. 
+            Whether you're looking for friendship, love, or just someone to chat with, Connectify 
+            makes it easy to find meaningful connections.
+          </p>
+        </div>
 
+        {/* Quick Links Section */}
+        <div style={styles.quickLinksSection}>
+          <h4 style={styles.sectionTitle}>Quick Links</h4>
+          <ul style={styles.shortcutsList}>
+            <li><a href="/home" style={styles.shortcutLink}>Home</a></li>
+            <li><a href="/ChatPage" style={styles.shortcutLink}>Chat</a></li>
+            <li><a href="/profile" style={styles.shortcutLink}>My Profile</a></li>
+            <li><a href="/about" style={styles.shortcutLink}>About Us</a></li>
+            <li><a href="/matches" style={styles.shortcutLink}>My Matches</a></li>
+            <li><a href="/PolicyCompliance" style={styles.shortcutLink}>Policy & Compliance</a></li>
+          </ul>
+        </div>
+
+        {/* Contact Us Section */}
+        <div style={styles.contactSection}>
+          <h4 style={styles.sectionTitle}>Contact Us</h4>
+          <div style={styles.mapContainer}>
+            <iframe
+              title="Connectify Location"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3153.8354345093747!2d144.95373531531615!3d-37.81627974202167!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6ad642af0f11fd81%3A0xf577d5a32f8c33f8!2sConnectify%20HQ!5e0!3m2!1sen!2sus!4v1625070000000!5m2!1sen!2sus"
+              width="100%"
+              height="200"
+              style={{ border: 0 }}
+              allowFullScreen=""
+              loading="lazy"
+            ></iframe>
+          </div>
+          <p style={styles.contactText}>
+            Email: support@connectify.com<br />
+            Phone: +1 (123) 456-7890<br />
+            Address: 123 Connectify Lane, Social City, SC 12345
+          </p>
+        </div>
+      </div>
+
+      {/* Footer Bottom */}
+      <div style={styles.footerBottom}>
+        <p style={styles.footerText}>© 2025 Connectify LLC, All Rights Reserved.</p>
+      </div>
+    </footer>
+  );
+};
 
 const HomePage = () => {
   const navigate = useNavigate();
