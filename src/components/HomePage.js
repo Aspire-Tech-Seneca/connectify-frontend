@@ -112,7 +112,7 @@ const Footer = () => {
           <div style={styles.mapContainer}>
             <iframe
               title="Connectify Location"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3153.8354345093747!2d144.95373531531615!3d-37.81627974202167!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6ad642af0f11fd81%3A0xf577d5a32f8c33f8!2sConnectify%20HQ!5e0!3m2!1sen!2sus!4v1625070000000!5m2!1sen!2sus"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5759.76709855528!2d-79.3511667241204!3d43.79602937109577!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89d4d31babbf5ce7%3A0x5812aa25d9fb9912!2sSeneca%20Polytechnic%20Newnham%20Campus!5e0!3m2!1sen!2sca!4v1742076701886!5m2!1sen!2sca"
               width="100%"
               height="200"
               style={{ border: 0 }}
@@ -121,9 +121,9 @@ const Footer = () => {
             ></iframe>
           </div>
           <p style={styles.contactText}>
-            Email: support@connectify.com<br />
+            Email: John@connectify.com<br />
             Phone: +1 (123) 456-7890<br />
-            Address: 123 Connectify Lane, Social City, SC 12345
+            Address: 1750 Finch Ave E, North York ON M2J2X5
           </p>
         </div>
       </div>
@@ -295,7 +295,7 @@ const HomePage = () => {
         </div>
       </div>
       <UserReviews />
-      {/* <Footer /> */}
+      <Footer />
     </div>
   );
 };
