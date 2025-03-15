@@ -482,6 +482,7 @@ const styles = {
     margin: "0 auto",
     gap: "40px",
     flexWrap: "wrap",
+    textAlign: "justify",
   },
   aboutSection: {
     flex: 1,
@@ -490,6 +491,7 @@ const styles = {
   quickLinksSection: {
     flex: 1,
     minWidth: "150px",
+    textAlign: "center",
   },
   contactSection: {
     flex: 1,
