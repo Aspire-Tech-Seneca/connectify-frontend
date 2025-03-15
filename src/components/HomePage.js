@@ -470,19 +470,19 @@ const styles = {
     fontSize: "14px",
     color: "#6c757d",
   },
-  // footer: {
-  //   backgroundColor: "#C38282",
-  //   padding: "40px 20px",
-  //   color: "white",
-  // },
-  // footerContent: {
-  //   display: "flex",
-  //   justifyContent: "space-between",
-  //   maxWidth: "1200px",
-  //   margin: "0 auto",
-  //   gap: "40px",
-  //   flexWrap: "wrap",
-  // },
+  footer: {
+    backgroundColor: "#C38282",
+    padding: "40px 20px",
+    color: "white",
+  },
+  footerContent: {
+    display: "flex",
+    justifyContent: "space-between",
+    maxWidth: "1200px",
+    margin: "0 auto",
+    gap: "40px",
+    flexWrap: "wrap",
+  },
   aboutSection: {
     flex: 1,
     minWidth: "250px",
@@ -521,13 +521,13 @@ const styles = {
     fontSize: "14px",
     lineHeight: "1.6",
   },
-  // footerBottom: {
-  //   textAlign: "center",
-  //   marginTop: "40px",
-  // },
-  // footerText: {
-  //   fontSize: "14px",
-  // },
+  footerBottom: {
+    textAlign: "center",
+    marginTop: "40px",
+  },
+  footerText: {
+    fontSize: "14px",
+  },
 };
 
 export default HomePage;
