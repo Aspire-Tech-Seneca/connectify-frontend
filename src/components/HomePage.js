@@ -102,6 +102,7 @@ const Footer = () => {
             <li><a href="/profile" style={styles.shortcutLink}>My Profile</a></li>
             <li><a href="/about" style={styles.shortcutLink}>About Us</a></li>
             <li><a href="/matches" style={styles.shortcutLink}>My Matches</a></li>
+            <li><a href="/ViewEvents" style={styles.shortcutLink}>My Events</a></li>
             <li><a href="/PolicyCompliance" style={styles.shortcutLink}>Policy & Compliance</a></li>
           </ul>
         </div>
