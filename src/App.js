@@ -21,7 +21,7 @@ const AppContent = () => {
   const location = useLocation(); // Get current route
 
   // Apply background only if it's NOT the signup page
-  const appStyles = location.pathname !== "/signup"
+  const appStyles = location.pathname !== "/Signup" && location.pathname !== "/login"
     ? {
         backgroundImage: `url(${peachImage})`,
         backgroundRepeat: "no-repeat",
@@ -42,7 +42,7 @@ const AppContent = () => {
         <Route path="/notifications" element={<NotificationPage />} />
         <Route path="/about" element={<AboutPage />} /> 
         <Route path="/profile" element={<Profile />} />
-        <Route path="/signup" element={<Signup />} />
+        <Route path="/Signup" element={<Signup />} />
         <Route path="/" element={<WelcomePage />} />
         <Route path="/matches" element={<MyMatches />} />
         <Route path="/ChatPage" element={<ChatPage />} />
