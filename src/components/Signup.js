@@ -107,7 +107,7 @@ const Signup = () => {
 
   return (
     <div style={{ position: "relative", minHeight: "100vh" }}>
-      <AnimatedBackground animationName="starryNight" blendMode="normal" />
+      <AnimatedBackground animationName="gradientWave" blendMode="normal" />
       <FormContainer>
         <img src={logo} alt="Logo" style={{ width: "250px", marginBottom: "10px" }} />
         <Typography variant="h4" gutterBottom style={{ fontWeight: "bold", color: "#0052D4" }}>
