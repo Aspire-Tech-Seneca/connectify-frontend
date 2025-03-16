@@ -97,7 +97,7 @@ const LoginForm = () => {
     try {
       const response = await axios.post(apiUrl, { email, password });
       localStorage.setItem("authToken", response.data.access);
-      alert("Login successful!");
+      // Alert removed
       navigate("/profile");
     } catch (error) {
       setErrorMessage(error.response?.data?.error || "Login failed. Try again.");
