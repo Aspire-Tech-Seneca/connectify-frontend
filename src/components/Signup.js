@@ -41,8 +41,12 @@ const ImageContainer = styled(Box)({
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
-  background: "rgba(0, 82, 212, 0.95)",
+  background: "rgba(10, 25, 47, 0.95)",
   padding: "20px",
+  padding: "20px",
+   border: "3px solid rgba(255, 255, 255, 0.5)", // Semi-transparent blue border
+ // borderRadius: "12px", // Optional rounded corners
+  
 });
 
 const FormContainer = styled(Container)(({ theme }) => ({
