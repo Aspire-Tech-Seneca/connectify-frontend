@@ -151,7 +151,7 @@ const Signup = () => {
         <FormContainer>
           <img src={logo} alt="Logo" style={{ width: "200px", marginBottom: "10px" }} />
           <Typography variant="h4" gutterBottom style={{ fontWeight: "bold", color: "#0052D4" }}>
-            Sign Up to Connectify
+            Create an Account
           </Typography>
           {serverError && <Typography color="error">{serverError}</Typography>}
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "15px", width: "100%" }}>
