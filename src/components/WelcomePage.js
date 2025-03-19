@@ -76,7 +76,7 @@ const WelcomePage = () => {
             literature, find friends and build meaningful connections.
           </Typography>
           <Box sx={{ display: "flex", justifyContent: "center", gap: 2 }}>
-            <StyledButton onClick={() => navigate("/signup")}>
+            <StyledButton onClick={() => navigate("/Signup")}>
               Get Started
             </StyledButton>
             <StyledButton onClick={() => navigate("/login")}>
