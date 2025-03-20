@@ -1,6 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { IconButton, Badge, Popover, List, ListItem, ListItemText } from "@mui/material";
+import {
+  IconButton,
+  Badge,
+  Popover,
+  List,
+  ListItem,
+  ListItemText
+} from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import ChatIcon from "@mui/icons-material/Chat";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -42,28 +49,48 @@ async function uploadFileToBlob(file, containerName) {
   return `${BLOB_STORAGE_BASE_URL}${containerName}${uniqueFileName}`;
 }
 
-// NavBar Component
+// NavBar Component with additional hamburger menu functionality
 const NavBar = ({ navigate, notificationCount, notifications }) => {
   const [anchorEl, setAnchorEl] = useState(null);
+  const [hamburgerAnchorEl, setHamburgerAnchorEl] = useState(null);
 
   const handleNotificationIconClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
-  const handleClosePopover = () => {
+  const handleCloseNotificationPopover = () => {
     setAnchorEl(null);
   };
 
-  const open = Boolean(anchorEl);
-  const popoverId = open ? "notification-popover" : undefined;
+  const handleHamburgerClick = (event) => {
+    setHamburgerAnchorEl(event.currentTarget);
+  };
+  const handleCloseHamburgerPopover = () => {
+    setHamburgerAnchorEl(null);
+  };
 
-  // You can tweak the margins here to shift Home and Logout
+  const openNotification = Boolean(anchorEl);
+  const notificationPopoverId = openNotification ? "notification-popover" : undefined;
+  const openHamburger = Boolean(hamburgerAnchorEl);
+  const hamburgerPopoverId = openHamburger ? "hamburger-popover" : undefined;
+
+  // Main menu items already in nav
   const navItems = [
     { label: "Home", path: "/home" },
     { label: "Chat", path: "/ChatPage" },
     { label: "My Profile", path: "/profile" },
     { label: "About Us", path: "/about" },
     { label: "My Matches", path: "/matches" },
-    { label: "Logout", path: "/login", customStyle: { marginRight: "60px" } },
+    { label: "Logout", path: "/login", customStyle: { marginRight: "50px" } },
+  ];
+
+  // Additional pages for the hamburger menu
+  const additionalMenuItems = [
+    { label: "Notifications", path: "/notifications" },
+    { label: "User Settings", path: "/UserSettings" },
+    { label: "View Events", path: "/ViewEvents" },
+    { label: "Create Event", path: "/createevent" },
+    { label: "Community Chat", path: "/CommunityChat" },
+    { label: "Policy Compliance", path: "/PolicyCompliance" },
   ];
 
   return (
@@ -79,28 +106,27 @@ const NavBar = ({ navigate, notificationCount, notifications }) => {
           </button>
         ))}
 
-        {/* Icons container: gap=0, no extra padding */}
+        {/* Grouping icons (notifications, chat, hamburger) with no gap */}
         <div style={{ display: "flex", gap: 0, alignItems: "center" }}>
           <IconButton onClick={handleNotificationIconClick} style={{ padding: 0 }}>
             <Badge badgeContent={notificationCount} color="error">
               <NotificationsIcon style={{ color: "white" }} />
             </Badge>
           </IconButton>
-
           <IconButton onClick={() => navigate("/ChatPage")} style={{ padding: 0 }}>
             <ChatIcon style={{ color: "white" }} />
           </IconButton>
-
-          <IconButton style={{ padding: 0 }}>
+          <IconButton onClick={handleHamburgerClick} style={{ padding: 0 }}>
             <MenuIcon style={{ color: "white" }} />
           </IconButton>
         </div>
 
+        {/* Notification Popover */}
         <Popover
-          id={popoverId}
-          open={open}
+          id={notificationPopoverId}
+          open={openNotification}
           anchorEl={anchorEl}
-          onClose={handleClosePopover}
+          onClose={handleCloseNotificationPopover}
           anchorOrigin={{
             vertical: "bottom",
             horizontal: "center",
@@ -121,7 +147,7 @@ const NavBar = ({ navigate, notificationCount, notifications }) => {
                   button
                   key={index}
                   onClick={() => {
-                    handleClosePopover();
+                    handleCloseNotificationPopover();
                     navigate("/notifications");
                   }}
                 >
@@ -131,12 +157,42 @@ const NavBar = ({ navigate, notificationCount, notifications }) => {
             )}
           </List>
         </Popover>
+
+        {/* Hamburger Menu Popover */}
+        <Popover
+          id={hamburgerPopoverId}
+          open={openHamburger}
+          anchorEl={hamburgerAnchorEl}
+          onClose={handleCloseHamburgerPopover}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "center",
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "center",
+          }}
+        >
+          <List>
+            {additionalMenuItems.map((item, index) => (
+              <ListItem
+                button
+                key={index}
+                onClick={() => {
+                  handleCloseHamburgerPopover();
+                  navigate(item.path);
+                }}
+              >
+                <ListItemText primary={item.label} />
+              </ListItem>
+            ))}
+          </List>
+        </Popover>
       </div>
     </nav>
   );
 };
 
-// ProfileCard Component
 const ProfileCard = ({
   profilePic,
   isEditing,
@@ -250,7 +306,6 @@ const ProfileCard = ({
   </div>
 );
 
-// Gallery Component
 const Gallery = ({ galleryImages, handleGalleryImageUpload, removeGalleryImage }) => (
   <div style={styles.gallerySection}>
     <h2 style={styles.sectionTitle}>My Gallery</h2>
@@ -286,7 +341,6 @@ const Gallery = ({ galleryImages, handleGalleryImageUpload, removeGalleryImage }
   </div>
 );
 
-// Matches Component
 const Matches = ({ suggestedMatches, handleRemoveMatch, handleMatchRequest }) => {
   return (
     <div>
@@ -310,14 +364,12 @@ const Matches = ({ suggestedMatches, handleRemoveMatch, handleMatchRequest }) =>
               </div>
             </div>
             <div style={styles.buttonRow}>
-              {/* ❌ => block-matchup-request */}
               <button
                 onClick={() => handleRemoveMatch(match.id)}
                 style={styles.removeButton}
               >
                 ❌ Remove
               </button>
-              {/* ✅ => request-matchup */}
               <button
                 onClick={() => handleMatchRequest(match.id)}
                 style={styles.matchButton}
@@ -332,7 +384,6 @@ const Matches = ({ suggestedMatches, handleRemoveMatch, handleMatchRequest }) =>
   );
 };
 
-// Main Profile Component
 const Profile = () => {
   const navigate = useNavigate();
   const [name, setName] = useState("Eni Zeqo");
@@ -499,7 +550,7 @@ const Profile = () => {
     setGalleryImages((prev) => prev.filter((img) => img.id !== id));
   };
 
-  // ❌ => block-matchup-request
+  // Block matchup request
   const handleRemoveMatch = async (userId) => {
     try {
       const response = await fetch(`${BASE_URL}/users/block-matchup-request/`, {
@@ -519,7 +570,7 @@ const Profile = () => {
     }
   };
 
-  // ✅ => request-matchup
+  // Request matchup
   const handleMatchRequest = async (userId) => {
     try {
       const match = suggestedMatches.find((m) => m.id === userId);
@@ -637,6 +688,7 @@ const styles = {
   navItems: {
     display: "flex",
     alignItems: "center",
+    gap: "20px",
   },
   navButton: {
     background: "none",
