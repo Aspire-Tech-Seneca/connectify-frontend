@@ -6,6 +6,7 @@ import Profile from "./components/profile";
 import HomePage from "./components/HomePage"; 
 import AboutPage from "./components/AboutPage";
 import peachImage from "./peach.jpg"; // Background image for all pages except signup
+import abstract from "./abstract.jpg";
 import Signup from "./components/Signup";
 import WelcomePage from "./components/WelcomePage";
 import ChatPage from "./components/ChatPage";
@@ -19,22 +20,26 @@ import NotificationPage from "./components/NotificationPage";
 
 const AppContent = () => {
   const location = useLocation(); // Get current route
- const appStyles =
-    location.pathname !== "/Signup" &&
-	location.pathname !== "/ViewEvents" &&
-    location.pathname !== "/login" &&
-    location.pathname !== "/CreateEvent"
-      ? {
-          backgroundImage: `url(${peachImage})`,
-          backgroundRepeat: "no-repeat",
-          backgroundSize: "cover",
-          height: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-        }
-      : {};
+
+  // Apply background only if it's NOT the signup page
+  const appStyles =
+  location.pathname !== "/Signup" && location.pathname !== "/login"
+    ? {
+        background: `linear-gradient(
+          rgba(100, 126, 135, 0.4),
+          rgba(255, 255, 255, 0.3)
+        ), url(${abstract})`,
+        backgroundRepeat: "no-repeat",
+        backgroundSize: "cover",
+        backgroundPosition: "center center",
+        backgroundAttachment: "fixed",        
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+      }
+    : {};
 
   return (
     <div className="App" style={appStyles}>
