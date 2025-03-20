@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { IconButton, Badge } from "@mui/material";
+import { IconButton, Badge, Popover, List, ListItem, ListItemText } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { useNavigate, Link } from "react-router-dom";
 import eni from '../image/Eni.jpg';
@@ -65,10 +65,10 @@ function Navbar({navigate}){
           </button>
         ))}
         {/* Bell Icon with Notifications */}
-        <IconButton color="inherit"  component={Link} to="/notifications">
-                  <Badge badgeContent={notifications.length} color="error">
-                    <NotificationsIcon />
-                  </Badge>
+        <IconButton onClick={() => navigate("/notifications")}>
+          <Badge badgeContent={0} color="error">
+            <NotificationsIcon style={{ color: "white" }} />
+          </Badge>
                 </IconButton>
       </div>
     </nav>
