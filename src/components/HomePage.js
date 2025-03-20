@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { IconButton, Badge } from "@mui/material";
+import { IconButton, Badge, Snackbar, Alert } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 
 // Environment variables
@@ -143,6 +143,9 @@ const HomePage = () => {
 
   const [matches, setMatches] = useState([]);
   const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("info");
 
   useEffect(() => {
     if (!authToken) return;
@@ -221,6 +224,40 @@ const HomePage = () => {
     }
   };
 
+  const handleUnmatch = async (id) => {
+    try {
+      const response = await fetch(`${BASE_URL}/api/unmatch/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${authToken}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to unmatch user.");
+      }
+
+      setMatches(matches.filter((m) => m.id !== id));
+      setSnackbarMessage("User unmatched successfully!");
+      setSnackbarSeverity("success");
+    } catch (error) {
+      console.error("Error unmatching user:", error);
+      setSnackbarMessage(error.message || "Failed to unmatch user.");
+      setSnackbarSeverity("error");
+    } finally {
+      setSnackbarOpen(true);
+    }
+  };
+
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setSnackbarOpen(false);
+  };
+
   const currentProfile = matches[currentProfileIndex];
 
   return (
@@ -275,7 +312,7 @@ const HomePage = () => {
                         </button>
                         <button 
                           style={styles.messageBtn}
-                          onClick={() => console.log("Unmatch functionality to be implemented")}
+                          onClick={() => handleUnmatch(currentProfile.id)}
                         >
                           Unmatch
                         </button>
@@ -297,6 +334,20 @@ const HomePage = () => {
       </div>
       <UserReviews />
       <Footer />
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbarSeverity}
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };
