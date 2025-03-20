@@ -2,7 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { IconButton, Badge, Popover, List, ListItem, ListItemText } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
-import MenuIcon from "@mui/icons-material/Menu"; // Imported hamburger menu icon
+import ChatIcon from "@mui/icons-material/Chat";
+import MenuIcon from "@mui/icons-material/Menu";
 
 // Adjust to your actual backend URLs
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:8000";
@@ -41,6 +42,7 @@ async function uploadFileToBlob(file, containerName) {
   return `${BLOB_STORAGE_BASE_URL}${containerName}${uniqueFileName}`;
 }
 
+// NavBar Component
 const NavBar = ({ navigate, notificationCount, notifications }) => {
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -54,34 +56,42 @@ const NavBar = ({ navigate, notificationCount, notifications }) => {
   const open = Boolean(anchorEl);
   const popoverId = open ? "notification-popover" : undefined;
 
+  // You can tweak the margins here to shift Home and Logout
+  const navItems = [
+    { label: "Home", path: "/home" },
+    { label: "Chat", path: "/ChatPage" },
+    { label: "My Profile", path: "/profile" },
+    { label: "About Us", path: "/about" },
+    { label: "My Matches", path: "/matches" },
+    { label: "Logout", path: "/login", customStyle: { marginRight: "60px" } },
+  ];
+
   return (
     <nav style={styles.navbar}>
       <div style={styles.navItems}>
-        {[
-          { label: "Home", path: "/home" },
-          { label: "Chat", path: "/ChatPage" },
-          { label: "My Profile", path: "/profile" },
-          { label: "About Us", path: "/about" },
-          { label: "My Matches", path: "/matches" },
-          { label: "Logout", path: "/login" },
-        ].map((item) => (
+        {navItems.map((item) => (
           <button
             key={item.label}
-            style={styles.navButton}
+            style={{ ...styles.navButton, ...(item.customStyle || {}) }}
             onClick={() => navigate(item.path)}
           >
             {item.label}
           </button>
         ))}
 
-        {/* Group the icons with a smaller gap */}
-        <div style={{ display: "flex", gap: "1px", alignItems: "center" }}>
-          <IconButton onClick={handleNotificationIconClick}>
+        {/* Icons container: gap=0, no extra padding */}
+        <div style={{ display: "flex", gap: 0, alignItems: "center" }}>
+          <IconButton onClick={handleNotificationIconClick} style={{ padding: 0 }}>
             <Badge badgeContent={notificationCount} color="error">
               <NotificationsIcon style={{ color: "white" }} />
             </Badge>
           </IconButton>
-          <IconButton>
+
+          <IconButton onClick={() => navigate("/ChatPage")} style={{ padding: 0 }}>
+            <ChatIcon style={{ color: "white" }} />
+          </IconButton>
+
+          <IconButton style={{ padding: 0 }}>
             <MenuIcon style={{ color: "white" }} />
           </IconButton>
         </div>
@@ -126,6 +136,7 @@ const NavBar = ({ navigate, notificationCount, notifications }) => {
   );
 };
 
+// ProfileCard Component
 const ProfileCard = ({
   profilePic,
   isEditing,
@@ -239,6 +250,7 @@ const ProfileCard = ({
   </div>
 );
 
+// Gallery Component
 const Gallery = ({ galleryImages, handleGalleryImageUpload, removeGalleryImage }) => (
   <div style={styles.gallerySection}>
     <h2 style={styles.sectionTitle}>My Gallery</h2>
@@ -274,6 +286,7 @@ const Gallery = ({ galleryImages, handleGalleryImageUpload, removeGalleryImage }
   </div>
 );
 
+// Matches Component
 const Matches = ({ suggestedMatches, handleRemoveMatch, handleMatchRequest }) => {
   return (
     <div>
@@ -297,12 +310,14 @@ const Matches = ({ suggestedMatches, handleRemoveMatch, handleMatchRequest }) =>
               </div>
             </div>
             <div style={styles.buttonRow}>
+              {/* ❌ => block-matchup-request */}
               <button
                 onClick={() => handleRemoveMatch(match.id)}
                 style={styles.removeButton}
               >
                 ❌ Remove
               </button>
+              {/* ✅ => request-matchup */}
               <button
                 onClick={() => handleMatchRequest(match.id)}
                 style={styles.matchButton}
@@ -317,6 +332,7 @@ const Matches = ({ suggestedMatches, handleRemoveMatch, handleMatchRequest }) =>
   );
 };
 
+// Main Profile Component
 const Profile = () => {
   const navigate = useNavigate();
   const [name, setName] = useState("Eni Zeqo");
@@ -483,7 +499,7 @@ const Profile = () => {
     setGalleryImages((prev) => prev.filter((img) => img.id !== id));
   };
 
-  // Block matchup request
+  // ❌ => block-matchup-request
   const handleRemoveMatch = async (userId) => {
     try {
       const response = await fetch(`${BASE_URL}/users/block-matchup-request/`, {
@@ -503,7 +519,7 @@ const Profile = () => {
     }
   };
 
-  // Request matchup
+  // ✅ => request-matchup
   const handleMatchRequest = async (userId) => {
     try {
       const match = suggestedMatches.find((m) => m.id === userId);
@@ -609,6 +625,29 @@ const Profile = () => {
 };
 
 const styles = {
+  navbar: {
+    backgroundColor: "#315b7e",
+    padding: "25px",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    color: "white",
+    width: "100%",
+  },
+  navItems: {
+    display: "flex",
+    alignItems: "center",
+  },
+  navButton: {
+    background: "none",
+    border: "none",
+    color: "white",
+    fontSize: "20px",
+    fontWeight: "bold",
+    cursor: "pointer",
+    transition: "color 0.3s",
+    whiteSpace: "nowrap",
+  },
   outerContainer: {
     background: "transparent",
     minHeight: "100vh",
@@ -818,46 +857,7 @@ const styles = {
   },
   buttonRow: {
     display: "flex",
-    gap: "20px",
-  },
-  navbar: {
-    backgroundColor: "#315b7e",
-    padding: "25px",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    color: "white",
-    width: "100%",
-  },
-  navItems: {
-    display: "flex",
-    gap: "20px",
-    alignItems: "center",
-  },
-  navButton: {
-    background: "none",
-    border: "none",
-    color: "white",
-    fontSize: "20px",
-    fontWeight: "bold",
-    cursor: "pointer",
-    transition: "color 0.3s",
-    whiteSpace: "nowrap",
-  },
-  emptyText: {
-    textAlign: "center",
-    color: "#A0522D",
-    fontStyle: "italic",
-  },
-  radioGroup: {
-    display: "flex",
     gap: "10px",
-    
-  },
-  radioLabel: {
-    display: "flex",
-    alignItems: "center",
-    gap: "5px",
   },
 };
 
