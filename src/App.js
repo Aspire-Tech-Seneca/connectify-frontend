@@ -19,20 +19,22 @@ import NotificationPage from "./components/NotificationPage";
 
 const AppContent = () => {
   const location = useLocation(); // Get current route
-
-  // Apply background only if it's NOT the signup page
-  const appStyles = location.pathname !== "/Signup" && location.pathname !== "/login"
-    ? {
-        backgroundImage: `url(${peachImage})`,
-        backgroundRepeat: "no-repeat",
-        backgroundSize: "cover",
-        height: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-      }
-    : {}; // No background styling for signup
+ const appStyles =
+    location.pathname !== "/Signup" &&
+	location.pathname !== "/ViewEvents" &&
+    location.pathname !== "/login" &&
+    location.pathname !== "/CreateEvent"
+      ? {
+          backgroundImage: `url(${peachImage})`,
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "cover",
+          height: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+        }
+      : {};
 
   return (
     <div className="App" style={appStyles}>
@@ -51,6 +53,7 @@ const AppContent = () => {
         <Route path="/createevent" element={<CreateEvent />} />
         <Route path="/CommunityChat" element={<CommunityChat />} />
         <Route path="/PolicyCompliance" element={<PolicyCompliance />} />
+
       </Routes>
     </div>
   );
