@@ -822,7 +822,7 @@ const styles = {
     gap: "10px",
   },
   navbar: {
-    backgroundColor: "#00264A",
+    backgroundColor: "#315b7e",
     padding: "25px",
     display: "flex",
     justifyContent: "center",
