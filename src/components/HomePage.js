@@ -33,9 +33,9 @@ const NavBar = ({ navigate }) => {
             {item.label}
           </button>
         ))}
-        <IconButton color="inherit" component={Link} to="/notifications">
-          <Badge badgeContent={notifications.length} color="error">
-            <NotificationsIcon />
+        <IconButton onClick={() => navigate("/notifications")}>
+          <Badge badgeContent={0} color="error">
+            <NotificationsIcon style={{ color: "white" }} />
           </Badge>
         </IconButton>
       </div>
