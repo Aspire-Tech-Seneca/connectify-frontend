@@ -42,20 +42,29 @@ const Navbar = () => (
 
 const ViewEvents = () => {
   const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState({ location: "", date_from: "", date_to: "" });
+  const [loading, setLoading] = useState(false);
+  const [filters, setFilters] = useState({
+    location: "",
+    date_from: "",
+    date_to: "",
+  });
+
+  const fetchEvents = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.post(`${BASE_URL}/events/list/`, filters, {
+        headers: { "Content-Type": "application/json" },
+      });
+      setEvents(response.data);
+    } catch (error) {
+      console.error("Error fetching events:", error);
+      setEvents([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const response = await axios.get(`${BASE_URL}/events/list`);
-        setEvents(response.data);
-      } catch (error) {
-        console.error("Error fetching events:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchEvents();
   }, []);
 
@@ -63,13 +72,9 @@ const ViewEvents = () => {
     setFilters({ ...filters, [e.target.name]: e.target.value });
   };
 
-  const filteredEvents = events.filter(event => {
-    return (
-      (filters.location === "" || event.location.toLowerCase().includes(filters.location.toLowerCase())) &&
-      (filters.date_from === "" || new Date(event.event_date) >= new Date(filters.date_from)) &&
-      (filters.date_to === "" || new Date(event.event_date) <= new Date(filters.date_to))
-    );
-  });
+  const handleSearch = () => {
+    fetchEvents();
+  };
 
   return (
     <BackgroundContainer>
@@ -111,15 +116,20 @@ const ViewEvents = () => {
               InputLabelProps={{ shrink: true }}
             />
           </Grid>
+          <Grid item xs={12} sm={4}>
+            <Button variant="contained" onClick={handleSearch} fullWidth sx={{ marginTop: "10px" }}>
+              Search
+            </Button>
+          </Grid>
         </Grid>
 
         {loading ? (
           <Typography variant="h6" align="center">Loading events...</Typography>
-        ) : filteredEvents.length === 0 ? (
+        ) : events.length === 0 ? (
           <Typography variant="h6" align="center">No events available.</Typography>
         ) : (
           <Grid container spacing={4}>
-            {filteredEvents.map((event) => (
+            {events.map((event) => (
               <Grid item key={event.id} xs={12} sm={6} md={4}>
                 <Card sx={{ boxShadow: 3 }}>
                   {event.imageUrl && (
