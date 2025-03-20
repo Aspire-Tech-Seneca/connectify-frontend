@@ -20,7 +20,7 @@ import peachImage from "./peach.jpg";
 
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:8000";
 
-// NavBar component (matches Matches and Profile pages)
+// NavBar component (matching Matches and Profile pages)
 const NavBar = ({ navigate, notificationCount, notifications }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [hamburgerAnchorEl, setHamburgerAnchorEl] = useState(null);
@@ -148,7 +148,7 @@ const CommunityChat = () => {
   const [currentUser, setCurrentUser] = useState("Anonymous");
   const authToken = localStorage.getItem("authToken");
 
-  // Fetch current user's info
+  // Fetch current user's info from backend and set as currentUser
   useEffect(() => {
     if (authToken) {
       fetch(`${BASE_URL}/users/get-user-info/`, {
@@ -168,7 +168,7 @@ const CommunityChat = () => {
   const [notifications] = useState([]);
   const notificationCount = notifications.length;
 
-  // Chat state
+  // Chat messages state
   const [messages, setMessages] = useState([
     { user: "Alice", message: "Hello everyone!", timestamp: "10:01 AM" },
     { user: "Bob", message: "Hi Alice! How are you?", timestamp: "10:02 AM" },
@@ -190,6 +190,7 @@ const CommunityChat = () => {
     });
   };
 
+  // When sending a message, the message object uses currentUser as the sender's name.
   const sendMessage = () => {
     if (!inputMessage.trim()) return;
     const newMsg = {
@@ -207,14 +208,20 @@ const CommunityChat = () => {
 
   return (
     <div style={styles.outerContainer}>
-      <NavBar navigate={navigate} notificationCount={notificationCount} notifications={notifications} />
+      <NavBar
+        navigate={navigate}
+        notificationCount={notificationCount}
+        notifications={notifications}
+      />
       <div style={styles.contentWrapper}>
         <div style={styles.chatSection}>
           <div style={styles.chatContainer}>
             <div style={styles.messagesList}>
               {messages.map((msg, i) => (
                 <div key={i} style={styles.messageItem}>
-                  <strong>{msg.user} [{msg.timestamp}]:</strong>
+                  <strong>
+                    {msg.user} [{msg.timestamp}]:
+                  </strong>
                   <p style={{ margin: "5px 0 0 0" }}>{msg.message}</p>
                 </div>
               ))}
@@ -252,6 +259,13 @@ const CommunityChat = () => {
           </div>
         </div>
       </div>
+      <Snackbar
+        open={false}
+        autoHideDuration={3000}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert severity="info">Placeholder</Alert>
+      </Snackbar>
     </div>
   );
 };
