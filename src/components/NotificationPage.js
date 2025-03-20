@@ -66,10 +66,10 @@ const NotificationPage = () => {
                 {item.label}
               </button>
             ))}
-            <IconButton color="inherit" component={Link} to="/notifications">
-              <Badge badgeContent={notifications.length} color="error">
-                <NotificationsIcon />
-              </Badge>
+            <IconButton onClick={() => navigate("/notifications")}>
+          <Badge badgeContent={0} color="error">
+            <NotificationsIcon style={{ color: "white" }} />
+          </Badge>
             </IconButton>
           </div>
         </nav>
