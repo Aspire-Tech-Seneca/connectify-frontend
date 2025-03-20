@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { IconButton, Badge, Snackbar, Alert } from "@mui/material";
+import { IconButton, Badge, Snackbar, Alert, TextField, Button } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 
 // Environment variables
@@ -40,6 +40,102 @@ const NavBar = ({ navigate }) => {
         </IconButton>
       </div>
     </nav>
+  );
+};
+
+// Review Form Component
+const ReviewForm = () => {
+  const [reviewText, setReviewText] = useState("");
+  const [authorName, setAuthorName] = useState("");
+  const [formMessage, setFormMessage] = useState({ text: "", type: "" });
+  const authToken = localStorage.getItem("authToken");
+
+  const handleSubmitReview = async (e) => {
+    e.preventDefault();
+    
+    if (!reviewText.trim() || !authorName.trim()) {
+      setFormMessage({ text: "Please fill all fields", type: "error" });
+      return;
+    }
+    
+    try {
+      const response = await fetch(`${BASE_URL}/reviews/add`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({
+          text: reviewText,
+          author: authorName
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to submit review");
+      }
+      
+      setFormMessage({ text: "Review submitted successfully!", type: "success" });
+      setReviewText("");
+      setAuthorName("");
+      
+      // Reset success message after 3 seconds
+      setTimeout(() => {
+        setFormMessage({ text: "", type: "" });
+      }, 3000);
+      
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      setFormMessage({ text: "Failed to submit review. Please try again.", type: "error" });
+    }
+  };
+  
+  return (
+    <div style={styles.reviewFormContainer}>
+      <h2 style={styles.reviewFormTitle}>Share Your Experience</h2>
+      <form onSubmit={handleSubmitReview} style={styles.reviewForm}>
+        <div style={styles.formGroup}>
+          <TextField
+            label="Your Name"
+            variant="outlined"
+            fullWidth
+            value={authorName}
+            onChange={(e) => setAuthorName(e.target.value)}
+            required
+            style={styles.inputField}
+          />
+        </div>
+        <div style={styles.formGroup}>
+          <TextField
+            label="Your Review"
+            variant="outlined"
+            multiline
+            rows={4}
+            fullWidth
+            value={reviewText}
+            onChange={(e) => setReviewText(e.target.value)}
+            required
+            style={styles.inputField}
+          />
+        </div>
+        <Button 
+          type="submit" 
+          variant="contained" 
+          style={styles.submitButton}
+        >
+          Submit Review
+        </Button>
+        
+        {formMessage.text && (
+          <div style={{
+            ...styles.formMessage,
+            color: formMessage.type === "success" ? "#4caf50" : "#f44336"
+          }}>
+            {formMessage.text}
+          </div>
+        )}
+      </form>
+    </div>
   );
 };
 
@@ -333,6 +429,7 @@ const HomePage = () => {
         </div>
       </div>
       <UserReviews />
+      <ReviewForm />
       <Footer />
       <Snackbar
         open={snackbarOpen}
@@ -489,6 +586,47 @@ const styles = {
     transition: "color 0.3s",
     whiteSpace: "nowrap",
   },
+
+  // Review Form Styles
+  reviewFormContainer: {
+    padding: "40px 20px",
+    maxWidth: "450px",
+    margin: "20px auto",
+    borderRadius: "20px",
+  },
+  reviewFormTitle: {
+    fontSize: "24px",
+    marginBottom: "20px",
+    color: "#5D4037",
+    textAlign: "center",
+  },
+  reviewForm: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "20px",
+  },
+  formGroup: {
+    width: "100%",
+  },
+  inputField: {
+    background: "#fff",
+  },
+  submitButton: {
+    backgroundColor: "#C38282",
+    color: "white",
+    padding: "10px 20px",
+    alignSelf: "center",
+    fontWeight: "bold",
+    "&:hover": {
+      backgroundColor: "#b57373",
+    },
+  },
+  formMessage: {
+    textAlign: "center",
+    marginTop: "10px",
+    fontWeight: "bold",
+  },
+
   reviewsContainer: {
     backgroundColor: "#f8f9fa",
     padding: "40px 20px",
