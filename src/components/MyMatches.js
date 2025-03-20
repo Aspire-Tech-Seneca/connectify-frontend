@@ -11,31 +11,51 @@ import {
   ListItemText,
 } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
+import ChatIcon from "@mui/icons-material/Chat";
+import MenuIcon from "@mui/icons-material/Menu";
 
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:8000";
 
-// NavBar Component with a notification icon and popover list
+// Updated NavBar Component (matches Profile page)
 const NavBar = ({ navigate, notificationCount, notifications }) => {
   const [anchorEl, setAnchorEl] = useState(null);
+  const [hamburgerAnchorEl, setHamburgerAnchorEl] = useState(null);
 
   const handleNotificationIconClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
-
-  const handleClosePopover = () => {
+  const handleCloseNotificationPopover = () => {
     setAnchorEl(null);
   };
 
-  const open = Boolean(anchorEl);
-  const popoverId = open ? "notification-popover" : undefined;
+  const handleHamburgerClick = (event) => {
+    setHamburgerAnchorEl(event.currentTarget);
+  };
+  const handleCloseHamburgerPopover = () => {
+    setHamburgerAnchorEl(null);
+  };
+
+  const openNotification = Boolean(anchorEl);
+  const notificationPopoverId = openNotification ? "notification-popover" : undefined;
+  const openHamburger = Boolean(hamburgerAnchorEl);
+  const hamburgerPopoverId = openHamburger ? "hamburger-popover" : undefined;
 
   const navItems = [
-    { label: "Home", path: "/home" },
+    { label: "Home", path: "/home", customStyle: { marginLeft: "40px" } },
     { label: "Chat", path: "/ChatPage" },
     { label: "My Profile", path: "/profile" },
     { label: "About Us", path: "/about" },
     { label: "My Matches", path: "/matches" },
-    { label: "Logout", path: "/login" },
+    { label: "Logout", path: "/login", customStyle: { marginRight: "30px" } },
+  ];
+
+  const additionalMenuItems = [
+    { label: "Notifications", path: "/notifications" },
+    { label: "User Settings", path: "/UserSettings" },
+    { label: "View Events", path: "/ViewEvents" },
+    { label: "Create Event", path: "/createevent" },
+    { label: "Community Chat", path: "/CommunityChat" },
+    { label: "Policy Compliance", path: "/PolicyCompliance" },
   ];
 
   return (
@@ -44,30 +64,32 @@ const NavBar = ({ navigate, notificationCount, notifications }) => {
         {navItems.map((item) => (
           <button
             key={item.label}
-            style={styles.navButton}
+            style={{ ...styles.navButton, ...(item.customStyle || {}) }}
             onClick={() => navigate(item.path)}
           >
             {item.label}
           </button>
         ))}
-        <IconButton onClick={handleNotificationIconClick}>
-          <Badge badgeContent={notificationCount} color="error">
-            <NotificationsIcon style={{ color: "white" }} />
-          </Badge>
-        </IconButton>
+        <div style={{ display: "flex", gap: 0, alignItems: "center" }}>
+          <IconButton onClick={handleNotificationIconClick} style={{ padding: 0 }}>
+            <Badge badgeContent={notificationCount} color="error">
+              <NotificationsIcon style={{ color: "white" }} />
+            </Badge>
+          </IconButton>
+          <IconButton onClick={() => navigate("/ChatPage")} style={{ padding: 0 }}>
+            <ChatIcon style={{ color: "white" }} />
+          </IconButton>
+          <IconButton onClick={handleHamburgerClick} style={{ padding: 0 }}>
+            <MenuIcon style={{ color: "white" }} />
+          </IconButton>
+        </div>
         <Popover
-          id={popoverId}
-          open={open}
+          id={notificationPopoverId}
+          open={openNotification}
           anchorEl={anchorEl}
-          onClose={handleClosePopover}
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "center",
-          }}
-          transformOrigin={{
-            vertical: "top",
-            horizontal: "center",
-          }}
+          onClose={handleCloseNotificationPopover}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+          transformOrigin={{ vertical: "top", horizontal: "center" }}
         >
           <List>
             {notifications.length === 0 ? (
@@ -80,7 +102,7 @@ const NavBar = ({ navigate, notificationCount, notifications }) => {
                   button
                   key={index}
                   onClick={() => {
-                    handleClosePopover();
+                    handleCloseNotificationPopover();
                     navigate("/notifications");
                   }}
                 >
@@ -90,12 +112,35 @@ const NavBar = ({ navigate, notificationCount, notifications }) => {
             )}
           </List>
         </Popover>
+        <Popover
+          id={hamburgerPopoverId}
+          open={openHamburger}
+          anchorEl={hamburgerAnchorEl}
+          onClose={handleCloseHamburgerPopover}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+          transformOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+          <List>
+            {additionalMenuItems.map((item, index) => (
+              <ListItem
+                button
+                key={index}
+                onClick={() => {
+                  handleCloseHamburgerPopover();
+                  navigate(item.path);
+                }}
+              >
+                <ListItemText primary={item.label} />
+              </ListItem>
+            ))}
+          </List>
+        </Popover>
       </div>
     </nav>
   );
 };
 
-// Component for displaying current (approved) matches or pending outgoing requests
+// CurrentMatches Component
 const CurrentMatches = ({ currentMatches, handleChat, handleCancelRequest }) => {
   return (
     <div>
@@ -128,10 +173,7 @@ const CurrentMatches = ({ currentMatches, handleChat, handleCancelRequest }) => 
                 Chat
               </button>
               {match.status === "pending" && (
-                <button
-                  onClick={() => handleCancelRequest(match.id)}
-                  style={styles.removeButton}
-                >
+                <button onClick={() => handleCancelRequest(match.id)} style={styles.removeButton}>
                   Cancel Request
                 </button>
               )}
@@ -143,13 +185,8 @@ const CurrentMatches = ({ currentMatches, handleChat, handleCancelRequest }) => 
   );
 };
 
-// Component for displaying incoming match requests (pending from others)
-// Here we implement the endpoint GET /users/get-matchup-status/
-const IncomingRequests = ({
-  incomingRequests,
-  handleApproveIncoming,
-  handleDeclineIncoming,
-}) => {
+// IncomingRequests Component
+const IncomingRequests = ({ incomingRequests, handleApproveIncoming, handleDeclineIncoming }) => {
   return (
     <div>
       <h2 style={styles.sectionTitle}>Incoming Requests</h2>
@@ -192,7 +229,7 @@ const IncomingRequests = ({
   );
 };
 
-// Component for displaying suggested matches with an option to send a match request
+// SuggestedMatches Component
 const SuggestedMatches = ({ suggestedMatches, handleSendRequest, handleDeclineSuggested }) => {
   return (
     <div>
@@ -235,26 +272,18 @@ const SuggestedMatches = ({ suggestedMatches, handleSendRequest, handleDeclineSu
 
 const MatchesPage = () => {
   const navigate = useNavigate();
-
-  // States for matches
   const [currentMatches, setCurrentMatches] = useState([]); // Approved or pending outgoing
   const [incomingRequests, setIncomingRequests] = useState([]); // Pending from others
   const [suggestedMatches, setSuggestedMatches] = useState([]); // New potential matches
-
-  // State for top bar notifications (a list of string messages)
   const [notificationList, setNotificationList] = useState([]);
-
-  // State for Snackbar notifications
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
-    severity: "success", // "success", "error", "info", "warning"
+    severity: "success",
   });
-
-  // Use authToken
   const authToken = localStorage.getItem("authToken");
 
-  // 1) Fetch current matches via GET /users/get-mymatchup-list/
+  // 1) Fetch current matches
   useEffect(() => {
     if (!authToken) return;
     fetch(`${BASE_URL}/users/get-mymatchup-list/`, {
@@ -275,7 +304,7 @@ const MatchesPage = () => {
       .catch((err) => console.error("Failed to fetch my matches:", err));
   }, [authToken]);
 
-  // 2) Fetch incoming requests via GET /users/get-matchup-status/
+  // 2) Fetch incoming requests
   useEffect(() => {
     if (!authToken) return;
     fetch(`${BASE_URL}/users/get-matchup-status/`, {
@@ -283,7 +312,6 @@ const MatchesPage = () => {
     })
       .then((res) => res.json())
       .then((data) => {
-        // Transform the data as needed
         const transformed = data.map((user) => ({
           id: user.id,
           name: user.fullname,
@@ -296,7 +324,7 @@ const MatchesPage = () => {
       .catch((err) => console.error("Failed to fetch incoming requests:", err));
   }, [authToken]);
 
-  // 3) Fetch suggested matches: get user's interest then POST /users/get-recommend-matchups/
+  // 3) Fetch suggested matches based on user's interest
   useEffect(() => {
     if (!authToken) return;
     fetch(`${BASE_URL}/users/retrieve-interest/`, {
@@ -329,22 +357,19 @@ const MatchesPage = () => {
       .catch((err) => console.error("Failed to fetch suggested matches:", err));
   }, [authToken]);
 
-  // Snackbar close handler
   const handleSnackbarClose = (event, reason) => {
     if (reason === "clickaway") return;
     setSnackbar({ ...snackbar, open: false });
   };
 
-  // Navigate to ChatPage
   const handleChat = (id) => {
     navigate("/ChatPage");
   };
 
-  // 4) Send a match request via POST /users/request-matchup/
+  // Send a match request
   const handleSendRequest = async (id) => {
     const match = suggestedMatches.find((m) => m.id === id);
     if (!match) return;
-
     try {
       const response = await fetch(`${BASE_URL}/users/request-matchup/`, {
         method: "POST",
@@ -362,30 +387,24 @@ const MatchesPage = () => {
       setCurrentMatches([...currentMatches, { ...match, status: "pending" }]);
       const message = `Match request sent to ${match.name}.`;
       setSnackbar({ open: true, message, severity: "info" });
-      // Optionally update notificationList here if you use one.
     } catch (err) {
       console.error("Error sending matchup request:", err);
       setSnackbar({ open: true, message: err.message, severity: "error" });
     }
   };
 
-  // 5) Cancel a pending request using the Deny matchup request API
+  // Cancel a pending request
   const handleCancelRequest = async (id) => {
     const match = currentMatches.find((m) => m.id === id && m.status === "pending");
     if (!match) return;
-
     try {
       const response = await fetch(`${BASE_URL}/users/deny-matchup-request/`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authToken}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
         body: JSON.stringify({ "requester-user-id": id }),
       });
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to cancel matchup request");
+        throw new Error("Failed to cancel matchup request");
       }
       setCurrentMatches(currentMatches.filter((m) => m.id !== id));
       const message = `Match request to ${match.name} cancelled successfully.`;
@@ -396,18 +415,14 @@ const MatchesPage = () => {
     }
   };
 
-  // 6) Approve an incoming match request via PUT /users/confirm-matchup-request/
+  // Approve an incoming request
   const handleApproveIncoming = async (id) => {
     const match = incomingRequests.find((m) => m.id === id);
     if (!match) return;
-
     try {
       const response = await fetch(`${BASE_URL}/users/confirm-matchup-request/`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authToken}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
         body: JSON.stringify({ "requester-user-id": id }),
       });
       if (!response.ok) {
@@ -424,18 +439,14 @@ const MatchesPage = () => {
     }
   };
 
-  // 7) Decline an incoming match request via PUT /users/deny-matchup-request/
+  // Decline an incoming request
   const handleDeclineIncoming = async (id) => {
     const match = incomingRequests.find((m) => m.id === id);
     if (!match) return;
-
     try {
       const response = await fetch(`${BASE_URL}/users/deny-matchup-request/`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authToken}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
         body: JSON.stringify({ "requester-user-id": id }),
       });
       if (!response.ok) {
@@ -451,7 +462,7 @@ const MatchesPage = () => {
     }
   };
 
-  // 8) Decline a suggested match (remove from local state)
+  // Decline a suggested match
   const handleDeclineSuggested = (id) => {
     const match = suggestedMatches.find((m) => m.id === id);
     if (!match) return;
@@ -460,7 +471,6 @@ const MatchesPage = () => {
     setSnackbar({ open: true, message, severity: "info" });
   };
 
-  // For top bar notification badge, we'll use the length of incomingRequests.
   const notificationCount = incomingRequests.length;
 
   return (
@@ -472,15 +482,13 @@ const MatchesPage = () => {
       />
       <div style={styles.contentWrapper}>
         <div style={styles.contentContainer}>
-          {/* Left Column: Current Matches */}
           <div style={styles.column}>
             <CurrentMatches
               currentMatches={currentMatches}
-              handleChat={(id) => navigate("/ChatPage")}
+              handleChat={handleChat}
               handleCancelRequest={handleCancelRequest}
             />
           </div>
-          {/* Right Column: Incoming Requests and Suggested Matches */}
           <div style={styles.column}>
             <IncomingRequests
               incomingRequests={incomingRequests}
@@ -510,6 +518,30 @@ const MatchesPage = () => {
 };
 
 const styles = {
+  navbar: {
+    backgroundColor: "#315b7e",
+    padding: "25px",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    color: "white",
+    width: "100%",
+  },
+  navItems: {
+    display: "flex",
+    alignItems: "center",
+    gap: "20px",
+  },
+  navButton: {
+    background: "none",
+    border: "none",
+    color: "white",
+    fontSize: "20px",
+    fontWeight: "bold",
+    cursor: "pointer",
+    transition: "color 0.3s",
+    whiteSpace: "nowrap",
+  },
   outerContainer: {
     background: "transparent",
     minHeight: "100vh",
@@ -517,7 +549,7 @@ const styles = {
     width: "100vw",
   },
   contentWrapper: {
-    background: "rgba(245,236,227,0.4)",
+    background: "rgba(7, 53, 102, 0.5)",
     backgroundImage: "url('./peach.jpg')",
     backgroundRepeat: "no-repeat",
     backgroundSize: "cover",
@@ -539,7 +571,7 @@ const styles = {
   },
   sectionTitle: {
     marginBottom: "15px",
-    color: "#5D4037",
+    color: "#ffffff",
     textAlign: "center",
   },
   matchedUserCard: {
@@ -582,7 +614,7 @@ const styles = {
     gap: "10px",
   },
   matchButton: {
-    background: "#C38282",
+    background: "#315b7e",
     color: "white",
     border: "none",
     padding: "8px 12px",
@@ -592,7 +624,7 @@ const styles = {
     transition: "background 0.3s, transform 0.3s",
   },
   removeButton: {
-    background: "#C38282",
+    background: "#315b7e",
     color: "white",
     border: "none",
     padding: "8px 12px",
@@ -601,32 +633,9 @@ const styles = {
     boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
     transition: "background 0.3s, transform 0.3s",
   },
-  navbar: {
-    backgroundColor: "#C38282",
-    padding: "25px",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    color: "white",
-    width: "100%",
-  },
-  navItems: {
-    display: "flex",
-    gap: "20px",
-  },
-  navButton: {
-    background: "none",
-    border: "none",
-    color: "white",
-    fontSize: "20px",
-    fontWeight: "bold",
-    cursor: "pointer",
-    transition: "color 0.3s",
-    whiteSpace: "nowrap",
-  },
   emptyText: {
     textAlign: "center",
-    color: "#A0522D",
+    color: "#ffffff",
     fontStyle: "italic",
   },
 };
