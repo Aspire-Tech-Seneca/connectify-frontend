@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { IconButton, Badge, Popover, List, ListItem, ListItemText } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
+import MenuIcon from "@mui/icons-material/Menu"; // Imported hamburger menu icon
 
 // Adjust to your actual backend URLs
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:8000";
@@ -72,11 +73,19 @@ const NavBar = ({ navigate, notificationCount, notifications }) => {
             {item.label}
           </button>
         ))}
-        <IconButton onClick={handleNotificationIconClick}>
-          <Badge badgeContent={notificationCount} color="error">
-            <NotificationsIcon style={{ color: "white" }} />
-          </Badge>
-        </IconButton>
+
+        {/* Group the icons with a smaller gap */}
+        <div style={{ display: "flex", gap: "1px", alignItems: "center" }}>
+          <IconButton onClick={handleNotificationIconClick}>
+            <Badge badgeContent={notificationCount} color="error">
+              <NotificationsIcon style={{ color: "white" }} />
+            </Badge>
+          </IconButton>
+          <IconButton>
+            <MenuIcon style={{ color: "white" }} />
+          </IconButton>
+        </div>
+
         <Popover
           id={popoverId}
           open={open}
@@ -809,7 +818,7 @@ const styles = {
   },
   buttonRow: {
     display: "flex",
-    gap: "10px",
+    gap: "20px",
   },
   navbar: {
     backgroundColor: "#315b7e",
@@ -823,6 +832,7 @@ const styles = {
   navItems: {
     display: "flex",
     gap: "20px",
+    alignItems: "center",
   },
   navButton: {
     background: "none",
@@ -842,6 +852,7 @@ const styles = {
   radioGroup: {
     display: "flex",
     gap: "10px",
+    
   },
   radioLabel: {
     display: "flex",
