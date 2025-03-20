@@ -319,7 +319,7 @@ const Gallery = ({ galleryImages, handleGalleryImageUpload, removeGalleryImage }
   </div>
 );
 
-// CurrentMatches Component from Matches.js (using current matches data)
+// CurrentMatches Component (from Matches.js)
 const CurrentMatches = ({ currentMatches, handleChat, handleCancelRequest }) => {
   return (
     <div>
@@ -383,7 +383,7 @@ const Profile = () => {
   const notificationCount = notifications.length;
   const authToken = localStorage.getItem("authToken");
 
-  // Fetch available interests
+  // 1) Fetch available interests
   useEffect(() => {
     fetch(`${BASE_URL}/users/get-interest-list/`)
       .then((res) => res.json())
@@ -395,7 +395,7 @@ const Profile = () => {
       .catch((err) => console.error("Error fetching interest list:", err));
   }, []);
 
-  // Fetch user info
+  // 2) Fetch user info
   useEffect(() => {
     fetch(`${BASE_URL}/users/get-user-info/`, {
       method: "GET",
@@ -413,7 +413,7 @@ const Profile = () => {
       .catch((err) => console.error("Error fetching profile details:", err));
   }, [authToken]);
 
-  // Retrieve profile image
+  // 3) Retrieve profile image
   useEffect(() => {
     fetch(`${BASE_URL}/users/retrieve-profile-image/`, {
       method: "GET",
@@ -430,7 +430,7 @@ const Profile = () => {
       .catch((err) => console.error("Error retrieving profile image:", err));
   }, [authToken]);
 
-  // Retrieve user's interest
+  // 4) Retrieve user's interest
   useEffect(() => {
     fetch(`${BASE_URL}/users/retrieve-interest/`, {
       method: "GET",
@@ -445,7 +445,7 @@ const Profile = () => {
       .catch((err) => console.error("Error retrieving interest:", err));
   }, [authToken]);
 
-  // Fetch current matches (approved or pending outgoing)
+  // 5) Fetch current matches (approved or pending outgoing)
   useEffect(() => {
     if (!authToken) return;
     fetch(`${BASE_URL}/users/get-mymatchup-list/`, {
@@ -525,7 +525,6 @@ const Profile = () => {
 
   // Handler to cancel a pending request
   const handleCancelRequest = async (id) => {
-    // Find the pending match (if any)
     const match = currentMatches.find((m) => m.id === id && m.status === "pending");
     if (!match) return;
     try {
@@ -558,7 +557,10 @@ const Profile = () => {
       if (categories.length > 0) {
         const interestResponse = await fetch(`${BASE_URL}/users/update-interest/`, {
           method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${authToken}`,
+          },
           body: JSON.stringify({ interest: categories[0] }),
         });
         if (!interestResponse.ok) {
@@ -617,7 +619,7 @@ const Profile = () => {
 
 const styles = {
   navbar: {
-    backgroundColor: "#315b7e",
+    backgroundColor: "#315b7e", // Navbar background color
     padding: "25px",
     display: "flex",
     justifyContent: "center",
@@ -647,7 +649,7 @@ const styles = {
     width: "100vw",
   },
   contentWrapper: {
-    background: "rgba(245,236,227,0.4)",
+    background: "rgba(7, 53, 102, 0.5)",
     backgroundImage: "url('./peach.jpg')",
     backgroundRepeat: "no-repeat",
     backgroundSize: "cover",
@@ -669,7 +671,7 @@ const styles = {
   },
   sectionTitle: {
     marginBottom: "15px",
-    color: "#5D4037",
+    color: "#ffffff",
     textAlign: "center",
   },
   profileCard: {
@@ -725,8 +727,9 @@ const styles = {
     border: "1px solid #ccc",
     resize: "vertical",
   },
+  // Replaced the pink (#C38282) with the same blue (#315b7e) used in the navbar
   editButton: {
-    background: "#C38282",
+    background: "#315b7e",
     color: "white",
     padding: "10px 15px",
     border: "none",
@@ -736,7 +739,7 @@ const styles = {
     transition: "background 0.3s, transform 0.3s",
   },
   removeButton: {
-    background: "#C38282",
+    background: "#315b7e",
     color: "white",
     border: "none",
     padding: "8px 12px",
@@ -746,7 +749,7 @@ const styles = {
     transition: "background 0.3s, transform 0.3s",
   },
   matchButton: {
-    background: "#C38282",
+    background: "#315b7e",
     color: "white",
     border: "none",
     padding: "8px 12px",
@@ -853,7 +856,7 @@ const styles = {
   },
   emptyText: {
     textAlign: "center",
-    color: "#A0522D",
+    color: "#ffffff",
     fontStyle: "italic",
   },
 };
