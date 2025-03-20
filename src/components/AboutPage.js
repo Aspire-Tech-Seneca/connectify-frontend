@@ -1,76 +1,120 @@
-import React, { useState, useEffect } from 'react';
+import React from "react";
+import { Container, Typography, Box, Grid } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import { IconButton, Badge, Popover, List, ListItem, ListItemText } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
-import { useNavigate, Link } from "react-router-dom";
-import eni from '../image/Eni.jpg';
-import shailendra from '../image/shailendra.jpg';
-import jiyun from '../image/Jiyun.jpg';
-import john from '../image/John.jpg';
-import behzad from '../image/Behzad.jpg';
-import zahrah from '../image/Zahrah.jpg';
+import ChatIcon from "@mui/icons-material/Chat";
+import MenuIcon from "@mui/icons-material/Menu";
+import eni from "../image/Eni.jpg";
+import shailendra from "../image/shailendra.jpg";
+import jiyun from "../image/Jiyun.jpg";
+import john from "../image/John.jpg";
+import behzad from "../image/Behzad.jpg";
+import zahrah from "../image/Zahrah.jpg";
 
-// Load environment variables
-const BASE_URL = process.env.REACT_APP_BASE_URL || "http://127.0.0.1:8000";
-// Azure Blob Storage Base URL for images
-const BLOB_STORAGE_BASE_URL = process.env.REACT_APP_BLOB_STORAGE_BASE_URL || "https://yourpublicblobstorage.com/";
-// SAS token used to authorize the upload. Ensure it starts with "?".
-const BLOB_SAS_TOKEN = process.env.REACT_APP_BLOB_SAS_TOKEN || "";
-// Azure Blob Connection String
-const AZURE_BLOB_CONNECTION_STRING = process.env.REACT_APP_AZURE_BLOB_CONNECTION_STRING || "DefaultEndpointsProtocol=https;AccountName=atcdevstorageaccount;AccountKey=T+85cg3NlucicdAWrvXmenqd7/chsh0jZH/x2e12wvKyRt1xCF/RAs6tLSxuKfPZQ/4eFBevFWOu+AStzTfoFw==;EndpointSuffix=core.windows.net";
+const NavBar = ({ navigate }) => {
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [hamburgerAnchorEl, setHamburgerAnchorEl] = React.useState(null);
 
-/**
- * Upload a file to Azure Blob Storage using the SAS token.
- * Returns  Promise that resolves with the public URL of the uploaded file.
- */
-async function uploadFileToBlob(file) {
-  const uniqueFileName = `${Date.now()}_${file.name}`;
-  // Construct the upload URL: base URL + file name + SAS token
-  const uploadUrl = `${BLOB_STORAGE_BASE_URL}${uniqueFileName}${BLOB_SAS_TOKEN}`;
-  const response = await fetch(uploadUrl, {
-    method: "PUT",
-    headers: {
-      "x-ms-blob-type": "BlockBlob",
-      "Content-Type": file.type,
-    },
-    body: file,
-  });
-  if (!response.ok) {
-    throw new Error("Upload failed");
-  }
-  // Assuming the container is public, return the URL without the SAS token
-  return `${BLOB_STORAGE_BASE_URL}${uniqueFileName}`;
-}
-// Navbar component (you can adjust the navbar styling as needed)
-function Navbar({navigate}){
-      const [notifications, setNotifications] = useState([/* Add notification objects here */]);
-  
+  const handleNotificationIconClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleCloseNotificationPopover = () => {
+    setAnchorEl(null);
+  };
+  const handleHamburgerClick = (event) => {
+    setHamburgerAnchorEl(event.currentTarget);
+  };
+  const handleCloseHamburgerPopover = () => {
+    setHamburgerAnchorEl(null);
+  };
+
+  const openNotification = Boolean(anchorEl);
+  const notificationPopoverId = openNotification ? "notification-popover" : undefined;
+  const openHamburger = Boolean(hamburgerAnchorEl);
+  const hamburgerPopoverId = openHamburger ? "hamburger-popover" : undefined;
+
   const navItems = [
-    { label: "Home", path: "/home" },
+    { label: "Home", path: "/home", customStyle: { marginLeft: "40px" } },
     { label: "Chat", path: "/ChatPage" },
     { label: "My Profile", path: "/profile" },
     { label: "About Us", path: "/about" },
     { label: "My Matches", path: "/matches" },
-    { label: "Logout", path: "/login" },
+    { label: "Logout", path: "/login", customStyle: { marginRight: "30px" } },
   ];
+
+  const additionalMenuItems = [
+    { label: "Notifications", path: "/notifications" },
+    { label: "User Settings", path: "/UserSettings" },
+    { label: "View Events", path: "/ViewEvents" },
+    { label: "Create Event", path: "/createevent" },
+    { label: "Community Chat", path: "/CommunityChat" },
+    { label: "Policy Compliance", path: "/PolicyCompliance" },
+  ];
+
   return (
     <nav style={styles.navbar}>
       <div style={styles.navItems}>
         {navItems.map((item) => (
           <button
             key={item.label}
-            style={styles.navButton}
+            style={{ ...styles.navButton, ...(item.customStyle || {}) }}
             onClick={() => navigate(item.path)}
           >
             {item.label}
           </button>
         ))}
-        {/* Bell Icon with Notifications */}
-        <IconButton onClick={() => navigate("/notifications")}>
-          <Badge badgeContent={0} color="error">
-            <NotificationsIcon style={{ color: "white" }} />
-          </Badge>
-                </IconButton>
+        <div style={{ display: "flex", gap: 0, alignItems: "center" }}>
+          <IconButton onClick={handleNotificationIconClick} style={{ padding: 0 }}>
+            <Badge badgeContent={0} color="error">
+              <NotificationsIcon style={{ color: "white" }} />
+            </Badge>
+          </IconButton>
+          <IconButton onClick={() => navigate("/ChatPage")} style={{ padding: 0 }}>
+            <ChatIcon style={{ color: "white", fontSize: "24px" }} />
+          </IconButton>
+          <IconButton onClick={handleHamburgerClick} style={{ padding: 0 }}>
+            <MenuIcon style={{ color: "white", fontSize: "24px" }} />
+          </IconButton>
+        </div>
       </div>
+      <Popover
+        id={notificationPopoverId}
+        open={openNotification}
+        anchorEl={anchorEl}
+        onClose={handleCloseNotificationPopover}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        transformOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <List>
+          <ListItem>
+            <ListItemText primary="No new notifications" />
+          </ListItem>
+        </List>
+      </Popover>
+      <Popover
+        id={hamburgerPopoverId}
+        open={openHamburger}
+        anchorEl={hamburgerAnchorEl}
+        onClose={handleCloseHamburgerPopover}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        transformOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <List>
+          {additionalMenuItems.map((item, index) => (
+            <ListItem
+              button
+              key={index}
+              onClick={() => {
+                handleCloseHamburgerPopover();
+                navigate(item.path);
+              }}
+            >
+              <ListItemText primary={item.label} />
+            </ListItem>
+          ))}
+        </List>
+      </Popover>
     </nav>
   );
 };
@@ -79,209 +123,186 @@ const AboutPage = () => {
   const navigate = useNavigate();
   return (
     <div style={styles.outerContainer}>
-      {/* Navbar */}
-      <Navbar navigate={navigate} />
+      <NavBar navigate={navigate} />
       <div style={styles.contentWrapper}>
-        <div style={styles.contentContainer}>
-      <div className="about_us_container">
-        <div className="about_us">
-          <div className="section">
-            <h1>About Us</h1>
-            <p className="intro">
-              Welcome to Connectify! Connectify is a user-friendly web application designed to help individuals build meaningful connections based on shared interests. Our platform allows users to create personalized profiles, discover like-minded people through interest-based matching, and connect with others both online and in person. Whether you're looking for new friends, networking opportunities, or local meetups, Connectify makes it easier to find and engage with people who share your passions.
-            </p>
-          </div>
-          <div className="section">
-            <h2>Meet the Team</h2>
-            <div className="team">
-              <div className="team-member">
-                <img src={shailendra} alt="Team Member" />
-                <h3>Shailendra</h3>
-                <p>Frontend</p>
-              </div>
-              <div className="team-member">
-                <img src={eni} alt="Team Member" />
-                <h3>Eni Zeqo</h3>
-                <p>Frontend</p>
-              </div>
-              <div className="team-member">
-                <img src={zahrah} alt="Team Member" />
-                <h3>Zahrah</h3>
-                <p>Frontend</p>
-              </div>
-              <div className="team-member">
-                <img src={behzad} alt="Team Member" />
-                <h3>Behzad</h3>
-                <p>Backend</p>
-              </div>
-              <div className="team-member">
-                <img src={jiyun} alt="Team Member" />
-                <h3>Jiyun Guo</h3>
-                <p>Backend</p>
-              </div>
-              <div className="team-member">
-                <img src={john} alt="Team Member" />
-                <h3>John</h3>
-                <p>SRE</p>
-              </div>
-            </div>
-          </div>
-          <div className="section">
-            <h2>Contact Us</h2>
-            <p>
-              We would love to hear from you! If you have any questions, feedback, or just want to say hello, please reach out to us at:
-            </p>
-            <ul>
-              <li>Email: <a href="mailto:support@connectify.com">John@connectify.com</a></li>
-              <li>Phone: <a href="tel:+1234567890">(123) 456-7890</a></li>
-              <li>Address: 1750 Finch Ave E, North York ON M2J2X5</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-      </div>
+        <Container maxWidth="md">
+          <Typography variant="h3" align="center" gutterBottom style={styles.heading}>
+            About Us
+          </Typography>
+          <Box mt={3}>
+            <Typography variant="body1" paragraph style={styles.text}>
+              Welcome to Connectify! Connectify is a modern, user-friendly platform designed to help you build meaningful connections based on shared interests. Our application empowers you to create personalized profiles, find like-minded individuals, and engage in social activities both online and in person.
+            </Typography>
+          </Box>
+          <Box mt={5}>
+            <Typography variant="h4" align="center" gutterBottom style={styles.subHeading}>
+              Meet the Team
+            </Typography>
+            <Grid container spacing={2} justifyContent="center" alignItems="center">
+              <Grid item xs={4} sm={2} style={{ textAlign: "center" }}>
+                <img src={shailendra} alt="Shailendra" style={styles.teamImage} />
+                <Typography variant="subtitle1" style={styles.teamName}>
+                  Shailendra
+                </Typography>
+                <Typography variant="caption" style={styles.teamRole}>
+                  Frontend
+                </Typography>
+              </Grid>
+              <Grid item xs={4} sm={2} style={{ textAlign: "center" }}>
+                <img src={eni} alt="Eni Zeqo" style={styles.teamImage} />
+                <Typography variant="subtitle1" style={styles.teamName}>
+                  Eni Zeqo
+                </Typography>
+                <Typography variant="caption" style={styles.teamRole}>
+                  Frontend
+                </Typography>
+              </Grid>
+              <Grid item xs={4} sm={2} style={{ textAlign: "center" }}>
+                <img src={zahrah} alt="Zahrah" style={styles.teamImage} />
+                <Typography variant="subtitle1" style={styles.teamName}>
+                  Zahrah
+                </Typography>
+                <Typography variant="caption" style={styles.teamRole}>
+                  Frontend
+                </Typography>
+              </Grid>
+              <Grid item xs={4} sm={2} style={{ textAlign: "center" }}>
+                <img src={behzad} alt="Behzad" style={styles.teamImage} />
+                <Typography variant="subtitle1" style={styles.teamName}>
+                  Behzad
+                </Typography>
+                <Typography variant="caption" style={styles.teamRole}>
+                  Backend
+                </Typography>
+              </Grid>
+              <Grid item xs={4} sm={2} style={{ textAlign: "center" }}>
+                <img src={jiyun} alt="Jiyun Guo" style={styles.teamImage} />
+                <Typography variant="subtitle1" style={styles.teamName}>
+                  Jiyun Guo
+                </Typography>
+                <Typography variant="caption" style={styles.teamRole}>
+                  Backend
+                </Typography>
+              </Grid>
+              <Grid item xs={4} sm={2} style={{ textAlign: "center" }}>
+                <img src={john} alt="John" style={styles.teamImage} />
+                <Typography variant="subtitle1" style={styles.teamName}>
+                  John
+                </Typography>
+                <Typography variant="caption" style={styles.teamRole}>
+                  SRE
+                </Typography>
+              </Grid>
+            </Grid>
+          </Box>
+          <Box mt={5}>
+            <Typography variant="h4" align="center" gutterBottom style={styles.subHeading}>
+              Contact Us
+            </Typography>
+            <Box textAlign="center" mt={2}>
+              <Typography variant="body1" paragraph style={styles.text}>
+                We would love to hear from you! Reach out for any inquiries or feedback.
+              </Typography>
+              <Typography variant="body1" style={styles.text}>
+                Email:{" "}
+                <a href="mailto:support@connectify.com" style={styles.link}>
+                  support@connectify.com
+                </a>
+              </Typography>
+              <Typography variant="body1" style={styles.text}>
+                Phone:{" "}
+                <a href="tel:+1234567890" style={styles.link}>
+                  (123) 456-7890
+                </a>
+              </Typography>
+              <Typography variant="body1" style={styles.text}>
+                Address: 1750 Finch Ave E, North York ON M2J2X5
+              </Typography>
+            </Box>
+          </Box>
+        </Container>
       </div>
     </div>
   );
-}
+};
 
 const styles = {
-  // Outer container fully transparent
   outerContainer: {
     background: "transparent",
     minHeight: "100vh",
     fontFamily: "'Roboto', sans-serif",
-    width: "100vw"
+    width: "100vw",
   },
-  // Content wrapper: Nude container with peach image background,
-  // semi-transparent so the peach texture shows, with an enhanced shadow.
   contentWrapper: {
-    background: "rgba(245,236,227,0.4)",
+    background: "rgba(7, 53, 102, 0.7)",
     backgroundImage: "url('./peach.jpg')",
     backgroundRepeat: "no-repeat",
     backgroundSize: "cover",
     margin: "20px auto",
     padding: "2rem",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+    boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
     borderRadius: "8px",
     maxWidth: "1200px",
-  },
-
-  contentContainer: {
-    display: "grid",
-    gap: "20px",
-    alignItems: "stretch",
-  },
-  column: {
-    flex: 1,
-    display: "flex",
-    flexDirection: "column",
+    width: "95%",
   },
   navbar: {
-    backgroundColor: "#C38282",
+    backgroundColor: "#315b7e",
     padding: "25px",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
     color: "white",
     width: "100%",
-    
-  },
-  logo: {
-    fontSize: "24px",
-    fontWeight: "bold",
   },
   navItems: {
     display: "flex",
+    alignItems: "center",
     gap: "20px",
   },
   navButton: {
     background: "none",
     border: "none",
-    color: "white", // white text for nav links
+    color: "white",
     fontSize: "20px",
     fontWeight: "bold",
     cursor: "pointer",
     transition: "color 0.3s",
-    whiteSpace: "nowrap", // Prevents text wrapping
+    whiteSpace: "nowrap",
   },
-  navLink: {
+  heading: {
     color: "white",
-    textDecoration: "none",
-    fontSize: "16px",
-    fontWeight: "bold",
+    fontWeight: 700,
+    marginBottom: "1rem",
   },
-  homePage: {
-    textAlign: "center",
-  },
-  welcomeTitle: {
-    marginBottom: "15px",
-    color: "#5D4037",
-  },
-  welcomeText: {
-    marginBottom: "20px",
-    color: "#5D4037",
-  },
-  ctaSignup: {
-    background: "#C38282",
+  subHeading: {
     color: "white",
-    padding: "10px 20px",
-    width: "20%",
-    border: "none",
-    borderRadius: "4px",
-    cursor: "pointer",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-    transition: "background 0.3s, transform 0.3s",
+    fontWeight: 600,
+    marginBottom: "1rem",
   },
-  matchesList: {
-    display: "flex",
-    flexWrap: "wrap",
-    justifyContent: "center",
-    gap: "20px",
-    marginTop: "20px",
-  },
-  matchCard: {
-    background: "#fff",
-    padding: "20px",
-    borderRadius: "8px",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-    width: "200px",
-    textAlign: "center",
-  },
-  matchImg: {
-    width: "100%",
-    borderRadius: "8px",
-    marginBottom: "10px",
-  },
-  matchInfo: {
-    textAlign: "center",
-  },
-  matchName: {
-    margin: "5px 0",
-    color: "#5D4037",
-  },
-  interests: {
-    display: "flex",
-    flexWrap: "wrap",
-    justifyContent: "center",
-    gap: "5px",
-    marginBottom: "10px",
-  },
-  interestTag: {
-    background: "#e9ecef",
-    padding: "5px 10px",
-    borderRadius: "20px",
-    fontSize: "14px",
-  },
-  messageBtn: {
-    background: "#C38282",
+  text: {
     color: "white",
-    padding: "8px 12px",
-    border: "none",
-    borderRadius: "4px",
-    cursor: "pointer",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-    transition: "background 0.3s, transform 0.3s",
+    lineHeight: 1.6,
+    fontSize: "1rem",
+  },
+  link: {
+    color: "white",
+    textDecoration: "underline",
+  },
+  teamImage: {
+    width: "100px",
+    height: "100px",
+    objectFit: "cover",
+    borderRadius: "50%",
+    boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
+  },
+  teamName: {
+    marginTop: "0.5rem",
+    fontWeight: 600,
+    color: "white",
+  },
+  teamRole: {
+    fontSize: "0.8rem",
+    color: "white",
   },
 };
 
