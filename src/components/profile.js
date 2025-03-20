@@ -5,16 +5,25 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 
 // Adjust to your actual backend URLs
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:8000";
+
+// Points to your Azure Blob Storage endpoint
 const BLOB_STORAGE_BASE_URL =
   process.env.REACT_APP_BLOB_STORAGE_BASE_URL || "https://yourpublicblobstorage.com/";
+// SAS token for write access
 const BLOB_SAS_TOKEN = process.env.REACT_APP_BLOB_SAS_TOKEN || "";
 
+// Container (folder) names
+const PROFILE_IMAGES_CONTAINER = "profile_images/";
+const GALLERY_IMAGES_CONTAINER = "gallery_images/";
+
 /**
- * Example function for uploading files to Azure Blob (if needed).
+ * Helper function to upload files to a specified container in Azure Blob.
+ * Returns the final public URL of the uploaded file.
  */
-async function uploadFileToBlob(file) {
+async function uploadFileToBlob(file, containerName) {
   const uniqueFileName = `${Date.now()}_${file.name}`;
-  const uploadUrl = `${BLOB_STORAGE_BASE_URL}${uniqueFileName}${BLOB_SAS_TOKEN}`;
+  const uploadUrl = `${BLOB_STORAGE_BASE_URL}${containerName}${uniqueFileName}${BLOB_SAS_TOKEN}`;
+
   const response = await fetch(uploadUrl, {
     method: "PUT",
     headers: {
@@ -23,10 +32,12 @@ async function uploadFileToBlob(file) {
     },
     body: file,
   });
+
   if (!response.ok) {
-    throw new Error("Gallery upload failed");
+    throw new Error("Upload to Blob failed");
   }
-  return `${BLOB_STORAGE_BASE_URL}${uniqueFileName}`;
+
+  return `${BLOB_STORAGE_BASE_URL}${containerName}${uniqueFileName}`;
 }
 
 const NavBar = ({ navigate, notificationCount, notifications }) => {
@@ -106,7 +117,6 @@ const NavBar = ({ navigate, notificationCount, notifications }) => {
   );
 };
 
-// ProfileCard Component
 const ProfileCard = ({
   profilePic,
   isEditing,
@@ -128,7 +138,10 @@ const ProfileCard = ({
     <div style={styles.profileContent}>
       <div style={styles.profilePicContainer}>
         <img
-          src={profilePic || `${BLOB_STORAGE_BASE_URL}defaultProfilePic.jpg`}
+          src={
+            profilePic ||
+            `${BLOB_STORAGE_BASE_URL}${PROFILE_IMAGES_CONTAINER}defaultProfilePic.jpg`
+          }
           alt="Profile"
           style={styles.fixedProfilePic}
         />
@@ -207,10 +220,7 @@ const ProfileCard = ({
               <strong>Categories:</strong>{" "}
               {categories.length ? categories.join(", ") : "None selected"}
             </p>
-            <button
-              onClick={() => setIsEditing(true)}
-              style={styles.editButton}
-            >
+            <button onClick={() => setIsEditing(true)} style={styles.editButton}>
               Edit Profile
             </button>
           </div>
@@ -220,7 +230,6 @@ const ProfileCard = ({
   </div>
 );
 
-// Gallery Component
 const Gallery = ({ galleryImages, handleGalleryImageUpload, removeGalleryImage }) => (
   <div style={styles.gallerySection}>
     <h2 style={styles.sectionTitle}>My Gallery</h2>
@@ -256,12 +265,7 @@ const Gallery = ({ galleryImages, handleGalleryImageUpload, removeGalleryImage }
   </div>
 );
 
-// Matches Component
-const Matches = ({
-  suggestedMatches,
-  handleRemoveMatch,
-  handleMatchRequest,
-}) => {
+const Matches = ({ suggestedMatches, handleRemoveMatch, handleMatchRequest }) => {
   return (
     <div>
       <h2 style={styles.sectionTitle}>Suggested Matches</h2>
@@ -284,14 +288,12 @@ const Matches = ({
               </div>
             </div>
             <div style={styles.buttonRow}>
-              {/* ❌ => block-matchup-request */}
               <button
                 onClick={() => handleRemoveMatch(match.id)}
                 style={styles.removeButton}
               >
                 ❌ Remove
               </button>
-              {/* ✅ => request-matchup (same logic as "Send Request" in MatchesPage) */}
               <button
                 onClick={() => handleMatchRequest(match.id)}
                 style={styles.matchButton}
@@ -311,24 +313,17 @@ const Profile = () => {
   const [name, setName] = useState("Eni Zeqo");
   const [bio, setBio] = useState("I am new in Canada and I want to make more friends...");
   const [age, setAge] = useState(25);
-  const [profilePic, setProfilePic] = useState(`${BLOB_STORAGE_BASE_URL}defaultProfilePic.jpg`);
+  const [profilePic, setProfilePic] = useState(
+    `${BLOB_STORAGE_BASE_URL}${PROFILE_IMAGES_CONTAINER}defaultProfilePic.jpg`
+  );
   const [isEditing, setIsEditing] = useState(false);
   const [categories, setCategories] = useState([]);
   const [availableCategories, setAvailableCategories] = useState([]);
-
-  // Only "suggestedMatches" here
   const [suggestedMatches, setSuggestedMatches] = useState([]);
-
-  // If you want to show pending matches on the Profile page itself,
-  // you could add something like:
-  // const [pendingMatches, setPendingMatches] = useState([]);
-
   const [galleryImages, setGalleryImages] = useState([]);
   const profilePicInputRef = useRef(null);
   const [notifications, setNotifications] = useState([]);
   const notificationCount = notifications.length;
-
-  // Use authToken
   const authToken = localStorage.getItem("authToken");
 
   // 1) Fetch available interests
@@ -372,7 +367,9 @@ const Profile = () => {
       .then((res) => res.json())
       .then((data) => {
         if (data.profile_image_name) {
-          setProfilePic(`${BLOB_STORAGE_BASE_URL}${data.profile_image_name}`);
+          setProfilePic(
+            `${BLOB_STORAGE_BASE_URL}${PROFILE_IMAGES_CONTAINER}${data.profile_image_name}`
+          );
         }
       })
       .catch((err) => console.error("Error retrieving profile image:", err));
@@ -409,7 +406,6 @@ const Profile = () => {
       })
         .then((res) => res.json())
         .then((data) => {
-          // Transform data to have { id, name, age, interests, photo } if needed
           const transformed = data.map((u) => ({
             id: u.id,
             name: u.fullname,
@@ -423,26 +419,34 @@ const Profile = () => {
     }
   }, [categories]);
 
-  // Handle profile picture upload
+  // Handle profile picture upload and refresh image immediately
   const handleProfilePicChange = async (event) => {
     const file = event.target.files[0];
     if (file) {
       try {
+        const formData = new FormData();
+        formData.append("profile_image", file);
+
         const response = await fetch(`${BASE_URL}/users/upload-profile-image/`, {
           method: "PUT",
           headers: { Authorization: `Bearer ${authToken}` },
-          body: (() => {
-            const formData = new FormData();
-            formData.append("profile_image", file);
-            return formData;
-          })(),
+          body: formData,
         });
+
         if (!response.ok) {
           throw new Error("Profile image upload failed");
         }
-        const data = await response.json();
-        if (data.profile_image_name) {
-          setProfilePic(`${BLOB_STORAGE_BASE_URL}${data.profile_image_name}`);
+
+        // Immediately refresh the profile image by calling the retrieve API
+        const newResponse = await fetch(`${BASE_URL}/users/retrieve-profile-image/`, {
+          method: "GET",
+          headers: { Authorization: `Bearer ${authToken}` },
+        });
+        const newData = await newResponse.json();
+        if (newData.profile_image_name) {
+          setProfilePic(
+            `${BLOB_STORAGE_BASE_URL}${PROFILE_IMAGES_CONTAINER}${newData.profile_image_name}`
+          );
         }
       } catch (error) {
         console.error("Profile image upload failed:", error);
@@ -450,12 +454,12 @@ const Profile = () => {
     }
   };
 
-  // Handle gallery uploads
+  // Handle gallery uploads (instant upload)
   const handleGalleryImageUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
       try {
-        const uploadedUrl = await uploadFileToBlob(file);
+        const uploadedUrl = await uploadFileToBlob(file, GALLERY_IMAGES_CONTAINER);
         setGalleryImages((prev) => [
           ...prev,
           { id: Date.now() + Math.random(), url: uploadedUrl },
@@ -470,7 +474,7 @@ const Profile = () => {
     setGalleryImages((prev) => prev.filter((img) => img.id !== id));
   };
 
-  // ❌ => block-matchup-request
+  // Block matchup request
   const handleRemoveMatch = async (userId) => {
     try {
       const response = await fetch(`${BASE_URL}/users/block-matchup-request/`, {
@@ -484,19 +488,16 @@ const Profile = () => {
       if (!response.ok) {
         throw new Error("Block matchup request failed");
       }
-      // Remove from suggested
       setSuggestedMatches((prev) => prev.filter((match) => match.id !== userId));
     } catch (error) {
       console.error("Error blocking matchup request:", error);
     }
   };
 
-  // ✅ => request-matchup (like "Send Request" in MatchesPage)
+  // Request matchup
   const handleMatchRequest = async (userId) => {
     try {
-      // (Optional) find the user object for a success message, etc.
       const match = suggestedMatches.find((m) => m.id === userId);
-
       const response = await fetch(`${BASE_URL}/users/request-matchup/`, {
         method: "POST",
         headers: {
@@ -508,25 +509,17 @@ const Profile = () => {
       if (!response.ok) {
         throw new Error("Request matchup failed");
       }
-
-      // Remove from suggested
       setSuggestedMatches((prev) => prev.filter((m) => m.id !== userId));
-
-      // Optionally show a local message or Snackbar
       console.log(`Match request sent to ${match ? match.name : "user"}.`);
-
-      // Now the MyMatches page, when re-fetched, will see this as "pending"
-      // because your backend marks it that way.
     } catch (error) {
       console.error("Error requesting matchup:", error);
     }
   };
 
-  // Save profile
+  // Save profile (for bio and interest updates)
   const handleSaveProfile = async () => {
     const payload = { bio };
     try {
-      // 1) Update user info
       const response = await fetch(`${BASE_URL}/users/update/`, {
         method: "PATCH",
         headers: {
@@ -539,7 +532,6 @@ const Profile = () => {
         throw new Error("Profile update failed");
       }
 
-      // 2) Update interest if needed
       if (categories.length > 0) {
         const interestResponse = await fetch(`${BASE_URL}/users/update-interest/`, {
           method: "POST",
@@ -594,8 +586,6 @@ const Profile = () => {
               removeGalleryImage={removeGalleryImage}
             />
           </div>
-
-          {/* Column with suggested matches */}
           <div style={styles.column}>
             <Matches
               suggestedMatches={suggestedMatches}
