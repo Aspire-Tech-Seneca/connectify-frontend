@@ -6,7 +6,9 @@ import {
   Popover,
   List,
   ListItem,
-  ListItemText
+  ListItemText,
+  Snackbar,
+  Alert
 } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import ChatIcon from "@mui/icons-material/Chat";
@@ -49,7 +51,7 @@ async function uploadFileToBlob(file, containerName) {
   return `${BLOB_STORAGE_BASE_URL}${containerName}${uniqueFileName}`;
 }
 
-// NavBar Component with additional hamburger menu functionality
+// NavBar Component with hamburger and other icons
 const NavBar = ({ navigate, notificationCount, notifications }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [hamburgerAnchorEl, setHamburgerAnchorEl] = useState(null);
@@ -73,17 +75,16 @@ const NavBar = ({ navigate, notificationCount, notifications }) => {
   const openHamburger = Boolean(hamburgerAnchorEl);
   const hamburgerPopoverId = openHamburger ? "hamburger-popover" : undefined;
 
-  // Main menu items already in nav
   const navItems = [
-    { label: "Home", path: "/home" },
+    { label: "Home", path: "/home", customStyle: { marginLeft: "40px" } },
     { label: "Chat", path: "/ChatPage" },
     { label: "My Profile", path: "/profile" },
     { label: "About Us", path: "/about" },
     { label: "My Matches", path: "/matches" },
-    { label: "Logout", path: "/login", customStyle: { marginRight: "50px" } },
+    { label: "Logout", path: "/login", customStyle: { marginRight: "30px" } },
   ];
 
-  // Additional pages for the hamburger menu
+  // Additional pages for hamburger menu
   const additionalMenuItems = [
     { label: "Notifications", path: "/notifications" },
     { label: "User Settings", path: "/UserSettings" },
@@ -106,7 +107,7 @@ const NavBar = ({ navigate, notificationCount, notifications }) => {
           </button>
         ))}
 
-        {/* Grouping icons (notifications, chat, hamburger) with no gap */}
+        {/* Icons grouped with minimal spacing */}
         <div style={{ display: "flex", gap: 0, alignItems: "center" }}>
           <IconButton onClick={handleNotificationIconClick} style={{ padding: 0 }}>
             <Badge badgeContent={notificationCount} color="error">
@@ -121,20 +122,13 @@ const NavBar = ({ navigate, notificationCount, notifications }) => {
           </IconButton>
         </div>
 
-        {/* Notification Popover */}
         <Popover
           id={notificationPopoverId}
           open={openNotification}
           anchorEl={anchorEl}
           onClose={handleCloseNotificationPopover}
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "center",
-          }}
-          transformOrigin={{
-            vertical: "top",
-            horizontal: "center",
-          }}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+          transformOrigin={{ vertical: "top", horizontal: "center" }}
         >
           <List>
             {notifications.length === 0 ? (
@@ -158,20 +152,13 @@ const NavBar = ({ navigate, notificationCount, notifications }) => {
           </List>
         </Popover>
 
-        {/* Hamburger Menu Popover */}
         <Popover
           id={hamburgerPopoverId}
           open={openHamburger}
           anchorEl={hamburgerAnchorEl}
           onClose={handleCloseHamburgerPopover}
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "center",
-          }}
-          transformOrigin={{
-            vertical: "top",
-            horizontal: "center",
-          }}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+          transformOrigin={{ vertical: "top", horizontal: "center" }}
         >
           <List>
             {additionalMenuItems.map((item, index) => (
@@ -193,6 +180,7 @@ const NavBar = ({ navigate, notificationCount, notifications }) => {
   );
 };
 
+// ProfileCard Component remains the same
 const ProfileCard = ({
   profilePic,
   isEditing,
@@ -227,11 +215,7 @@ const ProfileCard = ({
           <div>
             <button
               style={styles.uploadLabel}
-              onClick={() => {
-                if (hiddenFileInputRef.current) {
-                  hiddenFileInputRef.current.click();
-                }
-              }}
+              onClick={() => hiddenFileInputRef.current && hiddenFileInputRef.current.click()}
             >
               Change Profile Picture
             </button>
@@ -306,6 +290,7 @@ const ProfileCard = ({
   </div>
 );
 
+// Gallery Component remains the same
 const Gallery = ({ galleryImages, handleGalleryImageUpload, removeGalleryImage }) => (
   <div style={styles.gallerySection}>
     <h2 style={styles.sectionTitle}>My Gallery</h2>
@@ -323,15 +308,8 @@ const Gallery = ({ galleryImages, handleGalleryImageUpload, removeGalleryImage }
       ) : (
         galleryImages.map((image) => (
           <div key={image.id} style={styles.galleryItem}>
-            <img
-              src={image.url}
-              alt={`Gallery ${image.id}`}
-              style={styles.galleryImage}
-            />
-            <button
-              style={styles.deleteButton}
-              onClick={() => removeGalleryImage(image.id)}
-            >
+            <img src={image.url} alt={`Gallery ${image.id}`} style={styles.galleryImage} />
+            <button style={styles.deleteButton} onClick={() => removeGalleryImage(image.id)}>
               X
             </button>
           </div>
@@ -341,41 +319,43 @@ const Gallery = ({ galleryImages, handleGalleryImageUpload, removeGalleryImage }
   </div>
 );
 
-const Matches = ({ suggestedMatches, handleRemoveMatch, handleMatchRequest }) => {
+// CurrentMatches Component from Matches.js (using current matches data)
+const CurrentMatches = ({ currentMatches, handleChat, handleCancelRequest }) => {
   return (
     <div>
-      <h2 style={styles.sectionTitle}>Suggested Matches</h2>
-      {suggestedMatches.length === 0 ? (
-        <p style={styles.emptyGalleryText}>No suggested matches available.</p>
+      <h2 style={styles.sectionTitle}>Current Matches</h2>
+      {currentMatches.length === 0 ? (
+        <p style={styles.emptyText}>No current matches.</p>
       ) : (
-        suggestedMatches.map((match) => (
+        currentMatches.map((match) => (
           <div key={match.id} style={styles.matchedUserCard}>
             <div style={styles.matchContent}>
               <img src={match.photo} alt={match.name} style={styles.matchPhoto} />
               <div style={styles.matchDetails}>
                 <p style={styles.matchName}>
                   <strong>
-                    {match.name}, {match.age}
+                    {match.name}, {match.age}{" "}
+                    {match.status === "pending" && (
+                      <span style={{ fontStyle: "italic", color: "#ae4040" }}>
+                        (Pending)
+                      </span>
+                    )}
                   </strong>
                 </p>
                 <p style={styles.matchInterests}>
-                  Interests: {match.interests}
+                  Interests: {match.interests?.join(", ") || "N/A"}
                 </p>
               </div>
             </div>
             <div style={styles.buttonRow}>
-              <button
-                onClick={() => handleRemoveMatch(match.id)}
-                style={styles.removeButton}
-              >
-                ❌ Remove
+              <button onClick={() => handleChat(match.id)} style={styles.matchButton}>
+                Chat
               </button>
-              <button
-                onClick={() => handleMatchRequest(match.id)}
-                style={styles.matchButton}
-              >
-                ✅ Match
-              </button>
+              {match.status === "pending" && (
+                <button onClick={() => handleCancelRequest(match.id)} style={styles.removeButton}>
+                  Cancel Request
+                </button>
+              )}
             </div>
           </div>
         ))
@@ -395,14 +375,15 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [categories, setCategories] = useState([]);
   const [availableCategories, setAvailableCategories] = useState([]);
-  const [suggestedMatches, setSuggestedMatches] = useState([]);
   const [galleryImages, setGalleryImages] = useState([]);
+  const [currentMatches, setCurrentMatches] = useState([]);
   const profilePicInputRef = useRef(null);
   const [notifications, setNotifications] = useState([]);
+  // For NavBar, we'll use the length of notifications (or you can adjust as needed)
   const notificationCount = notifications.length;
   const authToken = localStorage.getItem("authToken");
 
-  // 1) Fetch available interests
+  // Fetch available interests
   useEffect(() => {
     fetch(`${BASE_URL}/users/get-interest-list/`)
       .then((res) => res.json())
@@ -414,7 +395,7 @@ const Profile = () => {
       .catch((err) => console.error("Error fetching interest list:", err));
   }, []);
 
-  // 2) Fetch user info
+  // Fetch user info
   useEffect(() => {
     fetch(`${BASE_URL}/users/get-user-info/`, {
       method: "GET",
@@ -426,15 +407,13 @@ const Profile = () => {
         setAge(data.age || age);
         setBio(data.bio || bio);
         if (data.gallery_images) {
-          setGalleryImages(
-            data.gallery_images.map((url, index) => ({ id: index, url }))
-          );
+          setGalleryImages(data.gallery_images.map((url, index) => ({ id: index, url })));
         }
       })
       .catch((err) => console.error("Error fetching profile details:", err));
   }, [authToken]);
 
-  // 3) Retrieve profile image
+  // Retrieve profile image
   useEffect(() => {
     fetch(`${BASE_URL}/users/retrieve-profile-image/`, {
       method: "GET",
@@ -451,14 +430,11 @@ const Profile = () => {
       .catch((err) => console.error("Error retrieving profile image:", err));
   }, [authToken]);
 
-  // 4) Retrieve user's interest
+  // Retrieve user's interest
   useEffect(() => {
     fetch(`${BASE_URL}/users/retrieve-interest/`, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${authToken}`,
-      },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
     })
       .then((res) => res.json())
       .then((data) => {
@@ -469,33 +445,28 @@ const Profile = () => {
       .catch((err) => console.error("Error retrieving interest:", err));
   }, [authToken]);
 
-  // 5) Fetch suggested matches
+  // Fetch current matches (approved or pending outgoing)
   useEffect(() => {
-    if (categories.length > 0) {
-      fetch(`${BASE_URL}/users/get-recommend-matchups/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authToken}`,
-        },
-        body: JSON.stringify({ interest: categories[0] }),
+    if (!authToken) return;
+    fetch(`${BASE_URL}/users/get-mymatchup-list/`, {
+      headers: { Authorization: `Bearer ${authToken}` },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        const transformed = data.map((user) => ({
+          id: user.id,
+          name: user.fullname,
+          age: user.age,
+          interests: user.interest ? [user.interest.name] : [],
+          photo: user.profile_image?.image_url || "https://via.placeholder.com/150",
+          status: "approved",
+        }));
+        setCurrentMatches(transformed);
       })
-        .then((res) => res.json())
-        .then((data) => {
-          const transformed = data.map((u) => ({
-            id: u.id,
-            name: u.fullname,
-            age: u.age,
-            interests: u.interest ? u.interest.name : "",
-            photo: u.profile_image_url || "https://via.placeholder.com/150",
-          }));
-          setSuggestedMatches(transformed);
-        })
-        .catch((err) => console.error("Error fetching suggested matches:", err));
-    }
-  }, [categories]);
+      .catch((err) => console.error("Failed to fetch current matches:", err));
+  }, [authToken]);
 
-  // Handle profile picture upload and refresh image immediately
+  // Handle profile picture upload and immediate refresh
   const handleProfilePicChange = async (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -508,12 +479,9 @@ const Profile = () => {
           headers: { Authorization: `Bearer ${authToken}` },
           body: formData,
         });
-
         if (!response.ok) {
           throw new Error("Profile image upload failed");
         }
-
-        // Immediately refresh the profile image by calling the retrieve API
         const newResponse = await fetch(`${BASE_URL}/users/retrieve-profile-image/`, {
           method: "GET",
           headers: { Authorization: `Bearer ${authToken}` },
@@ -530,7 +498,7 @@ const Profile = () => {
     }
   };
 
-  // Handle gallery uploads (instant upload)
+  // Handle gallery upload (instant)
   const handleGalleryImageUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -550,45 +518,28 @@ const Profile = () => {
     setGalleryImages((prev) => prev.filter((img) => img.id !== id));
   };
 
-  // Block matchup request
-  const handleRemoveMatch = async (userId) => {
-    try {
-      const response = await fetch(`${BASE_URL}/users/block-matchup-request/`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authToken}`,
-        },
-        body: JSON.stringify({ "requester-user-id": userId }),
-      });
-      if (!response.ok) {
-        throw new Error("Block matchup request failed");
-      }
-      setSuggestedMatches((prev) => prev.filter((match) => match.id !== userId));
-    } catch (error) {
-      console.error("Error blocking matchup request:", error);
-    }
+  // Handler to navigate to ChatPage
+  const handleChat = (id) => {
+    navigate("/ChatPage");
   };
 
-  // Request matchup
-  const handleMatchRequest = async (userId) => {
+  // Handler to cancel a pending request
+  const handleCancelRequest = async (id) => {
+    // Find the pending match (if any)
+    const match = currentMatches.find((m) => m.id === id && m.status === "pending");
+    if (!match) return;
     try {
-      const match = suggestedMatches.find((m) => m.id === userId);
-      const response = await fetch(`${BASE_URL}/users/request-matchup/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authToken}`,
-        },
-        body: JSON.stringify({ "receiver-user-id": userId }),
+      const response = await fetch(`${BASE_URL}/users/deny-matchup-request/`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
+        body: JSON.stringify({ "requester-user-id": id }),
       });
       if (!response.ok) {
-        throw new Error("Request matchup failed");
+        throw new Error("Failed to cancel matchup request");
       }
-      setSuggestedMatches((prev) => prev.filter((m) => m.id !== userId));
-      console.log(`Match request sent to ${match ? match.name : "user"}.`);
-    } catch (error) {
-      console.error("Error requesting matchup:", error);
+      setCurrentMatches(currentMatches.filter((m) => m.id !== id));
+    } catch (err) {
+      console.error("Error cancelling matchup request:", err);
     }
   };
 
@@ -598,30 +549,22 @@ const Profile = () => {
     try {
       const response = await fetch(`${BASE_URL}/users/update/`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authToken}`,
-        },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
         body: JSON.stringify(payload),
       });
       if (!response.ok) {
         throw new Error("Profile update failed");
       }
-
       if (categories.length > 0) {
         const interestResponse = await fetch(`${BASE_URL}/users/update-interest/`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${authToken}`,
-          },
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
           body: JSON.stringify({ interest: categories[0] }),
         });
         if (!interestResponse.ok) {
           throw new Error("Interest update failed");
         }
       }
-      console.log("Profile saved successfully");
       setIsEditing(false);
     } catch (error) {
       console.error("Error saving profile:", error);
@@ -630,11 +573,7 @@ const Profile = () => {
 
   return (
     <div style={styles.outerContainer}>
-      <NavBar
-        navigate={navigate}
-        notificationCount={notificationCount}
-        notifications={notifications}
-      />
+      <NavBar navigate={navigate} notificationCount={notificationCount} notifications={[]} />
       <div style={styles.contentWrapper}>
         <div style={styles.contentContainer}>
           <div style={styles.column}>
@@ -662,11 +601,12 @@ const Profile = () => {
               removeGalleryImage={removeGalleryImage}
             />
           </div>
+          {/* Right column now shows Current Matches */}
           <div style={styles.column}>
-            <Matches
-              suggestedMatches={suggestedMatches}
-              handleRemoveMatch={handleRemoveMatch}
-              handleMatchRequest={handleMatchRequest}
+            <CurrentMatches
+              currentMatches={currentMatches}
+              handleChat={handleChat}
+              handleCancelRequest={handleCancelRequest}
             />
           </div>
         </div>
@@ -910,6 +850,11 @@ const styles = {
   buttonRow: {
     display: "flex",
     gap: "10px",
+  },
+  emptyText: {
+    textAlign: "center",
+    color: "#A0522D",
+    fontStyle: "italic",
   },
 };
 
