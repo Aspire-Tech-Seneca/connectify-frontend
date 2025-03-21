@@ -184,6 +184,9 @@ const NotificationPage = () => {
                     "&:hover": {
                       backgroundColor: "#f5f5f5",
                       cursor: "pointer",
+                      "& .MuiListItemText-primary, & .MuiListItemText-secondary": {
+                        color: "black",
+                      },
                     },
                     padding: "1rem",
                   }}
@@ -193,8 +196,10 @@ const NotificationPage = () => {
                   </ListItemAvatar>
                   <ListItemText
                     primary={notif.message}
+                    primaryTypographyProps={{ sx: { color: "white" } }}
                     secondary={notif.timestamp ? new Date(notif.timestamp).toLocaleString() : ""}
-                    style={styles.text}
+                    secondaryTypographyProps={{ sx: { color: "rgb(208 208 208)" } }}
+                    sx={{ ...styles.text, color: "white" }}
                   />
                 </ListItem>
               ))}
@@ -224,6 +229,7 @@ const styles = {
     borderRadius: "8px",
     maxWidth: "1200px",
     width: "95%",
+    color: "white",
   },
   navbar: {
     backgroundColor: "#315b7e",
@@ -238,6 +244,12 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "20px"
+  },
+  text: {
+    color: "white",
+    "&:hover": {
+      color: "black",
+    },
   },
   navButton: {
     background: "none",
