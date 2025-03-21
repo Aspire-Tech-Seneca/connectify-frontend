@@ -428,10 +428,10 @@ const Profile = () => {
     })
       .then((res) => res.json())
       .then((data) => {
-        if (data.profile_image_name) {
+        if (data.profile_image) {
           // data.profile_image_name might be "profile_images/<someFile>.jpg"
           // so we do NOT prepend PROFILE_IMAGES_CONTAINER
-          setProfilePic(`${BLOB_STORAGE_BASE_URL}${data.profile_image_name}`);
+          setProfilePic(`${BLOB_STORAGE_BASE_URL}${data.profile_image}`);
         }
       })
       .catch((err) => console.error("Error retrieving profile image:", err));
@@ -495,8 +495,8 @@ const Profile = () => {
           headers: { Authorization: `Bearer ${authToken}` },
         });
         const newData = await newResponse.json();
-        if (newData.profile_image_name) {
-          setProfilePic(`${BLOB_STORAGE_BASE_URL}${newData.profile_image_name}`);
+        if (newData.profile_image) {
+          setProfilePic(`${BLOB_STORAGE_BASE_URL}${newData.profile_image}`);
         }
       } catch (error) {
         console.error("Profile image upload failed:", error);
