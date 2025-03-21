@@ -89,7 +89,7 @@ const NavBar = ({ navigate, notificationCount, notifications }) => {
     { label: "Notifications", path: "/notifications" },
     { label: "User Settings", path: "/UserSettings" },
     { label: "View Events", path: "/ViewEvents" },
-    { label: "Create Event", path: "/createevent" },
+    { label: "Create Event", path: "/CreateEvent" },
     { label: "Community Chat", path: "/CommunityChat" },
     { label: "Policy Compliance", path: "/PolicyCompliance" },
   ];
