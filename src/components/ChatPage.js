@@ -265,7 +265,7 @@ const NavBar = ({ navigate }) => {
 const ChatMatches = ({ matches, selectedMatch, setSelectedMatch }) => {
   return (
     <div style={styles.matchesContainer}>
-      <h2 style={{ marginBottom: "10px", textAlign: "center" }}>Matches</h2>
+      <h2 style={{ marginBottom: "10px", textAlign: "center", color: "white" }}>Matches</h2>
       {matches.map((match) => {
         const isSelected = selectedMatch?.id === match.id;
         return (
@@ -309,7 +309,7 @@ const ChatConversation = ({
 
   return (
     <div style={styles.conversationContainer}>
-      <h2 style={{ marginBottom: "10px", textAlign: "center" }}>
+      <h2 style={{ marginBottom: "10px", textAlign: "center", color: "white" }}>
         {match ? `Chat with ${match.name}` : "Select a Match"}
       </h2>
       <div style={styles.messagesContainer}>
