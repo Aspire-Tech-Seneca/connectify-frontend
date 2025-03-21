@@ -6,7 +6,7 @@ import ChatIcon from "@mui/icons-material/Chat";
 import MenuIcon from "@mui/icons-material/Menu";
 
 // Placeholder image to avoid repeated blob calls
-const DEFAULT_IMAGE = "https://via.placeholder.com/80";
+const DEFAULT_IMAGE = "https://atcdevstorageaccount.blob.core.windows.net/media/profile_images/defaultProfilePic.jpg";
 
 // Reuse your peach background & container styles
 const styles = {
@@ -17,16 +17,16 @@ const styles = {
     width: "100vw",
   },
   contentWrapper: {
-    background: "rgba(245,236,227,0.4)",
+    background:"rgba(7, 53, 102, 0.7)",
     backgroundImage: "url('./peach.jpg')",
     backgroundRepeat: "no-repeat",
     backgroundSize: "cover",
     margin: "20px auto",
     padding: "2rem",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
+    boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
     borderRadius: "8px",
     maxWidth: "1200px",
-    width: "100%",
+    width: "95%",
   },
   contentContainer: {
     display: "flex",
@@ -39,7 +39,7 @@ const styles = {
     flexDirection: "column",
   },
   navbar: {
-    backgroundColor: "#C38282",
+    background:"#315b7e",
     padding: "25px",
     display: "flex",
     justifyContent: "center",
@@ -64,7 +64,7 @@ const styles = {
   },
   // Match list styling
   matchesContainer: {
-    backgroundColor: "#fff",
+    background:"rgba(7, 53, 102, 0.7)",
     borderRadius: "8px",
     boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
     padding: "15px",
@@ -83,7 +83,7 @@ const styles = {
     backgroundColor: "#f5f5f5",
   },
   matchCardSelected: {
-    backgroundColor: "#ecd8d8",
+    backgroundColor: "rgb(170 198 227)",
   },
   matchPhoto: {
     width: "50px",
@@ -103,7 +103,7 @@ const styles = {
   },
   // Conversation styling
   conversationContainer: {
-    backgroundColor: "#fff",
+    background: "rgba(7, 53, 102, 0.7)",
     borderRadius: "8px",
     boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
     padding: "15px",
@@ -126,8 +126,8 @@ const styles = {
   },
   sent: {
     alignSelf: "flex-end",
-    backgroundColor: "#C38282",
-    color: "white",
+    backgroundColor: "#eee",
+    color: "black",
   },
   received: {
     alignSelf: "flex-start",
@@ -145,7 +145,7 @@ const styles = {
     border: "1px solid #ccc",
   },
   sendButton: {
-    background: "#C38282",
+    background:"rgba(7, 53, 102, 0.7)",
     color: "white",
     border: "none",
     borderRadius: "4px",
@@ -278,7 +278,7 @@ const ChatMatches = ({ matches, selectedMatch, setSelectedMatch }) => {
             onClick={() => setSelectedMatch(match)}
           >
             <img
-              src={match.photo || DEFAULT_IMAGE}
+              src={DEFAULT_IMAGE || match.photo}
               alt={match.name}
               style={styles.matchPhoto}
             />
