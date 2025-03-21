@@ -20,14 +20,14 @@ const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:8000";
 const BackgroundContainer = styled("div")({
   minHeight: "100vh",
   backgroundColor: "#f8f8f8",
-  paddingTop: "200px",
+  paddingTop: "230px",
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
 });
 
 const Navbar = () => (
-  <AppBar position="fixed" sx={{ background: "#008080" }}>
+  <AppBar position="fixed" sx={{ background: "#315b7e" }}>
     <Toolbar>
       <img src={logo} alt="Logo" style={{ height: "90px", marginRight: "20px" }} />
       <Typography variant="h6" sx={{ flexGrow: 1 }}>
@@ -52,10 +52,7 @@ const ViewEvents = () => {
   const fetchEvents = async () => {
     setLoading(true);
     try {
-      // Retrieve the token from local storage
       const token = localStorage.getItem("authToken");
-
-      // Include the token in the Authorization header
       const response = await axios.post(
         `${BASE_URL}/events/list/`,
         filters,
@@ -95,7 +92,11 @@ const ViewEvents = () => {
         <Typography
           variant="h4"
           gutterBottom
-          sx={{ textAlign: "center", color: "#89574c", fontWeight: "bold" }}
+          sx={{
+            textAlign: "center",
+            color: "#89574c",
+            fontWeight: "bold",
+          }}
         >
           Upcoming Events
         </Typography>
@@ -133,35 +134,26 @@ const ViewEvents = () => {
             />
           </Grid>
           <Grid item xs={12} sm={4}>
-            <Button
-              variant="contained"
-              onClick={handleSearch}
-              fullWidth
-              sx={{ marginTop: "10px" }}
-            >
+            <Button variant="contained" onClick={handleSearch} fullWidth sx={{ marginTop: "10px" }}>
               Search
             </Button>
           </Grid>
         </Grid>
 
         {loading ? (
-          <Typography variant="h6" align="center">
-            Loading events...
-          </Typography>
+          <Typography variant="h6" align="center">Loading events...</Typography>
         ) : events.length === 0 ? (
-          <Typography variant="h6" align="center">
-            No events available.
-          </Typography>
+          <Typography variant="h6" align="center">No events available.</Typography>
         ) : (
           <Grid container spacing={4}>
             {events.map((event) => (
               <Grid item key={event.id} xs={12} sm={6} md={4}>
                 <Card sx={{ boxShadow: 3 }}>
-                  {event.imageUrl && (
+                  {event.event_image && (
                     <CardMedia
                       component="img"
                       height="200"
-                      image={event.imageUrl}
+                      image={event.event_image}
                       alt={event.event_name}
                     />
                   )}
@@ -177,6 +169,9 @@ const ViewEvents = () => {
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
                       Category: {event.category}
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      {event.description}
                     </Typography>
                   </CardContent>
                 </Card>
