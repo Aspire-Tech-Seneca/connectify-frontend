@@ -23,7 +23,7 @@ const BLOB_STORAGE_BASE_URL =
 // SAS token for write access
 const BLOB_SAS_TOKEN = process.env.REACT_APP_BLOB_SAS_TOKEN || "";
 
-// Container (folder) names
+// Container (folder) names for direct Azure blob uploads
 const PROFILE_IMAGES_CONTAINER = "profile_images/";
 const GALLERY_IMAGES_CONTAINER = "gallery_images/";
 
@@ -33,7 +33,9 @@ const GALLERY_IMAGES_CONTAINER = "gallery_images/";
  */
 async function uploadFileToBlob(file, containerName) {
   const uniqueFileName = `${Date.now()}_${file.name}`;
-  const uploadUrl = `${BLOB_STORAGE_BASE_URL}${containerName}${uniqueFileName}${BLOB_SAS_TOKEN}`;
+  const uploadUrl = `${BLOB_STORAGE_BASE_URL}${containerName}${uniqueFileName}${
+    BLOB_SAS_TOKEN.startsWith("?") ? BLOB_SAS_TOKEN : `?${BLOB_SAS_TOKEN}`
+  }`;
 
   const response = await fetch(uploadUrl, {
     method: "PUT",
@@ -86,10 +88,10 @@ const NavBar = ({ navigate, notificationCount, notifications }) => {
 
   // Additional pages for hamburger menu
   const additionalMenuItems = [
-    { label: "Notifications", path: "/notifications" },
+    { label: "Notifications", path: "/Notifications" },
     { label: "User Settings", path: "/UserSettings" },
     { label: "View Events", path: "/ViewEvents" },
-    { label: "Create Event", path: "/createevent" },
+    { label: "Create Event", path: "/CreateEvent" },
     { label: "Community Chat", path: "/CommunityChat" },
     { label: "Policy Compliance", path: "/PolicyCompliance" },
   ];
@@ -180,7 +182,6 @@ const NavBar = ({ navigate, notificationCount, notifications }) => {
   );
 };
 
-// ProfileCard Component remains the same
 const ProfileCard = ({
   profilePic,
   isEditing,
@@ -201,10 +202,15 @@ const ProfileCard = ({
   <div style={styles.profileCard}>
     <div style={styles.profileContent}>
       <div style={styles.profilePicContainer}>
+        {/* 
+          IMPORTANT: We do NOT prepend 'profile_images/' here, 
+          because your backend is already returning that if needed.
+        */}
         <img
           src={
-            profilePic ||
-            `${BLOB_STORAGE_BASE_URL}${PROFILE_IMAGES_CONTAINER}defaultProfilePic.jpg`
+            profilePic || 
+            // fallback if profilePic is not set
+            `${BLOB_STORAGE_BASE_URL}defaultProfilePic.jpg`
           }
           alt="Profile"
           style={styles.fixedProfilePic}
@@ -290,7 +296,6 @@ const ProfileCard = ({
   </div>
 );
 
-// Gallery Component remains the same
 const Gallery = ({ galleryImages, handleGalleryImageUpload, removeGalleryImage }) => (
   <div style={styles.gallerySection}>
     <h2 style={styles.sectionTitle}>My Gallery</h2>
@@ -319,7 +324,6 @@ const Gallery = ({ galleryImages, handleGalleryImageUpload, removeGalleryImage }
   </div>
 );
 
-// CurrentMatches Component (from Matches.js)
 const CurrentMatches = ({ currentMatches, handleChat, handleCancelRequest }) => {
   return (
     <div>
@@ -369,9 +373,12 @@ const Profile = () => {
   const [name, setName] = useState("Eni Zeqo");
   const [bio, setBio] = useState("I am new in Canada and I want to make more friends...");
   const [age, setAge] = useState(25);
+
+  // IMPORTANT: no container path in fallback
   const [profilePic, setProfilePic] = useState(
-    `${BLOB_STORAGE_BASE_URL}${PROFILE_IMAGES_CONTAINER}defaultProfilePic.jpg`
+    `${BLOB_STORAGE_BASE_URL}defaultProfilePic.jpg`
   );
+
   const [isEditing, setIsEditing] = useState(false);
   const [categories, setCategories] = useState([]);
   const [availableCategories, setAvailableCategories] = useState([]);
@@ -422,9 +429,9 @@ const Profile = () => {
       .then((res) => res.json())
       .then((data) => {
         if (data.profile_image_name) {
-          setProfilePic(
-            `${BLOB_STORAGE_BASE_URL}${PROFILE_IMAGES_CONTAINER}${data.profile_image_name}`
-          );
+          // data.profile_image_name might be "profile_images/<someFile>.jpg"
+          // so we do NOT prepend PROFILE_IMAGES_CONTAINER
+          setProfilePic(`${BLOB_STORAGE_BASE_URL}${data.profile_image_name}`);
         }
       })
       .catch((err) => console.error("Error retrieving profile image:", err));
@@ -482,15 +489,14 @@ const Profile = () => {
         if (!response.ok) {
           throw new Error("Profile image upload failed");
         }
+        // Retrieve the new profile image name from the server
         const newResponse = await fetch(`${BASE_URL}/users/retrieve-profile-image/`, {
           method: "GET",
           headers: { Authorization: `Bearer ${authToken}` },
         });
         const newData = await newResponse.json();
         if (newData.profile_image_name) {
-          setProfilePic(
-            `${BLOB_STORAGE_BASE_URL}${PROFILE_IMAGES_CONTAINER}${newData.profile_image_name}`
-          );
+          setProfilePic(`${BLOB_STORAGE_BASE_URL}${newData.profile_image_name}`);
         }
       } catch (error) {
         console.error("Profile image upload failed:", error);
@@ -727,7 +733,6 @@ const styles = {
     border: "1px solid #ccc",
     resize: "vertical",
   },
-  // Replaced the pink (#C38282) with the same blue (#315b7e) used in the navbar
   editButton: {
     background: "#315b7e",
     color: "white",
