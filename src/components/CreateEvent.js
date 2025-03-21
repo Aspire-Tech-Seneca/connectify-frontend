@@ -9,18 +9,18 @@ import {
   Container,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import peachImage from "../tempbg.jpeg";
+//import peachImage from "../tempbg.jpeg";
 import logo from "../newlogo.png";
 import axios from "axios";
 
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:8000";
 const BASE_IMAGE_URL = process.env.REACT_APP_BLOB_STORAGE_EVENT_IMAGES;
 const BLOB_SAS_TOKEN = process.env.REACT_APP_BLOB_SAS_TOKEN || "";
-document.body.style.background = `url(${peachImage}) no-repeat center center fixed`;
+//document.body.style.background = `url(${peachImage}) no-repeat center center fixed`;
 document.body.style.backgroundSize = "cover";
 
 const BackgroundContainer = styled("div")({
-  backgroundImage: `url(${peachImage})`,
+  //backgroundImage: `url(${peachImage})`,
   backgroundRepeat: "no-repeat",
   backgroundSize: "cover",
   backgroundPosition: "center",
@@ -45,19 +45,19 @@ const FormContainer = styled(Container)({
 });
 
 const StyledButton = styled(Button)({
-  background: "linear-gradient(to right, #008080, #958f8f)",
+  background: "linear-gradient(to right, #008080, #315b7e)",
   color: "white",
   fontWeight: "bold",
   padding: "16px",
   transition: "0.3s",
   "&:hover": {
-    background: "linear-gradient(to right, #ae4040, #008080)",
+    background: "linear-gradient(to right, #315b7e, #008080)",
     transform: "scale(1.05)",
   },
 });
 
 const Navbar = () => (
-  <AppBar position="fixed" sx={{ background: "#008080" }}>
+  <AppBar position="fixed" sx={{ background: "#315b7e" }}>
     <Toolbar>
       <img src={logo} alt="Logo" style={{ height: "90px", marginRight: "20px" }} />
       <Typography variant="h6" sx={{ flexGrow: 1 }}>
