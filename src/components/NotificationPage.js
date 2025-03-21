@@ -1,12 +1,130 @@
 import React, { useState, useEffect } from "react";
-import { Container, List, ListItem, ListItemText, Typography, CircularProgress, IconButton, Badge, ListItemAvatar } from "@mui/material";
+import {
+  Container,
+  List,
+  ListItem,
+  ListItemText,
+  Typography,
+  CircularProgress,
+  IconButton,
+  Badge,
+  ListItemAvatar,
+  Popover,
+} from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
-import { useNavigate, Link } from "react-router-dom";
+import ChatIcon from "@mui/icons-material/Chat";
+import MenuIcon from "@mui/icons-material/Menu";
+import { useNavigate } from "react-router-dom";
 
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://127.0.0.1:8000";
-const BASE_PATH = process.env.REACT_APP_BASE_PATH || "/api/v1"; 
-const BLOB_STORAGE_BASE_URL = process.env.REACT_APP_BLOB_STORAGE_BASE_URL || "https://yourpublicblobstorage.com/";
-const BLOB_SAS_TOKEN = process.env.REACT_APP_BLOB_SAS_TOKEN || "";
+const BASE_PATH = process.env.REACT_APP_BASE_PATH || "/api/v1";
+
+const NavBar = ({ navigate }) => {
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [hamburgerAnchorEl, setHamburgerAnchorEl] = useState(null);
+
+  const handleNotificationIconClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleCloseNotificationPopover = () => {
+    setAnchorEl(null);
+  };
+  const handleHamburgerClick = (event) => {
+    setHamburgerAnchorEl(event.currentTarget);
+  };
+  const handleCloseHamburgerPopover = () => {
+    setHamburgerAnchorEl(null);
+  };
+
+  const openNotification = Boolean(anchorEl);
+  const notificationPopoverId = openNotification ? "notification-popover" : undefined;
+  const openHamburger = Boolean(hamburgerAnchorEl);
+  const hamburgerPopoverId = openHamburger ? "hamburger-popover" : undefined;
+
+  const navItems = [
+    { label: "Home", path: "/home", customStyle: { marginLeft: "40px" } },
+    { label: "Chat", path: "/ChatPage" },
+    { label: "My Profile", path: "/profile" },
+    { label: "About Us", path: "/about" },
+    { label: "My Matches", path: "/matches" },
+    { label: "Logout", path: "/login", customStyle: { marginRight: "30px" } },
+  ];
+
+  const additionalMenuItems = [
+    { label: "Notifications", path: "/notifications" },
+    { label: "User Settings", path: "/UserSettings" },
+    { label: "View Events", path: "/ViewEvents" },
+    { label: "Create Event", path: "/createevent" },
+    { label: "Community Chat", path: "/CommunityChat" },
+    { label: "Policy Compliance", path: "/PolicyCompliance" },
+  ];
+
+  return (
+    <nav style={styles.navbar}>
+      <div style={styles.navItems}>
+        {navItems.map((item) => (
+          <button
+            key={item.label}
+            style={{ ...styles.navButton, ...(item.customStyle || {}) }}
+            onClick={() => navigate(item.path)}
+          >
+            {item.label}
+          </button>
+        ))}
+        <div style={{ display: "flex", gap: 0, alignItems: "center" }}>
+          <IconButton onClick={handleNotificationIconClick} style={{ padding: 0 }}>
+            <Badge badgeContent={0} color="error">
+              <NotificationsIcon style={{ color: "white" }} />
+            </Badge>
+          </IconButton>
+          <IconButton onClick={() => navigate("/ChatPage")} style={{ padding: 0 }}>
+            <ChatIcon style={{ color: "white", fontSize: "24px" }} />
+          </IconButton>
+          <IconButton onClick={handleHamburgerClick} style={{ padding: 0 }}>
+            <MenuIcon style={{ color: "white", fontSize: "24px" }} />
+          </IconButton>
+        </div>
+      </div>
+      <Popover
+        id={notificationPopoverId}
+        open={openNotification}
+        anchorEl={anchorEl}
+        onClose={handleCloseNotificationPopover}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        transformOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <List>
+          <ListItem>
+            <ListItemText primary="No new notifications" />
+          </ListItem>
+        </List>
+      </Popover>
+      <Popover
+        id={hamburgerPopoverId}
+        open={openHamburger}
+        anchorEl={hamburgerAnchorEl}
+        onClose={handleCloseHamburgerPopover}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        transformOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <List>
+          {additionalMenuItems.map((item, index) => (
+            <ListItem
+              button
+              key={index}
+              onClick={() => {
+                handleCloseHamburgerPopover();
+                navigate(item.path);
+              }}
+            >
+              <ListItemText primary={item.label} />
+            </ListItem>
+          ))}
+        </List>
+      </Popover>
+    </nav>
+  );
+};
 
 const NotificationPage = () => {
   const [notifications, setNotifications] = useState([]);
@@ -14,7 +132,7 @@ const NotificationPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`${BASE_URL}${BASE_PATH}/notifications`)
+    fetch(`<span class="math-inline">\{BASE\_URL\}</span>{BASE_PATH}/notifications`)
       .then((res) => {
         if (!res.ok) {
           throw new Error("Failed to fetch notifications");
@@ -26,6 +144,7 @@ const NotificationPage = () => {
         setLoading(false);
       })
       .catch(() => {
+        // Mock data for demonstration purposes
         setNotifications([
           { message: "New user signed up", timestamp: Date.now() },
           { message: "System maintenance scheduled", timestamp: Date.now() - 3600000 },
@@ -39,50 +158,21 @@ const NotificationPage = () => {
     console.log("Notification clicked:", notif);
   };
 
-  const navItems = [
-    { label: "Home", path: "/home" },
-    { label: "Chat", path: "/ChatPage" },
-    { label: "My Profile", path: "/profile" },
-    { label: "About Us", path: "/about" },
-    { label: "My Matches", path: "/matches" },
-    { label: "Logout", path: "/login" },
-  ];
-
-  const handleNavigation = (path) => {
-    navigate(path);
-  };
-
   return (
-    <>
-      <div style={styles.outerContainer}>
-        <nav style={styles.navbar}>
-          <div style={styles.navItems}>
-            {navItems.map((item) => (
-              <button
-                key={item.label}
-                style={styles.navButton}
-                onClick={() => handleNavigation(item.path)}
-              >
-                {item.label}
-              </button>
-            ))}
-            <IconButton onClick={() => navigate("/notifications")}>
-          <Badge badgeContent={0} color="error">
-            <NotificationsIcon style={{ color: "white" }} />
-          </Badge>
-            </IconButton>
-          </div>
-        </nav>
-
+    <div style={styles.outerContainer}>
+      <NavBar navigate={navigate} />
+      <div style={styles.contentWrapper}>
         <Container sx={{ padding: "2rem", maxWidth: "600px", marginTop: "4rem" }}>
-          <Typography variant="h4" gutterBottom>
+          <Typography variant="h4" gutterBottom style={styles.heading}>
             Notifications
           </Typography>
 
           {loading ? (
             <CircularProgress />
           ) : notifications.length === 0 ? (
-            <Typography variant="body1">No notifications.</Typography>
+            <Typography variant="body1" style={styles.text}>
+              No notifications.
+            </Typography>
           ) : (
             <List>
               {notifications.map((notif, index) => (
@@ -91,11 +181,11 @@ const NotificationPage = () => {
                   divider
                   onClick={() => handleNotificationClick(notif)}
                   sx={{
-                    '&:hover': {
-                      backgroundColor: '#f5f5f5',
-                      cursor: 'pointer',
+                    "&:hover": {
+                      backgroundColor: "#f5f5f5",
+                      cursor: "pointer",
                     },
-                    padding: '1rem',
+                    padding: "1rem",
                   }}
                 >
                   <ListItemAvatar>
@@ -104,6 +194,7 @@ const NotificationPage = () => {
                   <ListItemText
                     primary={notif.message}
                     secondary={notif.timestamp ? new Date(notif.timestamp).toLocaleString() : ""}
+                    style={styles.text}
                   />
                 </ListItem>
               ))}
@@ -111,7 +202,7 @@ const NotificationPage = () => {
           )}
         </Container>
       </div>
-    </>
+    </div>
   );
 };
 
@@ -122,8 +213,20 @@ const styles = {
     fontFamily: "'Roboto', sans-serif",
     width: "100vw",
   },
+  contentWrapper: {
+    background: "rgba(7, 53, 102, 0.7)",
+    backgroundImage: "url('./peach.jpg')", // Ensure this path is correct
+    backgroundRepeat: "no-repeat",
+    backgroundSize: "cover",
+    margin: "20px auto",
+    padding: "2rem",
+    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.5)",
+    borderRadius: "8px",
+    maxWidth: "1200px",
+    width: "95%",
+  },
   navbar: {
-    backgroundColor: "#C38282",
+    backgroundColor: "#315b7e",
     padding: "25px",
     display: "flex",
     justifyContent: "center",
@@ -133,7 +236,8 @@ const styles = {
   },
   navItems: {
     display: "flex",
-    gap: "20px",
+    alignItems: "center",
+    gap: "20px"
   },
   navButton: {
     background: "none",

@@ -20,14 +20,14 @@ const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:8000";
 const BackgroundContainer = styled("div")({
   minHeight: "100vh",
   backgroundColor: "#f8f8f8",
-  paddingTop: "200px",
+  paddingTop: "230px",
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
 });
 
 const Navbar = () => (
-  <AppBar position="fixed" sx={{ background: "#008080" }}>
+  <AppBar position="fixed" sx={{ background: "#315b7e" }}>
     <Toolbar>
       <img src={logo} alt="Logo" style={{ height: "90px", marginRight: "20px" }} />
       <Typography variant="h6" sx={{ flexGrow: 1 }}>
@@ -52,9 +52,17 @@ const ViewEvents = () => {
   const fetchEvents = async () => {
     setLoading(true);
     try {
-      const response = await axios.post(`${BASE_URL}/events/list/`, filters, {
-        headers: { "Content-Type": "application/json" },
-      });
+      const token = localStorage.getItem("authToken");
+      const response = await axios.post(
+        `${BASE_URL}/events/list/`,
+        filters,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       setEvents(response.data);
     } catch (error) {
       console.error("Error fetching events:", error);
@@ -66,6 +74,7 @@ const ViewEvents = () => {
 
   useEffect(() => {
     fetchEvents();
+    // eslint-disable-next-line
   }, []);
 
   const handleFilterChange = (e) => {
@@ -80,7 +89,15 @@ const ViewEvents = () => {
     <BackgroundContainer>
       <Navbar />
       <Container maxWidth="lg">
-        <Typography variant="h4" gutterBottom sx={{ textAlign: "center", color: "#89574c", fontWeight: "bold" }}>
+        <Typography
+          variant="h4"
+          gutterBottom
+          sx={{
+            textAlign: "center",
+            color: "#89574c",
+            fontWeight: "bold",
+          }}
+        >
           Upcoming Events
         </Typography>
 
@@ -132,21 +149,30 @@ const ViewEvents = () => {
             {events.map((event) => (
               <Grid item key={event.id} xs={12} sm={6} md={4}>
                 <Card sx={{ boxShadow: 3 }}>
-                  {event.imageUrl && (
+                  {event.event_image && (
                     <CardMedia
                       component="img"
                       height="200"
-                      image={event.imageUrl}
+                      image={event.event_image}
                       alt={event.event_name}
                     />
                   )}
                   <CardContent>
-                    <Typography variant="h6" fontWeight="bold">{event.event_name}</Typography>
+                    <Typography variant="h6" fontWeight="bold">
+                      {event.event_name}
+                    </Typography>
                     <Typography variant="body2" color="textSecondary">
                       {event.event_date} at {event.event_time}
                     </Typography>
-                    <Typography variant="body2" color="textSecondary">Location: {event.location}</Typography>
-                    <Typography variant="body2" color="textSecondary">Category: {event.category}</Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      Location: {event.location}
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      Category: {event.category}
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      {event.description}
+                    </Typography>
                   </CardContent>
                 </Card>
               </Grid>
