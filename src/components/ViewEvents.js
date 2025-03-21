@@ -52,9 +52,20 @@ const ViewEvents = () => {
   const fetchEvents = async () => {
     setLoading(true);
     try {
-      const response = await axios.post(`${BASE_URL}/events/list/`, filters, {
-        headers: { "Content-Type": "application/json" },
-      });
+      // Retrieve the token from local storage
+      const token = localStorage.getItem("authToken");
+
+      // Include the token in the Authorization header
+      const response = await axios.post(
+        `${BASE_URL}/events/list/`,
+        filters,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       setEvents(response.data);
     } catch (error) {
       console.error("Error fetching events:", error);
@@ -66,6 +77,7 @@ const ViewEvents = () => {
 
   useEffect(() => {
     fetchEvents();
+    // eslint-disable-next-line
   }, []);
 
   const handleFilterChange = (e) => {
@@ -80,7 +92,11 @@ const ViewEvents = () => {
     <BackgroundContainer>
       <Navbar />
       <Container maxWidth="lg">
-        <Typography variant="h4" gutterBottom sx={{ textAlign: "center", color: "#89574c", fontWeight: "bold" }}>
+        <Typography
+          variant="h4"
+          gutterBottom
+          sx={{ textAlign: "center", color: "#89574c", fontWeight: "bold" }}
+        >
           Upcoming Events
         </Typography>
 
@@ -117,16 +133,25 @@ const ViewEvents = () => {
             />
           </Grid>
           <Grid item xs={12} sm={4}>
-            <Button variant="contained" onClick={handleSearch} fullWidth sx={{ marginTop: "10px" }}>
+            <Button
+              variant="contained"
+              onClick={handleSearch}
+              fullWidth
+              sx={{ marginTop: "10px" }}
+            >
               Search
             </Button>
           </Grid>
         </Grid>
 
         {loading ? (
-          <Typography variant="h6" align="center">Loading events...</Typography>
+          <Typography variant="h6" align="center">
+            Loading events...
+          </Typography>
         ) : events.length === 0 ? (
-          <Typography variant="h6" align="center">No events available.</Typography>
+          <Typography variant="h6" align="center">
+            No events available.
+          </Typography>
         ) : (
           <Grid container spacing={4}>
             {events.map((event) => (
@@ -141,12 +166,18 @@ const ViewEvents = () => {
                     />
                   )}
                   <CardContent>
-                    <Typography variant="h6" fontWeight="bold">{event.event_name}</Typography>
+                    <Typography variant="h6" fontWeight="bold">
+                      {event.event_name}
+                    </Typography>
                     <Typography variant="body2" color="textSecondary">
                       {event.event_date} at {event.event_time}
                     </Typography>
-                    <Typography variant="body2" color="textSecondary">Location: {event.location}</Typography>
-                    <Typography variant="body2" color="textSecondary">Category: {event.category}</Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      Location: {event.location}
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      Category: {event.category}
+                    </Typography>
                   </CardContent>
                 </Card>
               </Grid>
