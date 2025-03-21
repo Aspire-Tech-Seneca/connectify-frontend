@@ -532,7 +532,7 @@ const styles = {
     width: "100vw",
   },
   contentWrapper: {
-    background: "rgba(245,236,227,0.4)",
+    background: "rgba(7, 53, 102, 0.7)",
     backgroundImage: "url('./peach.jpg')",
     backgroundRepeat: "no-repeat",
     backgroundSize: "cover",
@@ -571,7 +571,7 @@ const styles = {
     position: "relative",
   },
   arrowButton: {
-    background: "rgba(195, 130, 130, 0.8)",
+    background:"rgba(7, 53, 102, 0.7)",
     color: "white",
     fontSize: "28px",
     fontWeight: "bold",
@@ -590,7 +590,7 @@ const styles = {
     zIndex: "2",
   },
   matchCard: {
-    background: "#fff",
+    background:"rgba(7, 53, 102, 0.7)",
     padding: "20px",
     borderRadius: "8px",
     boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
@@ -618,7 +618,7 @@ const styles = {
     marginBottom: "10px",
   },
   interestTag: {
-    background: "#e9ecef",
+    background:"rgba(7, 53, 102, 0.7)",
     padding: "5px 10px",
     borderRadius: "20px",
     fontSize: "14px",
@@ -630,7 +630,7 @@ const styles = {
     marginTop: "10px",
   },
   messageBtn: {
-    background: "#C38282",
+    background:"rgba(7, 53, 102, 0.7)",
     color: "white",
     padding: "8px 12px",
     border: "none",
@@ -640,7 +640,7 @@ const styles = {
     transition: "background 0.3s, transform 0.3s",
   },
   navbar: {
-    backgroundColor: "#C38282",
+    backgroundColor: "#315b7e",
     padding: "25px",
     display: "flex",
     justifyContent: "center",
@@ -689,13 +689,13 @@ const styles = {
     background: "#fff",
   },
   submitButton: {
-    backgroundColor: "#C38282",
+    background:"rgba(7, 53, 102, 0.7)",
     color: "white",
     padding: "10px 20px",
     alignSelf: "center",
     fontWeight: "bold",
     "&:hover": {
-      backgroundColor: "#b57373",
+      background:"rgba(7, 53, 102, 0.7)",
     },
   },
   formMessage: {
@@ -705,14 +705,14 @@ const styles = {
   },
 
   reviewsContainer: {
-    backgroundColor: "#f8f9fa",
+    background:"rgba(7, 53, 102, 0.7)",
     padding: "40px 20px",
     textAlign: "center",
   },
   reviewsTitle: {
     fontSize: "24px",
     marginBottom: "20px",
-    color: "#5D4037",
+    color: "white",
   },
   reviewsList: {
     display: "flex",
@@ -738,7 +738,7 @@ const styles = {
     color: "#6c757d",
   },
   footer: {
-    backgroundColor: "#C38282",
+    background:"rgba(7, 53, 102, 0.7)",
     padding: "40px 20px",
     color: "white",
   },

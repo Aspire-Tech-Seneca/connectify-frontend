@@ -72,7 +72,7 @@ button {
 }
 
 button:hover {
-  background-color: #C38282;
+  background-color: #eee;
 }
 
 .error-message {
@@ -82,7 +82,7 @@ button:hover {
 }
 
 .navbar {
-  background-color: #C38282;
+  background-color: #eee;
   padding: 25px;
   display: flex;
   justify-content: space-between;
@@ -216,7 +216,7 @@ h1 {
 }
 
 .message-btn:hover {
-  background-color: #C38282;
+  background-color: #eee;
 }
 
 .interest-tag {
@@ -352,7 +352,7 @@ h1 {
 
 /* Navigation Bar */
 .navbar {
-  background-color: #C38282;
+  background-color: #eee;
   padding: 25px;
   display: flex;
   justify-content: center;
@@ -466,7 +466,7 @@ h1 {
 }
 
 .send-button {
-  background: #C38282;
+  background: #eee;
   color: white;
   border: none;
   padding: 10px 15px;
