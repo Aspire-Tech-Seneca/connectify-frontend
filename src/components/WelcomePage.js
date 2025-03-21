@@ -3,11 +3,11 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Container, Typography, Box, Button } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import peach from "./peach.jpg"; // Consider using an env variable if needed
+//import peach from "./peach.jpg"; // Consider using an env variable if needed
 
 // Fullscreen background container with the peach image
 const BackgroundContainer = styled("div")({
-  backgroundImage: `url(${peach})`,
+  //backgroundImage: `url(${peach})`,
   backgroundRepeat: "no-repeat",
   backgroundSize: "cover",
   backgroundPosition: "center",
