@@ -4,7 +4,7 @@ import { Lock, LockOpen } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import peachImage from "../peach.jpg"; // Same background
+//import peachImage from "../peach.jpg"; // Same background
 import logo from "../logo.jpg"; // Ensure correct path
 
 // Load base URL from environment variables
@@ -12,13 +12,15 @@ const BASE_URL = process.env.REACT_APP_BASE_URL || "http://127.0.0.1:8000";
 
 // Background Styling
 const BackgroundContainer = styled("div")({
-  backgroundImage: `url(${peachImage})`,
+ // backgroundImage: `url(${peachImage})`,
   backgroundRepeat: "no-repeat",
   backgroundSize: "cover",
   backgroundPosition: "center",
   height: "100vh",
   display: "flex",
   flexDirection: "column",
+    padding: "70px",
+
   alignItems: "center",
   position: "relative",
 });
@@ -67,7 +69,7 @@ const StyledTextField = styled(TextField)({
 const Navbar = () => {
   const navigate = useNavigate();
   return (
-    <AppBar position="fixed" sx={{ background: "#89574c" }}>
+    <AppBar position="fixed" sx={{ background: "#315b7e" }}>
       <Toolbar>
         <img 
           src={logo} 
