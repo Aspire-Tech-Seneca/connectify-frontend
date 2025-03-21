@@ -1,97 +1,87 @@
-import React, { useState } from "react";
-import { TextField, Button, Container, Typography, Box, InputAdornment, AppBar, Toolbar } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Typography,
+  Button,
+  Container,
+  Box,
+  TextField,
+  InputAdornment,
+} from "@mui/material";
 import { Lock, LockOpen } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
-//import peachImage from "../peach.jpg"; // Same background
-import logo from "../logo.jpg"; // Ensure correct path
+import logo from "../newlogo.png"; // Use the same logo as in login
 
-// Load base URL from environment variables
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://127.0.0.1:8000";
 
-// Background Styling
-const BackgroundContainer = styled("div")({
- // backgroundImage: `url(${peachImage})`,
-  backgroundRepeat: "no-repeat",
-  backgroundSize: "cover",
-  backgroundPosition: "center",
-  height: "100vh",
+const PageContainer = styled("div")({
   display: "flex",
-  flexDirection: "column",
-    padding: "70px",
-
+  justifyContent: "center",
   alignItems: "center",
+  minHeight: "100vh",
   position: "relative",
 });
 
-// Overlay
-const Overlay = styled("div")({
-  position: "absolute",
-  width: "100%",
-  height: "100%",
-});
-
-// Styled Form Container (Cute & Pretty)
-const FormContainer = styled(Container)({
-  background: "rgba(253, 252, 230, 0.6)",
-  padding: "50px",
+const FormContainer = styled(Container)(({ theme }) => ({
+  background: "rgba(255, 255, 255, 0.85)",
+  backdropFilter: "blur(10px)",
+  padding: "40px 30px",
   borderRadius: "20px",
-  boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.2)",
-  width: "90%",
-  maxWidth: "500px",
+  boxShadow: "0px 10px 30px rgba(0, 0, 0, 0.2)",
+  maxWidth: "800px",
+  minWidth: "800px",
   textAlign: "center",
   zIndex: 2,
-});
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  position: "relative",
+  marginTop: "40px",
+}));
 
-// Styled Button
 const StyledButton = styled(Button)({
-  background: "linear-gradient(to right, #89574c, #a7311a)",
+  background: "linear-gradient(to right, #0052D4, #65C7F7)",
   color: "white",
   fontWeight: "bold",
   padding: "14px",
+  width: "100%",
   transition: "0.3s",
   "&:hover": {
-    background: "linear-gradient(to right, #c7a69f, #89574c)",
+    background: "linear-gradient(to right, #0044AA, #4DB2E0)",
     transform: "scale(1.05)",
   },
 });
 
-// Styled TextField
 const StyledTextField = styled(TextField)({
+  width: "100%",
   "& .MuiOutlinedInput-root": {
-    "& fieldset": { borderColor: "#89574c" },
-    "&:hover fieldset": { borderColor: "#89574c" },
-    "&.Mui-focused fieldset": { borderColor: "#89574c", borderWidth: "3px" },
+    "& fieldset": { borderColor: "#0052D4" },
+    "&:hover fieldset": { borderColor: "#0052D4" },
+    "&.Mui-focused fieldset": { borderColor: "#0052D4", borderWidth: "2px" },
   },
 });
 
-const Navbar = () => {
-  const navigate = useNavigate();
-  return (
-    <AppBar position="fixed" sx={{ background: "#315b7e" }}>
-      <Toolbar>
-        <img 
-          src={logo} 
-          alt="Logo" 
-          style={{ height: "60px", marginRight: "15px", cursor: "pointer" }} 
-          onClick={() => navigate("/")}
-        />
-        <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: "bold", color: "white" }}>
-          Connectify
-        </Typography>
-        <Button color="inherit" onClick={() => navigate("/")}>Home</Button>
-        <Button color="inherit" onClick={() => navigate("/about")}>About Us</Button>
-        <Button color="inherit" onClick={() => navigate("/profile")}>Profile</Button>
-      </Toolbar>
-    </AppBar>
-  );
-};
-
 const UserSettings = () => {
-  const [formData, setFormData] = useState({ old_password: "", new_password: "", confirm_new_password: "" });
+  const [formData, setFormData] = useState({
+    old_password: "",
+    new_password: "",
+    confirm_new_password: "",
+  });
   const [errors, setErrors] = useState({});
+  const [token, setToken] = useState(null);
   const navigate = useNavigate();
+
+  // Retrieve the token when the component mounts
+  useEffect(() => {
+    const storedToken = localStorage.getItem("authToken");
+    if (storedToken) {
+      setToken(storedToken);
+    } else {
+      alert("You must be logged in to change your password.");
+      navigate("/login"); // Redirect to login if token is missing
+    }
+  }, [navigate]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -111,86 +101,98 @@ const UserSettings = () => {
     e.preventDefault();
     if (validateForm()) {
       try {
-        // Build API URL using environment variable
         const apiUrl = `${BASE_URL}/users/change-password/`;
-        const response = await axios.post(apiUrl, formData);
+
+        const response = await axios.put(
+          apiUrl,
+          {
+            old_password: formData.old_password,
+            new_password: formData.new_password,
+            confirm_new_password: formData.confirm_new_password,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
         alert("Password updated successfully!");
-        navigate("/");
+        navigate("/profile");
       } catch (error) {
-        alert(error.response?.data?.message || "Update failed. Try again.");
+        console.error("Update failed:", error);
+        setErrors({ api: error.response?.data?.detail || "Update failed. Try again." });
       }
     }
   };
 
   return (
-    <BackgroundContainer>
-      <Navbar />
-      <Overlay />
-      <Box sx={{ mt: 8 }}>
-        <FormContainer>
-          <Typography variant="h4" gutterBottom style={{ fontWeight: "bold", color: "#89574c" }}>
-            Update Password 🔒
-          </Typography>
-          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-            <StyledTextField
-              label="Current Password"
-              type="password"
-              name="old_password"
-              value={formData.old_password}
-              onChange={handleChange}
-              error={!!errors.old_password}
-              helperText={errors.old_password}
-              required
-              fullWidth
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <LockOpen style={{ color: "#ff7e7e" }} />
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <StyledTextField
-              label="New Password"
-              type="password"
-              name="new_password"
-              value={formData.new_password}
-              onChange={handleChange}
-              error={!!errors.new_password}
-              helperText={errors.new_password}
-              required
-              fullWidth
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Lock style={{ color: "#ff7e7e" }} />
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <StyledTextField
-              label="Confirm New Password"
-              type="password"
-              name="confirm_new_password"
-              value={formData.confirm_new_password}
-              onChange={handleChange}
-              error={!!errors.confirm_new_password}
-              helperText={errors.confirm_new_password}
-              required
-              fullWidth
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Lock style={{ color: "#ff7e7e" }} />
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <StyledButton variant="contained" type="submit">Update Password</StyledButton>
-          </form>
-        </FormContainer>
-      </Box>
-    </BackgroundContainer>
+    <PageContainer>
+      <FormContainer>
+        <img src={logo} alt="Connectify Logo" style={{ width: "250px", marginBottom: "10px" }} />
+        <Typography variant="h4" gutterBottom style={{ fontWeight: "bold", color: "#0052D4" }}>
+          Update Password 🔒
+        </Typography>
+        {errors.api && <Typography color="error">{errors.api}</Typography>}
+
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "15px", width: "100%" }}>
+          <StyledTextField
+            label="Current Password"
+            type="password"
+            name="old_password"
+            value={formData.old_password}
+            onChange={handleChange}
+            error={!!errors.old_password}
+            helperText={errors.old_password}
+            required
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <LockOpen style={{ color: "#0052D4" }} />
+                </InputAdornment>
+              ),
+            }}
+          />
+          <StyledTextField
+            label="New Password"
+            type="password"
+            name="new_password"
+            value={formData.new_password}
+            onChange={handleChange}
+            error={!!errors.new_password}
+            helperText={errors.new_password}
+            required
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Lock style={{ color: "#0052D4" }} />
+                </InputAdornment>
+              ),
+            }}
+          />
+          <StyledTextField
+            label="Confirm New Password"
+            type="password"
+            name="confirm_new_password"
+            value={formData.confirm_new_password}
+            onChange={handleChange}
+            error={!!errors.confirm_new_password}
+            helperText={errors.confirm_new_password}
+            required
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Lock style={{ color: "#0052D4" }} />
+                </InputAdornment>
+              ),
+            }}
+          />
+
+          <StyledButton variant="contained" type="submit">Update Password</StyledButton>
+        </form>
+      </FormContainer>
+    </PageContainer>
   );
 };
 
