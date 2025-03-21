@@ -96,49 +96,50 @@ const CreateEvent = () => {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (!eventData.imageFile) {
-    alert("Please upload an event image.");
-    return;
-  }
+    if (!eventData.imageFile) {
+      alert("Please upload an event image.");
+      return;
+    }
 
-  const formData = new FormData();
+    const formData = new FormData();
 
-  // Create a Blob from JSON data
-  const eventJsonBlob = new Blob(
-    [JSON.stringify({
-      event_name: eventData.event_name,
-      event_date: eventData.event_date,
-      event_time: eventData.event_time,
-      location: eventData.location,
-      description: eventData.description,
-      category: eventData.category,
-    })],
-    { type: "application/json" }
-  );
+    // Create a Blob from JSON data
+    const eventJsonBlob = new Blob(
+      [JSON.stringify({
+        event_name: eventData.event_name,
+        event_date: eventData.event_date,
+        event_time: eventData.event_time,
+        location: eventData.location,
+        description: eventData.description,
+        category: eventData.category,
+      })],
+      { type: "application/json" }
+    );
 
-  // Append JSON as a file
-  formData.append("event_data", eventJsonBlob, "event.json");
+    // Append JSON as a file
+    formData.append("event_data", eventJsonBlob, "event.json");
 
-  // Append the image file
-  formData.append("event_image", eventData.imageFile);
+    // Append the image file
+    formData.append("event_image", eventData.imageFile);
 
-  try {
-    const response = await axios.post(`${BASE_URL}/events/create/`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${process.env.REACT_APP_ACCESS_TOKEN}`, // Ensure you have the token
-      },
-    });
+    try {
+      const response = await axios.post(`${BASE_URL}/events/create/`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          // Using the same token as in the login form by retrieving it from localStorage
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+      });
 
-    console.log("Event Created:", response.data);
-    alert("Event created successfully!");
-  } catch (error) {
-    console.error("Event creation failed:", error.response?.data || error.message);
-    alert("Event creation failed. Please check your inputs and try again.");
-  }
-};
+      console.log("Event Created:", response.data);
+      alert("Event created successfully!");
+    } catch (error) {
+      console.error("Event creation failed:", error.response?.data || error.message);
+      alert("Event creation failed. Please check your inputs and try again.");
+    }
+  };
 
   return (
     <BackgroundContainer>
@@ -153,8 +154,13 @@ const CreateEvent = () => {
           <TextField type="time" name="event_time" value={eventData.event_time} onChange={handleChange} required fullWidth />
           <TextField label="Location" name="location" value={eventData.location} onChange={handleChange} required fullWidth />
           <TextField label="Description" name="description" value={eventData.description} onChange={handleChange} required fullWidth multiline rows={3} />
-          <TextField select label="Category" name="category" value={eventData.category} onChange={handleChange} required fullWidth>
-            {categories.map((option) => (<MenuItem key={option} value={option}>{option}</MenuItem>))}
+          {/* Added explicit id "category" to resolve the accessibility warning */}
+          <TextField id="category" select label="Category" name="category" value={eventData.category} onChange={handleChange} required fullWidth>
+            {categories.map((option) => (
+              <MenuItem key={option} value={option}>
+                {option}
+              </MenuItem>
+            ))}
           </TextField>
           <StyledButton component="label">
             Add Image
