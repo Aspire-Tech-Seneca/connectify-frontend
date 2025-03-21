@@ -12,7 +12,6 @@ import { Email, Lock } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 import { AnimatedBackground } from "animated-backgrounds";
 import logo from "../newlogo.png"; // Use the same logo as in sign-up
-import loginImage from "../newlogo.png"; // Add your image here
 import axios from "axios";
 
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://127.0.0.1:8000";
@@ -25,27 +24,15 @@ const PageContainer = styled("div")({
   position: "relative",
 });
 
-const ImageContainer = styled("div")({
-  flex: "1",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-});
-
-const LoginImage = styled("img")({
-  width: "100%",
-  maxWidth: "500px",
-  height: "auto",
-  borderRadius: "12px",
-});
-
 const FormContainer = styled(Container)(({ theme }) => ({
   background: "rgba(255, 255, 255, 0.85)",
   backdropFilter: "blur(10px)",
   padding: "40px 30px",
   borderRadius: "20px",
   boxShadow: "0px 10px 30px rgba(0, 0, 0, 0.2)",
-  maxWidth: "500px",
+  maxWidth: "800px",
+  minWidth: "800px",
+
   textAlign: "center",
   zIndex: 2,
   display: "flex",
@@ -97,7 +84,6 @@ const LoginForm = () => {
     try {
       const response = await axios.post(apiUrl, { email, password });
       localStorage.setItem("authToken", response.data.access);
-      // Alert removed
       navigate("/profile");
     } catch (error) {
       setErrorMessage(error.response?.data?.error || "Login failed. Try again.");
@@ -108,10 +94,6 @@ const LoginForm = () => {
     <div style={{ position: "relative", minHeight: "100vh" }}>
       <AnimatedBackground animationName="starryNight" blendMode="normal" />
       <PageContainer>
-        <ImageContainer>
-          <LoginImage src={loginImage} alt="Login Visual" />
-        </ImageContainer>
-        
         <FormContainer>
           <img src={logo} alt="Connectify Logo" style={{ width: "250px", marginBottom: "10px" }} />
           <Typography variant="h4" gutterBottom style={{ fontWeight: "bold", color: "#0052D4" }}>
