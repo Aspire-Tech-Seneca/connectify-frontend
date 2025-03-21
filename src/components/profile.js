@@ -7,8 +7,6 @@ import {
   List,
   ListItem,
   ListItemText,
-  Snackbar,
-  Alert
 } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import ChatIcon from "@mui/icons-material/Chat";
@@ -23,7 +21,7 @@ const BLOB_STORAGE_BASE_URL =
 // SAS token for write access
 const BLOB_SAS_TOKEN = process.env.REACT_APP_BLOB_SAS_TOKEN || "";
 
-// Container (folder) names for direct Azure blob uploads
+// Container names for direct Azure blob uploads (used during upload only)
 const PROFILE_IMAGES_CONTAINER = "profile_images/";
 const GALLERY_IMAGES_CONTAINER = "gallery_images/";
 
@@ -202,13 +200,9 @@ const ProfileCard = ({
   <div style={styles.profileCard}>
     <div style={styles.profileContent}>
       <div style={styles.profilePicContainer}>
-        {/* 
-          IMPORTANT: We do NOT prepend 'profile_images/' here, 
-          because your backend is already returning that if needed.
-        */}
         <img
           src={
-            profilePic || 
+            profilePic ||
             // fallback if profilePic is not set
             `${BLOB_STORAGE_BASE_URL}defaultProfilePic.jpg`
           }
@@ -221,7 +215,9 @@ const ProfileCard = ({
           <div>
             <button
               style={styles.uploadLabel}
-              onClick={() => hiddenFileInputRef.current && hiddenFileInputRef.current.click()}
+              onClick={() =>
+                hiddenFileInputRef.current && hiddenFileInputRef.current.click()
+              }
             >
               Change Profile Picture
             </button>
@@ -313,8 +309,15 @@ const Gallery = ({ galleryImages, handleGalleryImageUpload, removeGalleryImage }
       ) : (
         galleryImages.map((image) => (
           <div key={image.id} style={styles.galleryItem}>
-            <img src={image.url} alt={`Gallery ${image.id}`} style={styles.galleryImage} />
-            <button style={styles.deleteButton} onClick={() => removeGalleryImage(image.id)}>
+            <img
+              src={image.url}
+              alt={`Gallery ${image.id}`}
+              style={styles.galleryImage}
+            />
+            <button
+              style={styles.deleteButton}
+              onClick={() => removeGalleryImage(image.id)}
+            >
               X
             </button>
           </div>
@@ -356,7 +359,10 @@ const CurrentMatches = ({ currentMatches, handleChat, handleCancelRequest }) => 
                 Chat
               </button>
               {match.status === "pending" && (
-                <button onClick={() => handleCancelRequest(match.id)} style={styles.removeButton}>
+                <button
+                  onClick={() => handleCancelRequest(match.id)}
+                  style={styles.removeButton}
+                >
                   Cancel Request
                 </button>
               )}
@@ -374,7 +380,7 @@ const Profile = () => {
   const [bio, setBio] = useState("I am new in Canada and I want to make more friends...");
   const [age, setAge] = useState(25);
 
-  // IMPORTANT: no container path in fallback
+  // If not retrieved yet, use default fallback below
   const [profilePic, setProfilePic] = useState(
     `${BLOB_STORAGE_BASE_URL}defaultProfilePic.jpg`
   );
@@ -386,7 +392,6 @@ const Profile = () => {
   const [currentMatches, setCurrentMatches] = useState([]);
   const profilePicInputRef = useRef(null);
   const [notifications, setNotifications] = useState([]);
-  // For NavBar, we'll use the length of notifications (or you can adjust as needed)
   const notificationCount = notifications.length;
   const authToken = localStorage.getItem("authToken");
 
@@ -402,7 +407,7 @@ const Profile = () => {
       .catch((err) => console.error("Error fetching interest list:", err));
   }, []);
 
-  // 2) Fetch user info
+  // 2) Fetch user info (including gallery images)
   useEffect(() => {
     fetch(`${BASE_URL}/users/get-user-info/`, {
       method: "GET",
@@ -413,8 +418,16 @@ const Profile = () => {
         setName(data.fullname || name);
         setAge(data.age || age);
         setBio(data.bio || bio);
+
+        // IMPORTANT: If backend returns e.g. "gallery_images/123.jpg",
+        // just prepend BLOB_STORAGE_BASE_URL
         if (data.gallery_images) {
-          setGalleryImages(data.gallery_images.map((url, index) => ({ id: index, url })));
+          setGalleryImages(
+            data.gallery_images.map((url, index) => ({
+              id: index,
+              url: `${BLOB_STORAGE_BASE_URL}${url}`,
+            }))
+          );
         }
       })
       .catch((err) => console.error("Error fetching profile details:", err));
@@ -428,9 +441,8 @@ const Profile = () => {
     })
       .then((res) => res.json())
       .then((data) => {
+        // If backend returns "profile_images/abc.jpg", just prepend the blob base URL
         if (data.profile_image) {
-          // data.profile_image_name might be "profile_images/<someFile>.jpg"
-          // so we do NOT prepend PROFILE_IMAGES_CONTAINER
           setProfilePic(`${BLOB_STORAGE_BASE_URL}${data.profile_image}`);
         }
       })
@@ -473,7 +485,7 @@ const Profile = () => {
       .catch((err) => console.error("Failed to fetch current matches:", err));
   }, [authToken]);
 
-  // Handle profile picture upload and immediate refresh
+  // Handle profile picture upload
   const handleProfilePicChange = async (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -496,6 +508,7 @@ const Profile = () => {
         });
         const newData = await newResponse.json();
         if (newData.profile_image) {
+          // e.g. "profile_images/abc.jpg"
           setProfilePic(`${BLOB_STORAGE_BASE_URL}${newData.profile_image}`);
         }
       } catch (error) {
@@ -504,11 +517,12 @@ const Profile = () => {
     }
   };
 
-  // Handle gallery upload (instant)
+  // Handle gallery upload
   const handleGalleryImageUpload = async (event) => {
     const file = event.target.files[0];
     if (file) {
       try {
+        // Upload to Azure Blob directly
         const uploadedUrl = await uploadFileToBlob(file, GALLERY_IMAGES_CONTAINER);
         setGalleryImages((prev) => [
           ...prev,
@@ -625,7 +639,7 @@ const Profile = () => {
 
 const styles = {
   navbar: {
-    backgroundColor: "#315b7e", // Navbar background color
+    backgroundColor: "#315b7e",
     padding: "25px",
     display: "flex",
     justifyContent: "center",
