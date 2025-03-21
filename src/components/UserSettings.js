@@ -69,7 +69,7 @@ const StyledTextField = styled(TextField)({
 const Navbar = () => {
   const navigate = useNavigate();
   return (
-    <AppBar position="fixed" sx={{ background: "#89574c" }}>
+    <AppBar position="fixed" sx={{ background: "#315b7e" }}>
       <Toolbar>
         <img 
           src={logo} 
