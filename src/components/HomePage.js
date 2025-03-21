@@ -313,6 +313,7 @@ const HomePage = () => {
   const authToken = localStorage.getItem("authToken");
 
   const [matches, setMatches] = useState([]);
+  const [currentMatches, setCurrentMatches] = useState([]);
   const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -383,15 +384,26 @@ const HomePage = () => {
         },
         body: JSON.stringify({ "receiver-user-id": id }),
       });
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to send matchup request");
       }
 
       setMatches(matches.filter((m) => m.id !== id));
-      navigate("/matches");
+      setCurrentMatches((prevMatches) => [
+        ...prevMatches,
+        { ...match, status: "pending" },
+      ]);
+
+      setSnackbarMessage("Match request sent successfully!");
+      setSnackbarSeverity("success");
     } catch (error) {
       console.error("Error sending matchup request:", error);
+      setSnackbarMessage(error.message || "Failed to send matchup request.");
+      setSnackbarSeverity("error");
+    } finally {
+      setSnackbarOpen(true);
     }
   };
 
@@ -410,7 +422,7 @@ const HomePage = () => {
         throw new Error(errorData.message || "Failed to unmatch user.");
       }
 
-      setMatches(matches.filter((m) => m.id !== id));
+      setCurrentMatches(currentMatches.filter((m) => m.id !== id));
       setSnackbarMessage("User unmatched successfully!");
       setSnackbarSeverity("success");
     } catch (error) {
@@ -478,8 +490,9 @@ const HomePage = () => {
                         <button 
                           style={styles.messageBtn}
                           onClick={() => handleSendRequest(currentProfile.id)}
+                          disabled={currentMatches.some(match => match.id === currentProfile.id && match.status === "pending")}
                         >
-                          Match
+                          {currentMatches.some(match => match.id === currentProfile.id && match.status === "pending") ? "Pending" : "Match"}
                         </button>
                         <button 
                           style={styles.messageBtn}
@@ -523,7 +536,6 @@ const HomePage = () => {
     </div>
   );
 };
-
 const styles = {
   outerContainer: {
     background: "transparent",
