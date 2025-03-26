@@ -16,31 +16,36 @@ import ChatIcon from "@mui/icons-material/Chat";
 import MenuIcon from "@mui/icons-material/Menu";
 import { useNavigate } from "react-router-dom";
 
-const BASE_URL = process.env.REACT_APP_BASE_URL || "http://127.0.0.1:8000";
-const BASE_PATH = process.env.REACT_APP_BASE_PATH || "/api/v1";
+
+// Adjust to your actual backend URLs
+const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:8000";
 
 const NavBar = ({ navigate }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [hamburgerAnchorEl, setHamburgerAnchorEl] = useState(null);
-
+  
   const handleNotificationIconClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
+  
   const handleCloseNotificationPopover = () => {
     setAnchorEl(null);
   };
+  
   const handleHamburgerClick = (event) => {
     setHamburgerAnchorEl(event.currentTarget);
   };
+  
   const handleCloseHamburgerPopover = () => {
     setHamburgerAnchorEl(null);
   };
-
+  
   const openNotification = Boolean(anchorEl);
   const notificationPopoverId = openNotification ? "notification-popover" : undefined;
+  
   const openHamburger = Boolean(hamburgerAnchorEl);
   const hamburgerPopoverId = openHamburger ? "hamburger-popover" : undefined;
-
+  
   const navItems = [
     { label: "Home", path: "/home", customStyle: { marginLeft: "40px" } },
     { label: "Chat", path: "/ChatPage" },
@@ -49,7 +54,7 @@ const NavBar = ({ navigate }) => {
     { label: "My Matches", path: "/matches" },
     { label: "Logout", path: "/login", customStyle: { marginRight: "30px" } },
   ];
-
+  
   const additionalMenuItems = [
     { label: "Notifications", path: "/notifications" },
     { label: "User Settings", path: "/UserSettings" },
@@ -58,7 +63,7 @@ const NavBar = ({ navigate }) => {
     { label: "Community Chat", path: "/CommunityChat" },
     { label: "Policy Compliance", path: "/PolicyCompliance" },
   ];
-
+  
   return (
     <nav style={styles.navbar}>
       <div style={styles.navItems}>
@@ -132,7 +137,7 @@ const NotificationPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`<span class="math-inline">\{BASE\_URL\}</span>{BASE_PATH}/notifications`)
+    fetch(`${BASE_URL}/notifications/list`)
       .then((res) => {
         if (!res.ok) {
           throw new Error("Failed to fetch notifications");
@@ -143,13 +148,9 @@ const NotificationPage = () => {
         setNotifications(data);
         setLoading(false);
       })
-      .catch(() => {
-        // Mock data for demonstration purposes
-        setNotifications([
-          { message: "New user signed up", timestamp: Date.now() },
-          { message: "System maintenance scheduled", timestamp: Date.now() - 3600000 },
-          { message: "New comment on your post", timestamp: Date.now() - 7200000 },
-        ]);
+      .catch((error) => {
+        console.error("Error fetching notifications:", error);
+        setNotifications([]);
         setLoading(false);
       });
   }, []);
@@ -166,12 +167,11 @@ const NotificationPage = () => {
           <Typography variant="h4" gutterBottom style={styles.heading}>
             Notifications
           </Typography>
-
           {loading ? (
             <CircularProgress />
           ) : notifications.length === 0 ? (
             <Typography variant="body1" style={styles.text}>
-              No notifications.
+              No new notifications.
             </Typography>
           ) : (
             <List>
