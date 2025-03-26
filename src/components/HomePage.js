@@ -214,40 +214,75 @@ const ReviewForm = () => {
   );
 };
 
-// User Reviews Section
+// User Reviews Section with Auto-Slider
 const UserReviews = () => {
-  const reviews = [
-    {
-      id: 1,
-      text: "Connectify is the app to connect people with different interests, just to connect and share thoughts.",
-      author: "John Doe",
-    },
-    {
-      id: 2,
-      text: "I've met so many interesting people through Connectify. It's a great way to expand your social circle!",
-      author: "Jane Smith",
-    },
-    {
-      id: 3,
-      text: "The app is easy to use and has a great interface. I highly recommend it to anyone looking to meet new people.",
-      author: "Alice Johnson",
-    },
-  ];
+  const [reviews, setReviews] = useState([]);
+  const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
+  const authToken = localStorage.getItem("authToken");
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const response = await fetch(`http://74.235.209.82:8000/users/api/reviews/`, {
+          headers: {
+            "Authorization": `Bearer ${authToken}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch reviews");
+        }
+
+        const data = await response.json();
+        setReviews(data);
+      } catch (error) {
+        console.error("Error fetching reviews:", error);
+      }
+    };
+
+    fetchReviews();
+
+    // Auto-slider interval
+    const sliderInterval = setInterval(() => {
+      setCurrentReviewIndex((prevIndex) => 
+        prevIndex === reviews.length - 1 ? 0 : prevIndex + 1
+      );
+    }, 5000); // Change slide every 5 seconds
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(sliderInterval);
+  }, [authToken]);
+
+  if (reviews.length === 0) return null;
+
+  const currentReview = reviews[currentReviewIndex];
 
   return (
     <div style={styles.reviewsContainer}>
       <h2 style={styles.reviewsTitle}>What Our Users Say</h2>
       <div style={styles.reviewsList}>
-        {reviews.map((review) => (
-          <div key={review.id} style={styles.reviewItem}>
-            <p style={styles.reviewText}>"{review.text}"</p>
-            <p style={styles.reviewAuthor}>- {review.author}</p>
-          </div>
-        ))}
+        <div key={currentReview.id} style={styles.reviewItem}>
+          <p style={styles.reviewText}>"{currentReview.comment}"</p>
+          <p style={styles.reviewAuthor}>- {currentReview.user}</p>
+        </div>
+        {/* Dot indicators */}
+        <div style={styles.sliderDots}>
+          {reviews.map((_, index) => (
+            <span 
+              key={index} 
+              style={{
+                ...styles.dot,
+                backgroundColor: index === currentReviewIndex ? 'white' : 'rgba(255,255,255,0.5)'
+              }}
+              onClick={() => setCurrentReviewIndex(index)}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
 };
+
 
 // Footer component
 const Footer = () => {
@@ -320,7 +355,10 @@ const HomePage = () => {
   const [snackbarSeverity, setSnackbarSeverity] = useState("info");
 
   useEffect(() => {
-    if (!authToken) return;
+    if (!authToken) {
+      navigate("/login"); // Redirect to login if no token is found
+      return;
+    }
 
     fetch(`${BASE_URL}/users/retrieve-interest/`, {
       headers: {
@@ -357,7 +395,7 @@ const HomePage = () => {
         setMatches(transformed);
       })
       .catch((err) => console.error("Failed to fetch matches:", err));
-  }, [authToken]);
+  }, [authToken, navigate]);
 
   const nextProfile = () => {
     setCurrentProfileIndex((prevIndex) =>
@@ -409,25 +447,26 @@ const HomePage = () => {
 
   const handleUnmatch = async (id) => {
     try {
-      const response = await fetch(`${BASE_URL}/api/unmatch/${id}`, {
-        method: "DELETE",
+      const response = await fetch(`${BASE_URL}/users/deny-matchup-request/`, {
+        method: "PUT",
         headers: {
           "Authorization": `Bearer ${authToken}`,
           "Content-Type": "application/json",
         },
+        body: JSON.stringify({ "requester-user-id": id }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to unmatch user.");
+        throw new Error(errorData.message || "Failed to deny matchup request.");
       }
 
       setCurrentMatches(currentMatches.filter((m) => m.id !== id));
-      setSnackbarMessage("User unmatched successfully!");
+      setSnackbarMessage("Match request denied successfully!");
       setSnackbarSeverity("success");
     } catch (error) {
-      console.error("Error unmatching user:", error);
-      setSnackbarMessage(error.message || "Failed to unmatch user.");
+      console.error("Error denying matchup request:", error);
+      setSnackbarMessage(error.message || "Failed to deny matchup request.");
       setSnackbarSeverity("error");
     } finally {
       setSnackbarOpen(true);
@@ -536,6 +575,7 @@ const HomePage = () => {
     </div>
   );
 };
+
 const styles = {
   outerContainer: {
     background: "transparent",
@@ -620,7 +660,7 @@ const styles = {
   },
   matchName: {
     margin: "5px 0",
-    color: "#5D4037",
+    color: "white",
   },
   interests: {
     display: "flex",
@@ -628,6 +668,7 @@ const styles = {
     justifyContent: "center",
     gap: "5px",
     marginBottom: "10px",
+    color: "white",
   },
   interestTag: {
     background:"rgba(7, 53, 102, 0.7)",
