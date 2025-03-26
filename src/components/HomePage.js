@@ -814,11 +814,28 @@ const styles = {
     fontSize: "14px",
     color: "#6c757d",
   },
+
+  sliderDots: {
+    display: 'flex',
+    justifyContent: 'center',
+    marginTop: '10px',
+  },
+
+  dot: {
+    height: '10px',
+    width: '10px',
+    borderRadius: '50%',
+    margin: '0 5px',
+    cursor: 'pointer',
+    transition: 'background-color 0.3s',
+  },
+
   footer: {
     background:"rgba(7, 53, 102, 0.7)",
     padding: "40px 20px",
     color: "white",
   },
+  
   footerContent: {
     display: "flex",
     justifyContent: "space-between",
