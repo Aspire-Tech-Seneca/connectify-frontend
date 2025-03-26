@@ -121,28 +121,26 @@ const NavBar = ({ navigate }) => {
 // Review Form Component
 const ReviewForm = () => {
   const [reviewText, setReviewText] = useState("");
-  const [authorName, setAuthorName] = useState("");
   const [formMessage, setFormMessage] = useState({ text: "", type: "" });
   const authToken = localStorage.getItem("authToken");
 
   const handleSubmitReview = async (e) => {
     e.preventDefault();
     
-    if (!reviewText.trim() || !authorName.trim()) {
-      setFormMessage({ text: "Please fill all fields", type: "error" });
+    if (!reviewText.trim()) {
+      setFormMessage({ text: "Please enter a review", type: "error" });
       return;
     }
     
     try {
-      const response = await fetch(`${BASE_URL}/reviews/add`, {
+      const response = await fetch(`${BASE_URL}/users/api/reviews/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${authToken}`,
         },
         body: JSON.stringify({
-          text: reviewText,
-          author: authorName
+          comment: reviewText
         }),
       });
       
@@ -152,7 +150,6 @@ const ReviewForm = () => {
       
       setFormMessage({ text: "Review submitted successfully!", type: "success" });
       setReviewText("");
-      setAuthorName("");
       
       // Reset success message after 3 seconds
       setTimeout(() => {
@@ -169,17 +166,6 @@ const ReviewForm = () => {
     <div style={styles.reviewFormContainer}>
       <h2 style={styles.reviewFormTitle}>Share Your Experience</h2>
       <form onSubmit={handleSubmitReview} style={styles.reviewForm}>
-        <div style={styles.formGroup}>
-          <TextField
-            label="Your Name"
-            variant="outlined"
-            fullWidth
-            value={authorName}
-            onChange={(e) => setAuthorName(e.target.value)}
-            required
-            style={styles.inputField}
-          />
-        </div>
         <div style={styles.formGroup}>
           <TextField
             label="Your Review"
@@ -218,12 +204,15 @@ const ReviewForm = () => {
 const UserReviews = () => {
   const [reviews, setReviews] = useState([]);
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const authToken = localStorage.getItem("authToken");
 
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const response = await fetch(`http://74.235.209.82:8000/users/api/reviews/`, {
+        setLoading(true);
+        const response = await fetch(`${BASE_URL}/users/api/reviews/`, {
           headers: {
             "Authorization": `Bearer ${authToken}`,
           },
@@ -234,27 +223,60 @@ const UserReviews = () => {
         }
 
         const data = await response.json();
-        setReviews(data);
+        
+        if (data.length === 0) {
+          setError(true);
+        } else {
+          setReviews(data);
+          setError(false);
+        }
       } catch (error) {
         console.error("Error fetching reviews:", error);
+        setError(true);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchReviews();
 
-    // Auto-slider interval
-    const sliderInterval = setInterval(() => {
-      setCurrentReviewIndex((prevIndex) => 
-        prevIndex === reviews.length - 1 ? 0 : prevIndex + 1
-      );
-    }, 5000); // Change slide every 5 seconds
+    // Auto-slider interval only if reviews exist
+    let sliderInterval;
+    if (reviews.length > 1) {
+      sliderInterval = setInterval(() => {
+        setCurrentReviewIndex((prevIndex) => 
+          prevIndex === reviews.length - 1 ? 0 : prevIndex + 1
+        );
+      }, 5000); // Change slide every 5 seconds
+    }
 
     // Cleanup interval on component unmount
-    return () => clearInterval(sliderInterval);
+    return () => {
+      if (sliderInterval) clearInterval(sliderInterval);
+    };
   }, [authToken]);
 
-  if (reviews.length === 0) return null;
+  // If loading, return null or a loading indicator
+  if (loading) {
+    return (
+      <div style={styles.reviewsContainer}>
+        <h2 style={styles.reviewsTitle}>User Reviews</h2>
+        <p style={styles.reviewText}>Loading reviews...</p>
+      </div>
+    );
+  }
 
+  // If there's an error or no reviews
+  if (error || reviews.length === 0) {
+    return (
+      <div style={styles.reviewsContainer}>
+        <h2 style={styles.reviewsTitle}>User Reviews</h2>
+        <p style={styles.reviewText}>No user reviews available</p>
+      </div>
+    );
+  }
+
+  // Render reviews when available
   const currentReview = reviews[currentReviewIndex];
 
   return (
@@ -266,18 +288,20 @@ const UserReviews = () => {
           <p style={styles.reviewAuthor}>- {currentReview.user}</p>
         </div>
         {/* Dot indicators */}
-        <div style={styles.sliderDots}>
-          {reviews.map((_, index) => (
-            <span 
-              key={index} 
-              style={{
-                ...styles.dot,
-                backgroundColor: index === currentReviewIndex ? 'white' : 'rgba(255,255,255,0.5)'
-              }}
-              onClick={() => setCurrentReviewIndex(index)}
-            />
-          ))}
-        </div>
+        {reviews.length > 1 && (
+          <div style={styles.sliderDots}>
+            {reviews.map((_, index) => (
+              <span 
+                key={index} 
+                style={{
+                  ...styles.dot,
+                  backgroundColor: index === currentReviewIndex ? 'white' : 'rgba(255,255,255,0.5)'
+                }}
+                onClick={() => setCurrentReviewIndex(index)}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
