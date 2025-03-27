@@ -819,7 +819,7 @@ const styles = {
   },
   emptyGalleryText: {
     textAlign: "center",
-    color: "#A0522D",
+    color: "#315b7e",
     fontStyle: "italic",
   },
   galleryItem: {
