@@ -34,14 +34,14 @@ const ContentContainer = styled(Container)({
 
 // Styled button with gradient and hover effects
 const StyledButton = styled(Button)({
-  background: "linear-gradient(to right, #315b7e ,rgb(60, 82, 100))",
+  background: "linear-gradient(to right, #315b7e ,rgb(109, 135, 155))",
   color: "white",
   fontWeight: "bold",
   padding: "16px",
   borderRadius: "4px",
   transition: "0.3s",
   "&:hover": {
-    background: "linear-gradient(to right, #315b7e ,rgb(60, 82, 100))",
+    background: "linear-gradient(to right, #315b7e ,rgb(109, 135, 155))",
     transform: "scale(1.05)",
   },
 });
