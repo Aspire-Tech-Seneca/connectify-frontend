@@ -202,6 +202,21 @@ const Signup = () => {
                 ),
               }}
             />
+			 <StyledTextField
+              label="Location"
+              name="location"
+              value={formData.location}
+              onChange={handleChange}
+              error={!!errors.location}
+              helperText={errors.location}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <AccountCircle style={{ color: "#0052D4" }} />
+                  </InputAdornment>
+                ),
+              }}
+            />
             <StyledTextField
               label="Password"
               type="password"
