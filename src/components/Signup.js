@@ -7,9 +7,10 @@ import {
   Box,
   TextField,
   InputAdornment,
-  Grid,
+  //Grid,
 } from "@mui/material";
-import { AccountCircle, Email, Lock, CalendarToday } from "@mui/icons-material";
+import { AccountCircle, Email, Lock, CalendarToday, LocationOn } from "@mui/icons-material";
+
 import { styled } from "@mui/material/styles";
 import { AnimatedBackground } from "animated-backgrounds";
 import logo from "../newlogo.png"; // Replace with actual logo path
@@ -212,7 +213,7 @@ const Signup = () => {
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    <AccountCircle style={{ color: "#0052D4" }} />
+                    <LocationOn  style={{ color: "#0052D4" }} />
                   </InputAdornment>
                 ),
               }}
