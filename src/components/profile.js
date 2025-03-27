@@ -186,11 +186,13 @@ const ProfileCard = ({
   name,
   age,
   bio,
+  location,           // NEW: location prop
   categories,
   availableCategories,
   setName,
   setAge,
   setBio,
+  setLocation,        // NEW: setter for location
   setCategories,
   setIsEditing,
   handleProfilePicChange,
@@ -203,7 +205,6 @@ const ProfileCard = ({
         <img
           src={
             profilePic ||
-            // fallback if profilePic is not set
             `${BLOB_STORAGE_BASE_URL}defaultProfilePic.jpg`
           }
           alt="Profile"
@@ -242,6 +243,14 @@ const ProfileCard = ({
               style={styles.input}
               placeholder="Age"
             />
+            {/* NEW: Input for location */}
+            <input
+              type="text"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              style={styles.input}
+              placeholder="Location"
+            />
             <textarea
               value={bio}
               onChange={(e) => setBio(e.target.value)}
@@ -274,6 +283,10 @@ const ProfileCard = ({
             <h3 style={styles.profileName}>{name}</h3>
             <p style={styles.profileDetail}>
               <strong>Age:</strong> {age}
+            </p>
+            {/* NEW: Display location */}
+            <p style={styles.profileDetail}>
+              <strong>Location:</strong> {location || "Not set"}
             </p>
             <p style={styles.profileDetail}>
               <strong>Bio:</strong> {bio}
@@ -379,6 +392,7 @@ const Profile = () => {
   const [name, setName] = useState("Eni Zeqo");
   const [bio, setBio] = useState("I am new in Canada and I want to make more friends...");
   const [age, setAge] = useState(25);
+  const [location, setLocation] = useState(""); // NEW: State for location
 
   // If not retrieved yet, use default fallback below
   const [profilePic, setProfilePic] = useState(
@@ -407,7 +421,7 @@ const Profile = () => {
       .catch((err) => console.error("Error fetching interest list:", err));
   }, []);
 
-  // 2) Fetch user info (including gallery images)
+  // 2) Fetch user info (including gallery images and location)
   useEffect(() => {
     fetch(`${BASE_URL}/users/get-user-info/`, {
       method: "GET",
@@ -418,6 +432,7 @@ const Profile = () => {
         setName(data.fullname || name);
         setAge(data.age || age);
         setBio(data.bio || bio);
+        setLocation(data.location || ""); // NEW: update location from API
 
         // IMPORTANT: If backend returns e.g. "gallery_images/123.jpg",
         // just prepend BLOB_STORAGE_BASE_URL
@@ -441,7 +456,6 @@ const Profile = () => {
     })
       .then((res) => res.json())
       .then((data) => {
-        // If backend returns "profile_images/abc.jpg", just prepend the blob base URL
         if (data.profile_image) {
           setProfilePic(`${BLOB_STORAGE_BASE_URL}${data.profile_image}`);
         }
@@ -508,7 +522,6 @@ const Profile = () => {
         });
         const newData = await newResponse.json();
         if (newData.profile_image) {
-          // e.g. "profile_images/abc.jpg"
           setProfilePic(`${BLOB_STORAGE_BASE_URL}${newData.profile_image}`);
         }
       } catch (error) {
@@ -522,7 +535,6 @@ const Profile = () => {
     const file = event.target.files[0];
     if (file) {
       try {
-        // Upload to Azure Blob directly
         const uploadedUrl = await uploadFileToBlob(file, GALLERY_IMAGES_CONTAINER);
         setGalleryImages((prev) => [
           ...prev,
@@ -562,9 +574,10 @@ const Profile = () => {
     }
   };
 
-  // Save profile (for bio and interest updates)
+  // Save profile (for bio, location, and interest updates)
   const handleSaveProfile = async () => {
-    const payload = { bio };
+    // Include location in the payload
+    const payload = { bio, location };
     try {
       const response = await fetch(`${BASE_URL}/users/update/`, {
         method: "PATCH",
@@ -606,11 +619,13 @@ const Profile = () => {
               name={name}
               age={age}
               bio={bio}
+              location={location}            // Pass location prop
               categories={categories}
               availableCategories={availableCategories}
               setName={setName}
               setAge={setAge}
               setBio={setBio}
+              setLocation={setLocation}        // Pass setLocation
               setCategories={setCategories}
               setIsEditing={setIsEditing}
               handleProfilePicChange={handleProfilePicChange}
