@@ -34,14 +34,14 @@ const ContentContainer = styled(Container)({
 
 // Styled button with gradient and hover effects
 const StyledButton = styled(Button)({
-  background: "linear-gradient(to right, #C38282, #ae4040)",
+  background: "linear-gradient(to right, #315b7e ,rgb(60, 82, 100))",
   color: "white",
   fontWeight: "bold",
   padding: "16px",
   borderRadius: "4px",
   transition: "0.3s",
   "&:hover": {
-    background: "linear-gradient(to right, #ae4040, #C38282)",
+    background: "linear-gradient(to right, #315b7e ,rgb(60, 82, 100))",
     transform: "scale(1.05)",
   },
 });
@@ -56,7 +56,7 @@ const WelcomePage = () => {
         <Typography
           variant="h4"
           gutterBottom
-          sx={{ fontWeight: "bold", color: "#C38282" }}
+          sx={{ fontWeight: "bold", color: "#315b7e" }}
         >
           Connectify: a platform that brings people together.
         </Typography>
@@ -66,11 +66,11 @@ const WelcomePage = () => {
           <Typography
             variant="h5"
             gutterBottom
-            sx={{ color: "#5D4037", mb: 2 }}
+            sx={{ color: "#315b7e", mb: 2 }}
           >
             Connect with People Who Share Your Passions
           </Typography>
-          <Typography variant="body1" sx={{ color: "#5D4037", mb: 3 }}>
+          <Typography variant="body1" sx={{ color: "#315b7e", mb: 3 }}>
             Welcome to Connectify – where you can discover your community based
             on shared interests. Whether you're into tech, art, sports, or
             literature, find friends and build meaningful connections.
@@ -95,14 +95,14 @@ const WelcomePage = () => {
             mb: 4,
           }}
         >
-          <Typography variant="h6" sx={{ color: "#5D4037", mb: 1 }}>
+          <Typography variant="h6" sx={{ color: "#315b7e", mb: 1 }}>
             What Our Users Say
           </Typography>
-          <Typography variant="body2" sx={{ color: "#5D4037", mb: 1 }}>
+          <Typography variant="body2" sx={{ color: "#315b7e", mb: 1 }}>
             "Connectify has completely transformed the way I connect with people
             who share my interests. I’ve made lifelong friends!"
           </Typography>
-          <Typography variant="caption" sx={{ color: "#C38282" }}>
+          <Typography variant="caption" sx={{ color: "#315b7e" }}>
             — Jordan
           </Typography>
         </Box>
@@ -120,11 +120,11 @@ const WelcomePage = () => {
           <Typography
             variant="h6"
             gutterBottom
-            sx={{ color: "#5D4037", mb: 2 }}
+            sx={{ color: "#315b7e", mb: 2 }}
           >
             Why Choose Connectify?
           </Typography>
-          <Typography variant="body1" sx={{ color: "#5D4037" }}>
+          <Typography variant="body1" sx={{ color: "#315b7e" }}>
             Our innovative matching system connects you with like-minded
             individuals, helping you form meaningful relationships. Join our
             vibrant community and explore new opportunities to learn, collaborate,
