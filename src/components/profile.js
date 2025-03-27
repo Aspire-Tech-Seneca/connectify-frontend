@@ -734,7 +734,7 @@ const styles = {
     objectFit: "cover",
   },
   uploadLabel: {
-    background: "#8B4513",
+    background: "#315b7e",
     color: "white",
     padding: "6px 10px",
     borderRadius: "4px",
