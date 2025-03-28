@@ -256,7 +256,7 @@ const styles = {
     alignItems: "center",
     color: "white",
     width: "100%",
-    position: "relative",
+  position: "fixed", // ✅ Fixes it to top
     padding: "15px",
     top: 0,
     zIndex: 999,
