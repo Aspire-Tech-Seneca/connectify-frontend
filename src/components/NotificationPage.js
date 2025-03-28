@@ -6,158 +6,41 @@ import {
   ListItemText,
   Typography,
   CircularProgress,
-  IconButton,
-  Badge,
   ListItemAvatar,
-  Popover,
+  Badge
 } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
-import ChatIcon from "@mui/icons-material/Chat";
-import MenuIcon from "@mui/icons-material/Menu";
 import { useNavigate } from "react-router-dom";
+import CustomNavbar from "./navbar";
 
 // Adjust to your actual backend URLs
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:8000";
 
-const NavBar = ({ navigate }) => {
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [hamburgerAnchorEl, setHamburgerAnchorEl] = useState(null);
-  const [notifications, setNotifications] = useState([]);
-  const authToken = localStorage.getItem("authToken");
-
-  // Fetch notifications for the notification popover
-  useEffect(() => {
-    if (authToken) {
-      fetch(`${BASE_URL}/notifications/list//`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`
-        }
-      })
-        .then((res) => {
-          if (!res.ok) {
-            throw new Error("Failed to fetch notifications");
-          }
-          return res.json();
-        })
-        .then((data) => {
-          setNotifications(data);
-        })
-        .catch((error) => {
-          console.error("Error fetching notifications:", error);
-          setNotifications([]);
-        });
-    }
-  }, [authToken]);
-  
-  const handleNotificationIconClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-  
-  const handleCloseNotificationPopover = () => {
-    setAnchorEl(null);
-  };
-  
-  const handleHamburgerClick = (event) => {
-    setHamburgerAnchorEl(event.currentTarget);
-  };
-  
-  const handleCloseHamburgerPopover = () => {
-    setHamburgerAnchorEl(null);
-  };
-  
-  const openNotification = Boolean(anchorEl);
-  const notificationPopoverId = openNotification ? "notification-popover" : undefined;
-  
-  const openHamburger = Boolean(hamburgerAnchorEl);
-  const hamburgerPopoverId = openHamburger ? "hamburger-popover" : undefined;
-  
-  const navItems = [
-    { label: "Home", path: "/home", customStyle: { marginLeft: "40px" } },
-    { label: "Chat", path: "/ChatPage" },
-    { label: "My Profile", path: "/profile" },
-    { label: "About Us", path: "/about" },
-    { label: "My Matches", path: "/matches" },
-    { label: "Logout", path: "/login", customStyle: { marginRight: "30px" } },
-  ];
-  
-  const additionalMenuItems = [
-    { label: "Notifications", path: "/notifications" },
-    { label: "User Settings", path: "/UserSettings" },
-    { label: "View Events", path: "/ViewEvents" },
-    { label: "Create Event", path: "/createevent" },
-    { label: "Community Chat", path: "/CommunityChat" },
-    { label: "Policy Compliance", path: "/PolicyCompliance" },
-  ];
-  
-  return (
-    <nav style={styles.navbar}>
-      <div style={styles.navItems}>
-        {navItems.map((item) => (
-          <button
-            key={item.label}
-            style={{ ...styles.navButton, ...(item.customStyle || {}) }}
-            onClick={() => navigate(item.path)}
-          >
-            {item.label}
-          </button>
-        ))}
-        <div style={{ display: "flex", gap: 0, alignItems: "center" }}>
-          <IconButton onClick={handleNotificationIconClick} style={{ padding: 0 }}>
-            <Badge badgeContent={notifications.length} color="error">
-              <NotificationsIcon style={{ color: "white" }} />
-            </Badge>
-          </IconButton>
-          <IconButton onClick={() => navigate("/ChatPage")} style={{ padding: 0 }}>
-            <ChatIcon style={{ color: "white", fontSize: "24px" }} />
-          </IconButton>
-          <IconButton onClick={handleHamburgerClick} style={{ padding: 0 }}>
-            <MenuIcon style={{ color: "white", fontSize: "24px" }} />
-          </IconButton>
-        </div>
-      </div>
-      <Popover
-        id={notificationPopoverId}
-        open={openNotification}
-        anchorEl={anchorEl}
-        onClose={handleCloseNotificationPopover}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        transformOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <List>
-          {notifications.length === 0 ? (
-            <ListItem>
-              <ListItemText primary="No new notifications" />
-            </ListItem>
-          ) : (
-            notifications.slice(0, 5).map((notif) => (
-              <ListItem 
-                key={notif.id}
-                onClick={() => {
-                  // Add logic to handle notification click if needed
-                  handleCloseNotificationPopover();
-                }}
-              >
-                <ListItemText 
-                  primary={notif.detail} 
-                  secondary={new Date(notif.created_at).toLocaleString()} 
-                />
-              </ListItem>
-            ))
-          )}
-        </List>
-      </Popover>
-      {/* ... rest of the existing Popover code ... */}
-    </nav>
-  );
-};
+// NavBar component
+const NavBar = CustomNavbar;
 
 const NotificationPage = () => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const authToken = localStorage.getItem("authToken");
+
+  // Function to get and update viewed notifications from localStorage
+  const getViewedNotifications = () => {
+    return JSON.parse(localStorage.getItem('viewedNotifications') || '{}');
+  };
+
+  // Function to update viewed notifications in localStorage
+  const updateViewedNotifications = (notificationId) => {
+    const viewedNotifications = getViewedNotifications();
+    viewedNotifications[notificationId] = true;
+    localStorage.setItem('viewedNotifications', JSON.stringify(viewedNotifications));
+  };
+
+  // Calculate unread notification count
+  const unreadCount = notifications.filter(notif => 
+    !getViewedNotifications()[notif.id]
+  ).length;
 
   useEffect(() => {
     if (authToken) {
@@ -175,7 +58,14 @@ const NotificationPage = () => {
           return res.json();
         })
         .then((data) => {
-          setNotifications(data);
+          // Add a 'viewed' property based on localStorage
+          const viewedNotifications = getViewedNotifications();
+          const processedNotifications = data.map(notif => ({
+            ...notif,
+            seen: !!viewedNotifications[notif.id]
+          }));
+
+          setNotifications(processedNotifications);
           setLoading(false);
         })
         .catch((error) => {
@@ -190,6 +80,15 @@ const NotificationPage = () => {
   }, [authToken]);
 
   const handleNotificationClick = (notif) => {
+    // Update local storage to mark notification as viewed
+    updateViewedNotifications(notif.id);
+
+    // Update local state to mark notification as seen
+    const updatedNotifications = notifications.map(n => 
+      n.id === notif.id ? { ...n, seen: true } : n
+    );
+    setNotifications(updatedNotifications);
+
     // Add specific handling for different notification types
     switch(notif.type) {
       case 'matchup':
@@ -203,7 +102,10 @@ const NotificationPage = () => {
 
   return (
     <div style={styles.outerContainer}>
-      <NavBar navigate={navigate} />
+      <NavBar 
+        navigate={navigate} 
+        notificationCount={unreadCount} 
+      />
       <div style={styles.contentWrapper}>
         <Container sx={{ padding: "2rem", maxWidth: "600px", marginTop: "4rem" }}>
           <Typography variant="h4" gutterBottom style={styles.heading}>
@@ -223,6 +125,7 @@ const NotificationPage = () => {
                   divider
                   onClick={() => handleNotificationClick(notif)}
                   sx={{
+                    backgroundColor: notif.seen ? "rgba(255,255,255,0.1)" : undefined,
                     "&:hover": {
                       backgroundColor: "#f5f5f5",
                       cursor: "pointer",
@@ -234,13 +137,24 @@ const NotificationPage = () => {
                   }}
                 >
                   <ListItemAvatar>
-                    <NotificationsIcon color="secondary" />
+                    <NotificationsIcon 
+                      color={notif.seen ? "disabled" : "secondary"} 
+                    />
                   </ListItemAvatar>
                   <ListItemText
                     primary={notif.requester}
-                    primaryTypographyProps={{ sx: { color: "white" } }}
+                    primaryTypographyProps={{ 
+                      sx: { 
+                        color: "white",
+                        fontWeight: notif.seen ? "normal" : "bold"
+                      } 
+                    }}
                     secondary={`${notif.detail} - ${new Date(notif.created_at).toLocaleString()}`}
-                    secondaryTypographyProps={{ sx: { color: "rgb(208 208 208)" } }}
+                    secondaryTypographyProps={{ 
+                      sx: { 
+                        color: notif.seen ? "rgb(150,150,150)" : "rgb(208 208 208)"
+                      } 
+                    }}
                     sx={{ ...styles.text, color: "white" }}
                   />
                 </ListItem>
