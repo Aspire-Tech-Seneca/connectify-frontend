@@ -7,11 +7,14 @@ import {
   Box,
   TextField,
   InputAdornment,
-} from "@mui/material";
+  Snackbar,
+  Alert,
+} from "@mui/material"; // ✅ Added Snackbar & Alert
 import { Lock, LockOpen } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 import axios from "axios";
-import logo from "../newlogo.png"; // Use the same logo as in login
+import logo from "../newlogo.png";
+import CustomNavbar from "./navbar";
 
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://127.0.0.1:8000";
 
@@ -41,14 +44,14 @@ const FormContainer = styled(Container)(({ theme }) => ({
 }));
 
 const StyledButton = styled(Button)({
-  background: "linear-gradient(to right, #0052D4, #65C7F7)",
+  background: "linear-gradient(to right, #008080, #315b7e)",
   color: "white",
   fontWeight: "bold",
   padding: "14px",
   width: "100%",
   transition: "0.3s",
   "&:hover": {
-    background: "linear-gradient(to right, #0044AA, #4DB2E0)",
+    background: "linear-gradient(to right, #315b7e, #008080)",
     transform: "scale(1.05)",
   },
 });
@@ -70,18 +73,31 @@ const UserSettings = () => {
   });
   const [errors, setErrors] = useState({});
   const [token, setToken] = useState(null);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
   const navigate = useNavigate();
 
-  // Retrieve the token when the component mounts
   useEffect(() => {
     const storedToken = localStorage.getItem("authToken");
     if (storedToken) {
       setToken(storedToken);
     } else {
-      alert("You must be logged in to change your password.");
-      navigate("/login"); // Redirect to login if token is missing
+      setSnackbar({
+        open: true,
+        message: "You must be logged in to change your password.",
+        severity: "warning",
+      });
+      navigate("/login");
     }
   }, [navigate]);
+
+  const handleSnackbarClose = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -102,8 +118,7 @@ const UserSettings = () => {
     if (validateForm()) {
       try {
         const apiUrl = `${BASE_URL}/users/change-password/`;
-
-        const response = await axios.put(
+        await axios.put(
           apiUrl,
           {
             old_password: formData.old_password,
@@ -118,20 +133,31 @@ const UserSettings = () => {
           }
         );
 
-        alert("Password updated successfully!");
-        navigate("/profile");
+        setSnackbar({
+          open: true,
+          message: "Password updated successfully!",
+          severity: "success",
+        });
+
+        // Optionally redirect after success
+        setTimeout(() => navigate("/profile"), 2000);
       } catch (error) {
-        console.error("Update failed:", error);
-        setErrors({ api: error.response?.data?.detail || "Update failed. Try again." });
+        setSnackbar({
+          open: true,
+          message: error.response?.data?.detail || "Update failed. Try again.",
+          severity: "error",
+        });
       }
     }
   };
 
   return (
     <PageContainer>
+      <CustomNavbar />
+
       <FormContainer>
         <img src={logo} alt="Connectify Logo" style={{ width: "250px", marginBottom: "10px" }} />
-        <Typography variant="h4" gutterBottom style={{ fontWeight: "bold", color: "#0052D4" }}>
+        <Typography variant="h4" gutterBottom style={{ fontWeight: "bold", color: "#315b7e" }}>
           Update Password 🔒
         </Typography>
         {errors.api && <Typography color="error">{errors.api}</Typography>}
@@ -192,6 +218,18 @@ const UserSettings = () => {
           <StyledButton variant="contained" type="submit">Update Password</StyledButton>
         </form>
       </FormContainer>
+
+      {/* ✅ Snackbar Notification */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: "100%" }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </PageContainer>
   );
 };
