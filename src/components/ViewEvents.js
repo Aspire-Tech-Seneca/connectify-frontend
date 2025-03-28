@@ -78,7 +78,7 @@ const ViewEvents = () => {
           gutterBottom
           sx={{
             textAlign: "center",
-            color: "#89574c",
+            color: "#315b7e",
             fontWeight: "bold",
           }}
         >
