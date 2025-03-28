@@ -12,7 +12,7 @@ import {
 import axios from "axios";
 import { styled } from "@mui/material/styles";
 import CustomNavbar from "./navbar"; // ✅ Import the shared navbar here
-
+import SearchIcon from "@mui/icons-material/Search"; 
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:8000";
 
 const BackgroundContainer = styled("div")({
@@ -118,9 +118,31 @@ const ViewEvents = () => {
             />
           </Grid>
           <Grid item xs={12} sm={4}>
-            <Button variant="contained" onClick={handleSearch} fullWidth sx={{ marginTop: "10px" }}>
-              Search
-            </Button>
+            <Button
+  variant="contained"
+  onClick={handleSearch}
+  fullWidth
+  startIcon={<SearchIcon />}
+  sx={{
+    marginTop: "10px",
+    padding: "12px 24px",
+    background: "linear-gradient(135deg, #315b7e, #008080)",
+    color: "white",
+    fontWeight: "bold",
+    borderRadius: "30px",
+    boxShadow: "0 8px 20px rgba(49, 91, 126, 0.4)",
+    backdropFilter: "blur(4px)",
+    textTransform: "uppercase",
+    transition: "all 0.3s ease-in-out",
+    "&:hover": {
+      background: "linear-gradient(135deg, #008080, #315b7e)",
+      boxShadow: "0 12px 24px rgba(0, 128, 128, 0.5)",
+      transform: "scale(1.06)",
+    },
+  }}
+>
+  Search
+</Button>
           </Grid>
         </Grid>
 
