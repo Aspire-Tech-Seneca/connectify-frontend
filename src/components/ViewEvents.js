@@ -68,24 +68,41 @@ const ViewEvents = () => {
   const handleSearch = () => {
     fetchEvents();
   };
-
+<style>
+  {`
+    @keyframes fadeInSlideUp {
+      0% {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  `}
+</style>
   return (
     <BackgroundContainer>
       <CustomNavbar /> {/* ✅ Replaces your old AppBar/Navbar */}
       <Container maxWidth="lg">
-        <Typography
+       <Typography
   variant="h4"
-  gutterBottom
+  align="center"
   sx={{
-    textAlign: "center",
-    color: "#315b7e",
     fontWeight: "bold",
-    mt: 4, // 👈 Add this line for top margin
+    mt: 4,
+    background: "linear-gradient(to right, #315b7e, #008080)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+    textShadow: "2px 2px 4px rgba(0,0,0,0.2)",
+    letterSpacing: "3px",
+    animation: "fadeInSlideUp 1s ease-in-out",
   }}
 >
   Upcoming Events
 </Typography>
-        <Grid container spacing={2} justifyContent="center" sx={{ marginBottom: "20px" }}>
+        <Grid container spacing={2} justifyContent="center" sx={{ marginTop: "20px" }}>
           <Grid item xs={12} sm={4}>
             <TextField
               label="Location"
