@@ -12,15 +12,14 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import ChatIcon from "@mui/icons-material/Chat";
 import MenuIcon from "@mui/icons-material/Menu";
 
-// Adjust to your actual backend URLs
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:8000";
 
-// Points to your Azure Blob Storage endpoint
+// Your Azure Blob Storage base URL (public container or with SAS token)
 const BLOB_STORAGE_BASE_URL =
   process.env.REACT_APP_BLOB_STORAGE_BASE_URL || "https://yourpublicblobstorage.com/";
 
 //
-// NavBar Component (unchanged from your code)
+// NavBar component (unchanged from your code)
 //
 const NavBar = ({ navigate, notificationCount, notifications }) => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -149,7 +148,7 @@ const NavBar = ({ navigate, notificationCount, notifications }) => {
 };
 
 //
-// ProfileCard Component
+// ProfileCard component
 //
 const ProfileCard = ({
   profilePic,
@@ -272,21 +271,33 @@ const ProfileCard = ({
 );
 
 //
-// Gallery Component
-// - Shows local previews and/or real images from your backend
-// - removeGalleryImage is called with either the filename or local id
+// Gallery component
+// - Uses the same "editButton" style as "Save Profile" for the "Choose Files" button
+// - The file input is hidden and triggered by the button
 //
 const Gallery = ({ galleryImages, handleGalleryImageUpload, removeGalleryImage }) => {
+  const fileInputRef = useRef(null);
+
+  const onButtonClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
   return (
     <div style={styles.gallerySection}>
       <h2 style={styles.sectionTitle}>My Gallery</h2>
       <div style={styles.galleryControls}>
+        <button style={styles.editButton} onClick={onButtonClick}>
+          Choose Files
+        </button>
         <input
           type="file"
           accept="image/*"
           multiple
+          ref={fileInputRef}
           onChange={handleGalleryImageUpload}
-          style={styles.fileInput}
+          style={{ display: "none" }}
         />
       </div>
       <div style={styles.galleryGrid}>
@@ -294,13 +305,12 @@ const Gallery = ({ galleryImages, handleGalleryImageUpload, removeGalleryImage }
           <p style={styles.emptyGalleryText}>No media added yet.</p>
         ) : (
           galleryImages.map((image) => {
-            // Key can be the filename if from server, or localId if it's a preview
-            const key = image.filename || image.tempId;
+            const key = image.filename || image.tempId || image.id;
             return (
               <div key={key} style={styles.galleryItem}>
                 <img
                   src={image.url}
-                  alt={`Gallery item ${key}`}
+                  alt={`Gallery ${key}`}
                   style={styles.galleryImage}
                 />
                 <button
@@ -319,7 +329,7 @@ const Gallery = ({ galleryImages, handleGalleryImageUpload, removeGalleryImage }
 };
 
 //
-// CurrentMatches component (unchanged)
+// CurrentMatches component (unchanged from your code)
 //
 const CurrentMatches = ({ currentMatches, handleChat, handleCancelRequest }) => {
   return (
@@ -369,8 +379,7 @@ const CurrentMatches = ({ currentMatches, handleChat, handleCancelRequest }) => 
 };
 
 //
-// Profile component
-// - We add local previews for gallery images
+// Main Profile component
 //
 const Profile = () => {
   const navigate = useNavigate();
@@ -513,12 +522,12 @@ const Profile = () => {
     }
   };
 
-  // Gallery image upload
+  // Gallery upload with local previews + final re-fetch
   const handleGalleryImageUpload = async (event) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
 
-    // 1) Show local previews immediately
+    // Show local previews
     const localPreviews = [];
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
@@ -528,8 +537,8 @@ const Profile = () => {
     }
     setGalleryImages((prev) => [...prev, ...localPreviews]);
 
+    // Upload to backend
     try {
-      // 2) Upload to the backend
       const formData = new FormData();
       for (let i = 0; i < files.length; i++) {
         formData.append("gallery_images", files[i]);
@@ -546,7 +555,7 @@ const Profile = () => {
         throw new Error("Gallery image upload failed");
       }
 
-      // 3) Re-fetch the updated gallery from the backend
+      // Re-fetch updated gallery
       const newResponse = await fetch(`${BASE_URL}/users/retrieve-profile-image/`, {
         method: "GET",
         headers: { Authorization: `Bearer ${authToken}` },
@@ -562,19 +571,19 @@ const Profile = () => {
       }
     } catch (error) {
       console.error("Error uploading gallery image:", error);
-      // If you want, remove local previews or leave them. It's up to you.
+      // If upload fails, you can decide whether to remove local previews or not
     }
   };
 
   // Remove from gallery (handle local or real)
   const removeGalleryImage = async (key) => {
-    // If it's a local preview (temp- prefix), just remove it from state
+    // If it's a local preview (temp- prefix), just remove from state
     if (key.startsWith("temp-")) {
       setGalleryImages((prev) => prev.filter((img) => (img.filename || img.tempId) !== key));
       return;
     }
 
-    // Otherwise, it's a real filename from the backend
+    // Otherwise, it's a real filename from the server
     try {
       const response = await fetch(`${BASE_URL}/users/delete-gallery-image/`, {
         method: "PATCH",
@@ -625,12 +634,11 @@ const Profile = () => {
     }
   };
 
-  // Handler to navigate to ChatPage
+  // Chat and Cancel Request
   const handleChat = (id) => {
     navigate("/ChatPage");
   };
 
-  // Cancel a pending request
   const handleCancelRequest = async (id) => {
     const match = currentMatches.find((m) => m.id === id && m.status === "pending");
     if (!match) return;
@@ -698,7 +706,7 @@ const Profile = () => {
 };
 
 //
-// Styles (same as yours)
+// Styles
 //
 const styles = {
   navbar: {
@@ -819,6 +827,7 @@ const styles = {
     cursor: "pointer",
     boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
     transition: "background 0.3s, transform 0.3s",
+    fontWeight: "bold",
   },
   removeButton: {
     background: "#315b7e",
@@ -859,6 +868,7 @@ const styles = {
   },
   galleryControls: {
     marginBottom: "10px",
+    textAlign: "center",
   },
   galleryGrid: {
     display: "grid",
