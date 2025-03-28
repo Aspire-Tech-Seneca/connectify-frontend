@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { IconButton, Badge, Snackbar, Alert, TextField, Button, Popover, List, ListItem, ListItemText, } from "@mui/material";
+import { IconButton, Badge, Snackbar, Alert, TextField, Button, Popover, List, ListItem, ListItemText, Rating, Box, Typography } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import ChatIcon from "@mui/icons-material/Chat";
 import MenuIcon from "@mui/icons-material/Menu";
+
 
 // Environment variables
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://127.0.0.1:8000";
@@ -118,9 +119,9 @@ const NavBar = ({ navigate }) => {
   );
 };
 
-// Review Form Component
 const ReviewForm = () => {
   const [reviewText, setReviewText] = useState("");
+  const [rating, setRating] = useState(0);
   const [formMessage, setFormMessage] = useState({ text: "", type: "" });
   const authToken = localStorage.getItem("authToken");
 
@@ -132,6 +133,11 @@ const ReviewForm = () => {
       return;
     }
     
+    if (rating === 0) {
+      setFormMessage({ text: "Please select a rating", type: "error" });
+      return;
+    }
+    
     try {
       const response = await fetch(`${BASE_URL}/users/api/reviews/`, {
         method: "POST",
@@ -140,7 +146,8 @@ const ReviewForm = () => {
           "Authorization": `Bearer ${authToken}`,
         },
         body: JSON.stringify({
-          comment: reviewText
+          comment: reviewText,
+          rating: rating
         }),
       });
       
@@ -150,6 +157,7 @@ const ReviewForm = () => {
       
       setFormMessage({ text: "Review submitted successfully!", type: "success" });
       setReviewText("");
+      setRating(0);
       
       // Reset success message after 3 seconds
       setTimeout(() => {
@@ -179,6 +187,25 @@ const ReviewForm = () => {
             style={styles.inputField}
           />
         </div>
+        <Box 
+          sx={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center', 
+            gap: 2,
+            marginBottom: 2 
+          }}
+        >
+          <Typography component="legend">Rate Your Experience</Typography>
+          <Rating
+            name="simple-controlled"
+            value={rating}
+            onChange={(event, newValue) => {
+              setRating(newValue);
+            }}
+            size="large"
+          />
+        </Box>
         <Button 
           type="submit" 
           variant="contained" 
@@ -200,12 +227,12 @@ const ReviewForm = () => {
   );
 };
 
-// User Reviews Section with Auto-Slider
 const UserReviews = () => {
   const [reviews, setReviews] = useState([]);
-  const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const authToken = localStorage.getItem("authToken");
 
   useEffect(() => {
@@ -217,11 +244,11 @@ const UserReviews = () => {
             "Authorization": `Bearer ${authToken}`,
           },
         });
-
+        
         if (!response.ok) {
           throw new Error("Failed to fetch reviews");
         }
-
+        
         const data = await response.json();
         
         if (data.length === 0) {
@@ -237,26 +264,30 @@ const UserReviews = () => {
         setLoading(false);
       }
     };
-
+    
     fetchReviews();
-
-    // Auto-slider interval only if reviews exist
-    let sliderInterval;
-    if (reviews.length > 1) {
-      sliderInterval = setInterval(() => {
-        setCurrentReviewIndex((prevIndex) => 
-          prevIndex === reviews.length - 1 ? 0 : prevIndex + 1
-        );
-      }, 5000); // Change slide every 5 seconds
-    }
-
-    // Cleanup interval on component unmount
-    return () => {
-      if (sliderInterval) clearInterval(sliderInterval);
-    };
   }, [authToken]);
 
-  // If loading, return null or a loading indicator
+  const nextSlide = () => {
+    setCurrentIndex((prevIndex) => 
+      prevIndex + 3 >= reviews.length ? 0 : prevIndex + 3
+    );
+  };
+
+  const prevSlide = () => {
+    setCurrentIndex((prevIndex) => 
+      prevIndex === 0 ? reviews.length - (reviews.length % 3 || 3) : prevIndex - 3
+    );
+  };
+
+  // Auto-slider effect
+  useEffect(() => {
+    if (reviews.length > 3) {
+      const interval = setInterval(nextSlide, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [reviews]);
+
   if (loading) {
     return (
       <div style={styles.reviewsContainer}>
@@ -266,7 +297,6 @@ const UserReviews = () => {
     );
   }
 
-  // If there's an error or no reviews
   if (error || reviews.length === 0) {
     return (
       <div style={styles.reviewsContainer}>
@@ -276,37 +306,79 @@ const UserReviews = () => {
     );
   }
 
-  // Render reviews when available
-  const currentReview = reviews[currentReviewIndex];
+  // Prepare reviews to display (3 at a time)
+  const displayedReviews = reviews.length > 3 
+    ? reviews.slice(currentIndex, currentIndex + 3).concat(
+        reviews.slice(0, Math.max(0, (currentIndex + 3) - reviews.length))
+      )
+    : reviews;
 
   return (
-    <div style={styles.reviewsContainer}>
+    <div 
+      style={styles.reviewsContainer}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <h2 style={styles.reviewsTitle}>What Our Users Say</h2>
-      <div style={styles.reviewsList}>
-        <div key={currentReview.id} style={styles.reviewItem}>
-          <p style={styles.reviewText}>"{currentReview.comment}"</p>
-          <p style={styles.reviewAuthor}>- {currentReview.user}</p>
+      
+      <div style={styles.reviewSliderContainer}>
+        {/* Previous Button */}
+        {isHovered && reviews.length > 3 && (
+          <button
+            style={styles.sliderButton}
+            onClick={prevSlide}
+          >
+            &#8249;
+          </button>
+        )}
+
+        {/* Reviews Container */}
+        <div style={styles.reviewsList}>
+          {displayedReviews.map((review, index) => (
+            <div
+              key={review.id}
+              style={{
+                ...styles.reviewItem,
+                transition: 'all 0.5s ease',
+                opacity: 1,
+              }}
+            >
+              <p style={styles.reviewText}>"{review.comment}"</p>
+              <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'center', 
+                gap: 1, 
+                marginTop: 2 
+              }}>
+                <Rating 
+                  name="read-only" 
+                  value={review.rating} 
+                  readOnly 
+                  size="medium" 
+                />
+                <Typography variant="body2" color="text.secondary">
+                  ({review.rating}/5)
+                </Typography>
+              </Box>
+              <p style={styles.reviewAuthor}>- {review.user.fullname}</p>
+            </div>
+          ))}
         </div>
-        {/* Dot indicators */}
-        {reviews.length > 1 && (
-          <div style={styles.sliderDots}>
-            {reviews.map((_, index) => (
-              <span 
-                key={index} 
-                style={{
-                  ...styles.dot,
-                  backgroundColor: index === currentReviewIndex ? 'white' : 'rgba(255,255,255,0.5)'
-                }}
-                onClick={() => setCurrentReviewIndex(index)}
-              />
-            ))}
-          </div>
+
+        {/* Next Button */}
+        {isHovered && reviews.length > 3 && (
+          <button
+            style={styles.sliderButton}
+            onClick={nextSlide}
+          >
+            &#8250;
+          </button>
         )}
       </div>
     </div>
   );
 };
-
 
 // Footer component
 const Footer = () => {
@@ -707,6 +779,58 @@ const styles = {
     whiteSpace: "nowrap",
   },
 
+  reviewsContainer: {
+    background: "rgba(7, 53, 102, 0.7)",
+    padding: "40px 20px",
+    textAlign: "center",
+    position: "relative",
+  },
+  reviewSliderContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    width: '100%',
+    maxWidth: '1200px',
+    margin: '0 auto',
+  },
+  reviewsList: {
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '20px',
+    width: '100%',
+    overflow: 'hidden',
+  },
+  reviewItem: {
+    background: "#fff",
+    padding: "20px",
+    borderRadius: "8px",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+    width: "300px",
+    textAlign: "center",
+    flex: '0 0 auto',
+  },
+  sliderButton: {
+    background: "rgba(7, 53, 102, 0.7)",
+    color: "white",
+    fontSize: "28px",
+    fontWeight: "bold",
+    width: "40px",
+    height: "40px",
+    border: "none",
+    borderRadius: "50%",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    cursor: "pointer",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+    transition: "background 0.3s, transform 0.3s",
+    position: "absolute",
+    top: "50%",
+    transform: "translateY(-50%)",
+    zIndex: 10,
+  },
+  
   // Review Form Styles
   reviewFormContainer: {
     padding: "40px 20px",
@@ -725,6 +849,7 @@ const styles = {
     flexDirection: "column",
     gap: "20px",
   },
+
   formGroup: {
     width: "100%",
   },
