@@ -172,7 +172,7 @@ const CreateEvent = () => {
     <BackgroundContainer>
       <CustomNavbar />
       <FormContainer>
-        <Typography variant="h4" gutterBottom style={{ fontWeight: "bold", color: "#89574c" }}>
+        <Typography variant="h4" gutterBottom style={{ fontWeight: "bold", color: "#315b7e" }}>
           Host an Event
         </Typography>
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
