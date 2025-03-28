@@ -74,17 +74,17 @@ const ViewEvents = () => {
       <CustomNavbar /> {/* ✅ Replaces your old AppBar/Navbar */}
       <Container maxWidth="lg">
         <Typography
-          variant="h4"
-          gutterBottom
-          sx={{
-            textAlign: "center",
-            color: "#315b7e",
-            fontWeight: "bold",
-          }}
-        >
-          Upcoming Events
-        </Typography>
-
+  variant="h4"
+  gutterBottom
+  sx={{
+    textAlign: "center",
+    color: "#315b7e",
+    fontWeight: "bold",
+    mt: 4, // 👈 Add this line for top margin
+  }}
+>
+  Upcoming Events
+</Typography>
         <Grid container spacing={2} justifyContent="center" sx={{ marginBottom: "20px" }}>
           <Grid item xs={12} sm={4}>
             <TextField
