@@ -380,7 +380,7 @@ const HomePage = () => {
 
   useEffect(() => {
     if (!authToken) {
-      navigate("/login"); // Redirect to login if no token is found
+      // navigate("/login"); // Redirect to login if no token is found
       return;
     }
 
@@ -469,34 +469,6 @@ const HomePage = () => {
     }
   };
 
-  const handleUnmatch = async (id) => {
-    try {
-      const response = await fetch(`${BASE_URL}/users/deny-matchup-request/`, {
-        method: "PUT",
-        headers: {
-          "Authorization": `Bearer ${authToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ "requester-user-id": id }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to deny matchup request.");
-      }
-
-      setCurrentMatches(currentMatches.filter((m) => m.id !== id));
-      setSnackbarMessage("Match request denied successfully!");
-      setSnackbarSeverity("success");
-    } catch (error) {
-      console.error("Error denying matchup request:", error);
-      setSnackbarMessage(error.message || "Failed to deny matchup request.");
-      setSnackbarSeverity("error");
-    } finally {
-      setSnackbarOpen(true);
-    }
-  };
-
   const handleSnackbarClose = (event, reason) => {
     if (reason === "clickaway") {
       return;
@@ -556,12 +528,6 @@ const HomePage = () => {
                           disabled={currentMatches.some(match => match.id === currentProfile.id && match.status === "pending")}
                         >
                           {currentMatches.some(match => match.id === currentProfile.id && match.status === "pending") ? "Pending" : "Match"}
-                        </button>
-                        <button 
-                          style={styles.messageBtn}
-                          onClick={() => handleUnmatch(currentProfile.id)}
-                        >
-                          Unmatch
                         </button>
                       </div>
                     </div>
@@ -835,7 +801,7 @@ const styles = {
     padding: "40px 20px",
     color: "white",
   },
-  
+
   footerContent: {
     display: "flex",
     justifyContent: "space-between",
