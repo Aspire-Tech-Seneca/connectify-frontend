@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { IconButton, Badge, Snackbar, Alert, TextField, Button, Popover, List, ListItem, ListItemText, } from "@mui/material";
-import NotificationsIcon from "@mui/icons-material/Notifications";
-import ChatIcon from "@mui/icons-material/Chat";
-import MenuIcon from "@mui/icons-material/Menu";
+import CustomNavbar from "./navbar";
 
 // Placeholder image to avoid repeated blob calls
 const DEFAULT_IMAGE = "https://atcdevstorageaccount.blob.core.windows.net/media/profile_images/defaultProfilePic.jpg";
@@ -154,112 +151,8 @@ const styles = {
   },
 };
 
-// A simple NavBar matching your style
-const NavBar = ({ navigate }) => {
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const [hamburgerAnchorEl, setHamburgerAnchorEl] = React.useState(null);
-
-  const handleNotificationIconClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleCloseNotificationPopover = () => {
-    setAnchorEl(null);
-  };
-  const handleHamburgerClick = (event) => {
-    setHamburgerAnchorEl(event.currentTarget);
-  };
-  const handleCloseHamburgerPopover = () => {
-    setHamburgerAnchorEl(null);
-  };
-
-  const openNotification = Boolean(anchorEl);
-  const notificationPopoverId = openNotification ? "notification-popover" : undefined;
-  const openHamburger = Boolean(hamburgerAnchorEl);
-  const hamburgerPopoverId = openHamburger ? "hamburger-popover" : undefined;
-
-  const navItems = [
-    { label: "Home", path: "/home" },
-    { label: "Chat", path: "/ChatPage" },
-    { label: "My Profile", path: "/profile" },
-    { label: "About Us", path: "/about" },
-    { label: "My Matches", path: "/matches" },
-    { label: "Logout", path: "/login" },
-  ];
-  const additionalMenuItems = [
-    { label: "Notifications", path: "/notifications" },
-    { label: "User Settings", path: "/UserSettings" },
-    { label: "View Events", path: "/ViewEvents" },
-    { label: "Create Event", path: "/createevent" },
-    { label: "Community Chat", path: "/CommunityChat" },
-    { label: "Policy Compliance", path: "/PolicyCompliance" },
-  ];
-
-  return (
-    <nav style={styles.navbar}>
-      <div style={styles.navItems}>
-        {navItems.map((item) => (
-          <button
-            key={item.label}
-            style={{ ...styles.navButton, ...(item.customStyle || {}) }}
-            onClick={() => navigate(item.path)}
-          >
-            {item.label}
-          </button>
-        ))}
-        <div style={{ display: "flex", gap: 0, alignItems: "center" }}>
-          <IconButton onClick={handleNotificationIconClick} style={{ padding: 0 }}>
-            <Badge badgeContent={0} color="error">
-              <NotificationsIcon style={{ color: "white" }} />
-            </Badge>
-          </IconButton>
-          <IconButton onClick={() => navigate("/ChatPage")} style={{ padding: 0 }}>
-            <ChatIcon style={{ color: "white", fontSize: "24px" }} />
-          </IconButton>
-          <IconButton onClick={handleHamburgerClick} style={{ padding: 0 }}>
-            <MenuIcon style={{ color: "white", fontSize: "24px" }} />
-          </IconButton>
-        </div>
-      </div>
-      <Popover
-        id={notificationPopoverId}
-        open={openNotification}
-        anchorEl={anchorEl}
-        onClose={handleCloseNotificationPopover}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        transformOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <List>
-          <ListItem>
-            <ListItemText primary="No new notifications" />
-          </ListItem>
-        </List>
-      </Popover>
-      <Popover
-        id={hamburgerPopoverId}
-        open={openHamburger}
-        anchorEl={hamburgerAnchorEl}
-        onClose={handleCloseHamburgerPopover}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        transformOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <List>
-          {additionalMenuItems.map((item, index) => (
-            <ListItem
-              button
-              key={index}
-              onClick={() => {
-                handleCloseHamburgerPopover();
-                navigate(item.path);
-              }}
-            >
-              <ListItemText primary={item.label} />
-            </ListItem>
-          ))}
-        </List>
-      </Popover>
-    </nav>
-  );
-};
+// NavBar component
+const NavBar = CustomNavbar;
 
 // Left column: Matches list
 const ChatMatches = ({ matches, selectedMatch, setSelectedMatch }) => {
