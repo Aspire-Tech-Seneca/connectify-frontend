@@ -948,7 +948,7 @@ const styles = {
   },
   emptyText: {
     textAlign: "center",
-    color: "#ffffff",
+    color: "blue",
     fontStyle: "italic",
   },
 };
