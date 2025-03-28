@@ -26,8 +26,8 @@ const PROFILE_IMAGES_CONTAINER = "profile_images/";
 const GALLERY_IMAGES_CONTAINER = "gallery_images/";
 
 /**
- * (Optional) Helper function to upload files directly to Azure Blob.
- * Not used for gallery uploads in the updated approach.
+ * Helper function to upload files directly to Azure Blob.
+ * (Not used for gallery uploads in this approach.)
  */
 async function uploadFileToBlob(file, containerName) {
   const uniqueFileName = `${Date.now()}_${file.name}`;
@@ -84,7 +84,6 @@ const NavBar = ({ navigate, notificationCount, notifications }) => {
     { label: "Logout", path: "/login", customStyle: { marginRight: "30px" } },
   ];
 
-  // Additional pages for hamburger menu
   const additionalMenuItems = [
     { label: "Notifications", path: "/Notifications" },
     { label: "User Settings", path: "/UserSettings" },
@@ -106,8 +105,6 @@ const NavBar = ({ navigate, notificationCount, notifications }) => {
             {item.label}
           </button>
         ))}
-
-        {/* Icons grouped with minimal spacing */}
         <div style={{ display: "flex", gap: 0, alignItems: "center" }}>
           <IconButton onClick={handleNotificationIconClick} style={{ padding: 0 }}>
             <Badge badgeContent={notificationCount} color="error">
@@ -121,7 +118,6 @@ const NavBar = ({ navigate, notificationCount, notifications }) => {
             <MenuIcon style={{ color: "white" }} />
           </IconButton>
         </div>
-
         <Popover
           id={notificationPopoverId}
           open={openNotification}
@@ -151,7 +147,6 @@ const NavBar = ({ navigate, notificationCount, notifications }) => {
             )}
           </List>
         </Popover>
-
         <Popover
           id={hamburgerPopoverId}
           open={openHamburger}
@@ -301,15 +296,15 @@ const ProfileCard = ({
 );
 
 /* 
-  Gallery Component: 
-  – We update this to use "filename" (returned by the backend) as the key.
-  – The upload handler now calls the API endpoint with a FormData containing "gallery_images"
-  – After upload, we retrieve the updated list from the backend.
+  Gallery Component:
+  Uses the galleryImages state where each image object is expected to have a 
+  "filename" property (from the backend) or an "id" if uploaded locally.
 */
 const Gallery = ({ galleryImages, handleGalleryImageUpload, removeGalleryImage }) => (
   <div style={styles.gallerySection}>
     <h2 style={styles.sectionTitle}>My Gallery</h2>
     <div style={styles.galleryControls}>
+      {/* You can allow multiple by adding "multiple" */}
       <input
         type="file"
         accept="image/*,video/*"
@@ -322,14 +317,25 @@ const Gallery = ({ galleryImages, handleGalleryImageUpload, removeGalleryImage }
         <p style={styles.emptyGalleryText}>No media added yet.</p>
       ) : (
         galleryImages.map((image) => (
-          <div key={image.id}>
-          <img src={image.url} alt="Gallery item" />
-        </div>
+          <div key={image.filename || image.id} style={styles.galleryItem}>
+            <img
+              src={image.url}
+              alt={`Gallery ${image.filename || image.id}`}
+              style={styles.galleryImage}
+            />
+            <button
+              style={styles.deleteButton}
+              onClick={() => removeGalleryImage(image.filename || image.id)}
+            >
+              X
+            </button>
+          </div>
         ))
       )}
     </div>
   </div>
 );
+
 
 const CurrentMatches = ({ currentMatches, handleChat, handleCancelRequest }) => {
   return (
@@ -425,7 +431,7 @@ const Profile = () => {
         setLocation(data.location || "");
 
         if (data.gallery_images) {
-          // Map returned filenames into objects with "filename" and "url"
+          // Expecting backend to return an array of filenames
           setGalleryImages(
             data.gallery_images.map((filename) => ({
               filename,
@@ -467,7 +473,7 @@ const Profile = () => {
       .catch((err) => console.error("Error retrieving interest:", err));
   }, [authToken]);
 
-  // 5) Fetch current matches (approved or pending outgoing)
+  // 5) Fetch current matches
   useEffect(() => {
     if (!authToken) return;
     fetch(`${BASE_URL}/users/get-mymatchup-list/`, {
@@ -488,7 +494,7 @@ const Profile = () => {
       .catch((err) => console.error("Failed to fetch current matches:", err));
   }, [authToken]);
 
-  // Handle profile picture upload (already working)
+  // Handle profile picture upload (working approach)
   const handleProfilePicChange = async (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -518,28 +524,67 @@ const Profile = () => {
     }
   };
 
-  // Handle gallery upload using the API endpoint
-  const handleGalleryImageUpload = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-  
-    try {
-      const uploadedUrl = await uploadFileToBlob(file, GALLERY_IMAGES_CONTAINER);
-      setGalleryImages((prev) => [
-        ...prev,
-        {
-          // local unique id for React
-          id: Date.now() + Math.random(),
-          url: uploadedUrl,
-        },
-      ]);
-    } catch (error) {
-      console.error("Gallery image upload failed:", error);
-    }
-  };
-  
+  // Handle gallery upload using the same tactic as profile image
+// In Profile.js
+const handleGalleryImageUpload = async (event) => {
+  const files = event.target.files;
+  if (!files || files.length === 0) return;
 
-  // Remove gallery image by filename (calls delete endpoint)
+  // 1) Create local preview(s) right away
+  const previews = [];
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    // create a temporary object URL
+    const localPreviewUrl = URL.createObjectURL(file);
+    const tempId = `temp-${Date.now()}-${Math.random()}`;
+    previews.push({ id: tempId, url: localPreviewUrl });
+  }
+
+  // 2) Add these local previews to the gallery state so user sees them immediately
+  setGalleryImages((prev) => [...prev, ...previews]);
+
+  try {
+    // 3) Also upload to your backend endpoint (like the profile image approach)
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+      formData.append("gallery_images", files[i]);
+    }
+
+    const response = await fetch(`${BASE_URL}/users/upload-profile-image/`, {
+      method: "PUT",
+      headers: { Authorization: `Bearer ${authToken}` },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Gallery upload failed:", errorText);
+      throw new Error("Gallery image upload failed");
+    }
+
+    // 4) Re-fetch updated gallery from your backend
+    const newResponse = await fetch(`${BASE_URL}/users/retrieve-profile-image/`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${authToken}` },
+    });
+    const newData = await newResponse.json();
+
+    // 5) If the server returns an updated array of filenames, set them
+    if (newData.gallery_images && Array.isArray(newData.gallery_images)) {
+      setGalleryImages(
+        newData.gallery_images.map((filename) => ({
+          filename,
+          url: `${BLOB_STORAGE_BASE_URL}${filename}`,
+        }))
+      );
+    }
+  } catch (error) {
+    console.error("Error uploading gallery image:", error);
+    // You might leave the local preview in place or remove it if the upload fails
+  }
+};
+
+  // Remove gallery image by filename
   const removeGalleryImage = async (filename) => {
     try {
       const response = await fetch(`${BASE_URL}/users/delete-gallery-image/`, {
