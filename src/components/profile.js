@@ -26,8 +26,8 @@ const PROFILE_IMAGES_CONTAINER = "profile_images/";
 const GALLERY_IMAGES_CONTAINER = "gallery_images/";
 
 /**
- * Helper function to upload files to a specified container in Azure Blob.
- * Returns the final public URL of the uploaded file.
+ * (Optional) Helper function to upload files directly to Azure Blob.
+ * Not used for gallery uploads in the updated approach.
  */
 async function uploadFileToBlob(file, containerName) {
   const uniqueFileName = `${Date.now()}_${file.name}`;
@@ -186,13 +186,13 @@ const ProfileCard = ({
   name,
   age,
   bio,
-  location,           // NEW: location prop
+  location,
   categories,
   availableCategories,
   setName,
   setAge,
   setBio,
-  setLocation,        // NEW: setter for location
+  setLocation,
   setCategories,
   setIsEditing,
   handleProfilePicChange,
@@ -203,10 +203,7 @@ const ProfileCard = ({
     <div style={styles.profileContent}>
       <div style={styles.profilePicContainer}>
         <img
-          src={
-            profilePic ||
-            `${BLOB_STORAGE_BASE_URL}defaultProfilePic.jpg`
-          }
+          src={profilePic || `${BLOB_STORAGE_BASE_URL}defaultProfilePic.jpg`}
           alt="Profile"
           style={styles.fixedProfilePic}
         />
@@ -243,7 +240,6 @@ const ProfileCard = ({
               style={styles.input}
               placeholder="Age"
             />
-            {/* NEW: Input for location */}
             <input
               type="text"
               value={location}
@@ -284,7 +280,6 @@ const ProfileCard = ({
             <p style={styles.profileDetail}>
               <strong>Age:</strong> {age}
             </p>
-            {/* NEW: Display location */}
             <p style={styles.profileDetail}>
               <strong>Location:</strong> {location || "Not set"}
             </p>
@@ -305,6 +300,12 @@ const ProfileCard = ({
   </div>
 );
 
+/* 
+  Gallery Component: 
+  – We update this to use "filename" (returned by the backend) as the key.
+  – The upload handler now calls the API endpoint with a FormData containing "gallery_images"
+  – After upload, we retrieve the updated list from the backend.
+*/
 const Gallery = ({ galleryImages, handleGalleryImageUpload, removeGalleryImage }) => (
   <div style={styles.gallerySection}>
     <h2 style={styles.sectionTitle}>My Gallery</h2>
@@ -321,19 +322,9 @@ const Gallery = ({ galleryImages, handleGalleryImageUpload, removeGalleryImage }
         <p style={styles.emptyGalleryText}>No media added yet.</p>
       ) : (
         galleryImages.map((image) => (
-          <div key={image.id} style={styles.galleryItem}>
-            <img
-              src={image.url}
-              alt={`Gallery ${image.id}`}
-              style={styles.galleryImage}
-            />
-            <button
-              style={styles.deleteButton}
-              onClick={() => removeGalleryImage(image.id)}
-            >
-              X
-            </button>
-          </div>
+          <div key={image.id}>
+          <img src={image.url} alt="Gallery item" />
+        </div>
         ))
       )}
     </div>
@@ -392,9 +383,8 @@ const Profile = () => {
   const [name, setName] = useState("Eni Zeqo");
   const [bio, setBio] = useState("I am new in Canada and I want to make more friends...");
   const [age, setAge] = useState(25);
-  const [location, setLocation] = useState(""); // NEW: State for location
+  const [location, setLocation] = useState("");
 
-  // If not retrieved yet, use default fallback below
   const [profilePic, setProfilePic] = useState(
     `${BLOB_STORAGE_BASE_URL}defaultProfilePic.jpg`
   );
@@ -432,15 +422,14 @@ const Profile = () => {
         setName(data.fullname || name);
         setAge(data.age || age);
         setBio(data.bio || bio);
-        setLocation(data.location || ""); // NEW: update location from API
+        setLocation(data.location || "");
 
-        // IMPORTANT: If backend returns e.g. "gallery_images/123.jpg",
-        // just prepend BLOB_STORAGE_BASE_URL
         if (data.gallery_images) {
+          // Map returned filenames into objects with "filename" and "url"
           setGalleryImages(
-            data.gallery_images.map((url, index) => ({
-              id: index,
-              url: `${BLOB_STORAGE_BASE_URL}${url}`,
+            data.gallery_images.map((filename) => ({
+              filename,
+              url: `${BLOB_STORAGE_BASE_URL}${filename}`,
             }))
           );
         }
@@ -499,7 +488,7 @@ const Profile = () => {
       .catch((err) => console.error("Failed to fetch current matches:", err));
   }, [authToken]);
 
-  // Handle profile picture upload
+  // Handle profile picture upload (already working)
   const handleProfilePicChange = async (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -515,7 +504,6 @@ const Profile = () => {
         if (!response.ok) {
           throw new Error("Profile image upload failed");
         }
-        // Retrieve the new profile image name from the server
         const newResponse = await fetch(`${BASE_URL}/users/retrieve-profile-image/`, {
           method: "GET",
           headers: { Authorization: `Bearer ${authToken}` },
@@ -530,24 +518,45 @@ const Profile = () => {
     }
   };
 
-  // Handle gallery upload
+  // Handle gallery upload using the API endpoint
   const handleGalleryImageUpload = async (event) => {
     const file = event.target.files[0];
-    if (file) {
-      try {
-        const uploadedUrl = await uploadFileToBlob(file, GALLERY_IMAGES_CONTAINER);
-        setGalleryImages((prev) => [
-          ...prev,
-          { id: Date.now() + Math.random(), url: uploadedUrl },
-        ]);
-      } catch (error) {
-        console.error("Gallery image upload failed:", error);
-      }
+    if (!file) return;
+  
+    try {
+      const uploadedUrl = await uploadFileToBlob(file, GALLERY_IMAGES_CONTAINER);
+      setGalleryImages((prev) => [
+        ...prev,
+        {
+          // local unique id for React
+          id: Date.now() + Math.random(),
+          url: uploadedUrl,
+        },
+      ]);
+    } catch (error) {
+      console.error("Gallery image upload failed:", error);
     }
   };
+  
 
-  const removeGalleryImage = (id) => {
-    setGalleryImages((prev) => prev.filter((img) => img.id !== id));
+  // Remove gallery image by filename (calls delete endpoint)
+  const removeGalleryImage = async (filename) => {
+    try {
+      const response = await fetch(`${BASE_URL}/users/delete-gallery-image/`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
+        body: JSON.stringify({ image: filename }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to delete gallery image");
+      }
+      setGalleryImages((prev) => prev.filter((img) => img.filename !== filename));
+    } catch (err) {
+      console.error("Error deleting gallery image:", err);
+    }
   };
 
   // Handler to navigate to ChatPage
@@ -562,7 +571,10 @@ const Profile = () => {
     try {
       const response = await fetch(`${BASE_URL}/users/deny-matchup-request/`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
         body: JSON.stringify({ "requester-user-id": id }),
       });
       if (!response.ok) {
@@ -576,7 +588,6 @@ const Profile = () => {
 
   // Save profile (for bio, location, and interest updates)
   const handleSaveProfile = async () => {
-    // Include location in the payload
     const payload = { bio, location };
     try {
       const response = await fetch(`${BASE_URL}/users/update/`, {
@@ -619,13 +630,13 @@ const Profile = () => {
               name={name}
               age={age}
               bio={bio}
-              location={location}            // Pass location prop
+              location={location}
               categories={categories}
               availableCategories={availableCategories}
               setName={setName}
               setAge={setAge}
               setBio={setBio}
-              setLocation={setLocation}        // Pass setLocation
+              setLocation={setLocation}
               setCategories={setCategories}
               setIsEditing={setIsEditing}
               handleProfilePicChange={handleProfilePicChange}
@@ -638,7 +649,6 @@ const Profile = () => {
               removeGalleryImage={removeGalleryImage}
             />
           </div>
-          {/* Right column now shows Current Matches */}
           <div style={styles.column}>
             <CurrentMatches
               currentMatches={currentMatches}
