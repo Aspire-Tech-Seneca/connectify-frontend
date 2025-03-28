@@ -5,11 +5,13 @@ import {
   TextField,
   MenuItem,
   Container,
-} from "@mui/material";
+  Snackbar,
+  Alert,
+} from "@mui/material"; // ✅ Added Snackbar and Alert
 import { styled } from "@mui/material/styles";
 import logo from "../newlogo.png";
 import axios from "axios";
-import CustomNavbar from "./navbar"; // ✅ Correct path and name
+import CustomNavbar from "./navbar";
 
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:8000";
 const BASE_IMAGE_URL = process.env.REACT_APP_BLOB_STORAGE_EVENT_IMAGES;
@@ -38,7 +40,7 @@ const FormContainer = styled(Container)({
   minWidth: "750px",
   textAlign: "center",
   zIndex: 2,
-  marginTop: "150px", // Adjusted for fixed navbar
+  marginTop: "150px",
 });
 
 const StyledButton = styled(Button)({
@@ -64,6 +66,16 @@ const CreateEvent = () => {
     imageUrl: "",
     imageFile: null,
   });
+
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
+  const handleSnackbarClose = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
 
   const categories = [
     "Outdoor",
@@ -95,7 +107,11 @@ const CreateEvent = () => {
     e.preventDefault();
 
     if (!eventData.imageFile) {
-      alert("Please upload an event image.");
+      setSnackbar({
+        open: true,
+        message: "Please upload an event image.",
+        severity: "warning",
+      });
       return;
     }
 
@@ -119,18 +135,36 @@ const CreateEvent = () => {
     formData.append("event_image", eventData.imageFile);
 
     try {
-      const response = await axios.post(`${BASE_URL}/events/create/`, formData, {
+      await axios.post(`${BASE_URL}/events/create/`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
         },
       });
 
-      console.log("Event Created:", response.data);
-      alert("Event created successfully!");
+      setSnackbar({
+        open: true,
+        message: "Event created successfully!",
+        severity: "success",
+      });
+
+      // Optionally reset the form here
+      setEventData({
+        event_name: "",
+        event_date: "",
+        event_time: "",
+        location: "",
+        description: "",
+        category: "",
+        imageUrl: "",
+        imageFile: null,
+      });
     } catch (error) {
-      console.error("Event creation failed:", error.response?.data || error.message);
-      alert("Event creation failed. Please check your inputs and try again.");
+      setSnackbar({
+        open: true,
+        message: "Event creation failed. Please try again.",
+        severity: "error",
+      });
     }
   };
 
@@ -162,6 +196,18 @@ const CreateEvent = () => {
           <StyledButton type="submit">Create Event</StyledButton>
         </form>
       </FormContainer>
+
+      {/* ✅ Snackbar Notification */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: "100%" }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </BackgroundContainer>
   );
 };
