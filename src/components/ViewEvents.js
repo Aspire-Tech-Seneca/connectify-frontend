@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 import {
-  AppBar,
-  Toolbar,
   Typography,
   Button,
   Card,
@@ -13,32 +11,18 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import { styled } from "@mui/material/styles";
-import logo from "../newlogo.png";
+import CustomNavbar from "./navbar"; // ✅ Import the shared navbar here
 
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:8000";
 
 const BackgroundContainer = styled("div")({
   minHeight: "100vh",
   backgroundColor: "#f8f8f8",
-  paddingTop: "230px",
+  paddingTop: "230px", // Leave enough space for fixed navbar
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
 });
-
-const Navbar = () => (
-  <AppBar position="fixed" sx={{ background: "#315b7e" }}>
-    <Toolbar>
-      <img src={logo} alt="Logo" style={{ height: "90px", marginRight: "20px" }} />
-      <Typography variant="h6" sx={{ flexGrow: 1 }}>
-        Events List
-      </Typography>
-      <Button color="inherit" href="/">Home</Button>
-      <Button color="inherit" href="/CreateEvent">Create Event</Button>
-      <Button color="inherit" href="/profile">Profile</Button>
-    </Toolbar>
-  </AppBar>
-);
 
 const ViewEvents = () => {
   const [events, setEvents] = useState([]);
@@ -87,7 +71,7 @@ const ViewEvents = () => {
 
   return (
     <BackgroundContainer>
-      <Navbar />
+      <CustomNavbar /> {/* ✅ Replaces your old AppBar/Navbar */}
       <Container maxWidth="lg">
         <Typography
           variant="h4"
