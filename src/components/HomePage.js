@@ -5,7 +5,6 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import ChatIcon from "@mui/icons-material/Chat";
 import MenuIcon from "@mui/icons-material/Menu";
 
-
 // Environment variables
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://127.0.0.1:8000";
 const BLOB_STORAGE_BASE_URL = process.env.REACT_APP_BLOB_STORAGE_BASE_URL || "https://yourpublicblobstorage.com/";
@@ -232,7 +231,6 @@ const UserReviews = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
   const authToken = localStorage.getItem("authToken");
 
   useEffect(() => {
@@ -269,12 +267,14 @@ const UserReviews = () => {
   }, [authToken]);
 
   const nextSlide = () => {
+    // Circular navigation for all reviews
     setCurrentIndex((prevIndex) => 
-      prevIndex + 3 >= reviews.length ? 0 : prevIndex + 3
+      (prevIndex + 3) % reviews.length
     );
   };
 
   const prevSlide = () => {
+    // Circular navigation for all reviews
     setCurrentIndex((prevIndex) => 
       prevIndex === 0 ? reviews.length - (reviews.length % 3 || 3) : prevIndex - 3
     );
@@ -283,7 +283,7 @@ const UserReviews = () => {
   // Auto-slider effect
   useEffect(() => {
     if (reviews.length > 3) {
-      const interval = setInterval(nextSlide, 5000);
+      const interval = setInterval(nextSlide, 2000);
       return () => clearInterval(interval);
     }
   }, [reviews]);
@@ -306,7 +306,7 @@ const UserReviews = () => {
     );
   }
 
-  // Prepare reviews to display (3 at a time)
+  // Prepare reviews to display (3 at a time with circular navigation)
   const displayedReviews = reviews.length > 3 
     ? reviews.slice(currentIndex, currentIndex + 3).concat(
         reviews.slice(0, Math.max(0, (currentIndex + 3) - reviews.length))
@@ -314,23 +314,20 @@ const UserReviews = () => {
     : reviews;
 
   return (
-    <div 
-      style={styles.reviewsContainer}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <div style={styles.reviewsContainer}>
       <h2 style={styles.reviewsTitle}>What Our Users Say</h2>
       
       <div style={styles.reviewSliderContainer}>
-        {/* Previous Button */}
-        {isHovered && reviews.length > 3 && (
-          <button
-            style={styles.sliderButton}
-            onClick={prevSlide}
-          >
-            &#8249;
-          </button>
-        )}
+        {/* Previous Button - Always Visible */}
+        <button
+          style={{
+            ...styles.sliderButton,
+            left: '10px',
+          }}
+          onClick={prevSlide}
+        >
+          &#8249;
+        </button>
 
         {/* Reviews Container */}
         <div style={styles.reviewsList}>
@@ -366,15 +363,16 @@ const UserReviews = () => {
           ))}
         </div>
 
-        {/* Next Button */}
-        {isHovered && reviews.length > 3 && (
-          <button
-            style={styles.sliderButton}
-            onClick={nextSlide}
-          >
-            &#8250;
-          </button>
-        )}
+        {/* Next Button - Always Visible */}
+        <button
+          style={{
+            ...styles.sliderButton,
+            right: '10px',
+          }}
+          onClick={nextSlide}
+        >
+          &#8250;
+        </button>
       </div>
     </div>
   );
@@ -778,7 +776,6 @@ const styles = {
     transition: "color 0.3s",
     whiteSpace: "nowrap",
   },
-
   reviewsContainer: {
     background: "rgba(7, 53, 102, 0.7)",
     padding: "40px 20px",
@@ -830,7 +827,21 @@ const styles = {
     transform: "translateY(-50%)",
     zIndex: 10,
   },
-  
+  reviewsTitle: {
+    color: 'white',
+    marginBottom: '20px',
+  },
+  reviewText: {
+    color: '#333',
+    fontSize: '16px',
+    lineHeight: '1.6',
+  },
+  reviewAuthor: {
+    color: '#666',
+    fontStyle: 'italic',
+    marginTop: '10px',
+  },
+
   // Review Form Styles
   reviewFormContainer: {
     padding: "40px 20px",
