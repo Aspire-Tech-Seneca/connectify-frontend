@@ -259,6 +259,7 @@ const styles = {
     fontWeight: "bold",
     cursor: "pointer",
     transition: "color 0.3s",
+    whiteSpace: "nowrap",
   },
 };
 
