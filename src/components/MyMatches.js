@@ -296,7 +296,7 @@ const MatchesPage = () => {
           name: user.fullname,
           age: user.age,
           interests: user.interest ? [user.interest.name] : [],
-          photo: user.profile_image?.image_url || "https://via.placeholder.com/150",
+          photo: user.profile_image?.image_name || "https://via.placeholder.com/150",
           status: "approved",
         }));
         setCurrentMatches(transformed);
@@ -317,7 +317,7 @@ const MatchesPage = () => {
           name: user.fullname,
           age: user.age,
           interests: user.interest ? [user.interest.name] : [],
-          photo: user.profile_image?.image_url || "https://via.placeholder.com/150",
+          photo: user.profile_image?.image_name || "https://via.placeholder.com/150",
         }));
         setIncomingRequests(transformed);
       })
@@ -350,7 +350,7 @@ const MatchesPage = () => {
           name: user.fullname,
           age: user.age,
           interests: user.interest ? [user.interest.name] : [],
-          photo: user.profile_image?.image_url || "https://via.placeholder.com/150",
+          photo: user.profile_image?.image_name || "https://via.placeholder.com/150",
         }));
         setSuggestedMatches(transformed);
       })
