@@ -1,155 +1,13 @@
+// src/components/Profile.js
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  IconButton,
-  Badge,
-  Popover,
-  List,
-  ListItem,
-  ListItemText,
-} from "@mui/material";
-import NotificationsIcon from "@mui/icons-material/Notifications";
-import ChatIcon from "@mui/icons-material/Chat";
-import MenuIcon from "@mui/icons-material/Menu";
 
+// API base URL and Blob Storage base URL
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:8000";
-
-// Your Azure Blob Storage base URL (public container or with SAS token)
 const BLOB_STORAGE_BASE_URL =
-  process.env.REACT_APP_BLOB_STORAGE_BASE_URL || "https://yourpublicblobstorage.com/";
+  process.env.REACT_APP_BLOB_STORAGE_BASE_URL || "http://localhost:8000/";
 
-//
-// NavBar component (unchanged from your code)
-//
-const NavBar = ({ navigate, notificationCount, notifications }) => {
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [hamburgerAnchorEl, setHamburgerAnchorEl] = useState(null);
-
-  const handleNotificationIconClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleCloseNotificationPopover = () => {
-    setAnchorEl(null);
-  };
-
-  const handleHamburgerClick = (event) => {
-    setHamburgerAnchorEl(event.currentTarget);
-  };
-  const handleCloseHamburgerPopover = () => {
-    setHamburgerAnchorEl(null);
-  };
-
-  const openNotification = Boolean(anchorEl);
-  const notificationPopoverId = openNotification ? "notification-popover" : undefined;
-  const openHamburger = Boolean(hamburgerAnchorEl);
-  const hamburgerPopoverId = openHamburger ? "hamburger-popover" : undefined;
-
-  const navItems = [
-    { label: "Home", path: "/home", customStyle: { marginLeft: "40px" } },
-    { label: "Chat", path: "/ChatPage" },
-    { label: "My Profile", path: "/profile" },
-    { label: "About Us", path: "/about" },
-    { label: "My Matches", path: "/matches" },
-    { label: "Logout", path: "/login", customStyle: { marginRight: "30px" } },
-  ];
-
-  const additionalMenuItems = [
-    { label: "Notifications", path: "/Notifications" },
-    { label: "User Settings", path: "/UserSettings" },
-    { label: "View Events", path: "/ViewEvents" },
-    { label: "Create Event", path: "/CreateEvent" },
-    { label: "Community Chat", path: "/CommunityChat" },
-    { label: "Policy Compliance", path: "/PolicyCompliance" },
-  ];
-
-  return (
-    <nav style={styles.navbar}>
-      <div style={styles.navItems}>
-        {navItems.map((item) => (
-          <button
-            key={item.label}
-            style={{ ...styles.navButton, ...(item.customStyle || {}) }}
-            onClick={() => navigate(item.path)}
-          >
-            {item.label}
-          </button>
-        ))}
-
-        <div style={{ display: "flex", gap: 0, alignItems: "center" }}>
-          <IconButton onClick={handleNotificationIconClick} style={{ padding: 0 }}>
-            <Badge badgeContent={notificationCount} color="error">
-              <NotificationsIcon style={{ color: "white" }} />
-            </Badge>
-          </IconButton>
-          <IconButton onClick={() => navigate("/ChatPage")} style={{ padding: 0 }}>
-            <ChatIcon style={{ color: "white" }} />
-          </IconButton>
-          <IconButton onClick={handleHamburgerClick} style={{ padding: 0 }}>
-            <MenuIcon style={{ color: "white" }} />
-          </IconButton>
-        </div>
-
-        <Popover
-          id={notificationPopoverId}
-          open={openNotification}
-          anchorEl={anchorEl}
-          onClose={handleCloseNotificationPopover}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-          transformOrigin={{ vertical: "top", horizontal: "center" }}
-        >
-          <List>
-            {notifications.length === 0 ? (
-              <ListItem>
-                <ListItemText primary="No new notifications" />
-              </ListItem>
-            ) : (
-              notifications.map((notif, index) => (
-                <ListItem
-                  button
-                  key={index}
-                  onClick={() => {
-                    handleCloseNotificationPopover();
-                    navigate("/notifications");
-                  }}
-                >
-                  <ListItemText primary={notif} />
-                </ListItem>
-              ))
-            )}
-          </List>
-        </Popover>
-
-        <Popover
-          id={hamburgerPopoverId}
-          open={openHamburger}
-          anchorEl={hamburgerAnchorEl}
-          onClose={handleCloseHamburgerPopover}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-          transformOrigin={{ vertical: "top", horizontal: "center" }}
-        >
-          <List>
-            {additionalMenuItems.map((item, index) => (
-              <ListItem
-                button
-                key={index}
-                onClick={() => {
-                  handleCloseHamburgerPopover();
-                  navigate(item.path);
-                }}
-              >
-                <ListItemText primary={item.label} />
-              </ListItem>
-            ))}
-          </List>
-        </Popover>
-      </div>
-    </nav>
-  );
-};
-
-//
-// ProfileCard component
-//
+// ProfileCard component (your own profile info)
 const ProfileCard = ({
   profilePic,
   isEditing,
@@ -270,14 +128,9 @@ const ProfileCard = ({
   </div>
 );
 
-//
 // Gallery component
-// - Uses the same "editButton" style as "Save Profile" for the "Choose Files" button
-// - The file input is hidden and triggered by the button
-//
 const Gallery = ({ galleryImages, handleGalleryImageUpload, removeGalleryImage }) => {
   const fileInputRef = useRef(null);
-
   const onButtonClick = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
@@ -328,10 +181,8 @@ const Gallery = ({ galleryImages, handleGalleryImageUpload, removeGalleryImage }
   );
 };
 
-//
-// CurrentMatches component (unchanged from your code)
-//
-const CurrentMatches = ({ currentMatches, handleChat, handleCancelRequest }) => {
+// CurrentMatches component – includes navigation to user profile page
+const CurrentMatches = ({ currentMatches, handleChat, handleCancelRequest, navigate }) => {
   return (
     <div>
       <h2 style={styles.sectionTitle}>Current Matches</h2>
@@ -340,8 +191,15 @@ const CurrentMatches = ({ currentMatches, handleChat, handleCancelRequest }) => 
       ) : (
         currentMatches.map((match) => (
           <div key={match.id} style={styles.matchedUserCard}>
-            <div style={styles.matchContent}>
-              <img src={match.photo} alt={match.name} style={styles.matchPhoto} />
+            <div
+              style={styles.matchContent}
+              onClick={() => navigate(`/user-profile/${match.id}`)}
+            >
+              <img
+                src={match.photo}
+                alt={match.name}
+                style={styles.matchPhoto}
+              />
               <div style={styles.matchDetails}>
                 <p style={styles.matchName}>
                   <strong>
@@ -370,6 +228,12 @@ const CurrentMatches = ({ currentMatches, handleChat, handleCancelRequest }) => 
                   Cancel Request
                 </button>
               )}
+              <button
+                onClick={() => navigate(`/user-profile/${match.id}`)}
+                style={styles.matchButton}
+              >
+                View Profile
+              </button>
             </div>
           </div>
         ))
@@ -378,20 +242,14 @@ const CurrentMatches = ({ currentMatches, handleChat, handleCancelRequest }) => 
   );
 };
 
-//
-// Main Profile component
-//
+// Main Profile component (your own profile view)
 const Profile = () => {
   const navigate = useNavigate();
   const [name, setName] = useState("Eni Zeqo");
   const [bio, setBio] = useState("I am new in Canada and I want to make more friends...");
   const [age, setAge] = useState(25);
   const [location, setLocation] = useState("");
-
-  const [profilePic, setProfilePic] = useState(
-    `${BLOB_STORAGE_BASE_URL}defaultProfilePic.jpg`
-  );
-
+  const [profilePic, setProfilePic] = useState(`${BLOB_STORAGE_BASE_URL}defaultProfilePic.jpg`);
   const [isEditing, setIsEditing] = useState(false);
   const [categories, setCategories] = useState([]);
   const [availableCategories, setAvailableCategories] = useState([]);
@@ -426,7 +284,6 @@ const Profile = () => {
         setAge(data.age || age);
         setBio(data.bio || bio);
         setLocation(data.location || "");
-
         if (data.gallery_images) {
           setGalleryImages(
             data.gallery_images.map((filename) => ({
@@ -439,7 +296,7 @@ const Profile = () => {
       .catch((err) => console.error("Error fetching profile details:", err));
   }, [authToken]);
 
-  // 3) Retrieve profile image
+  // 3) Retrieve profile and gallery images
   useEffect(() => {
     fetch(`${BASE_URL}/users/retrieve-profile-image/`, {
       method: "GET",
@@ -449,6 +306,14 @@ const Profile = () => {
       .then((data) => {
         if (data.profile_image) {
           setProfilePic(`${BLOB_STORAGE_BASE_URL}${data.profile_image}`);
+        }
+        if (data.gallery_images && Array.isArray(data.gallery_images)) {
+          setGalleryImages(
+            data.gallery_images.map((filename) => ({
+              filename,
+              url: `${BLOB_STORAGE_BASE_URL}${filename}`,
+            }))
+          );
         }
       })
       .catch((err) => console.error("Error retrieving profile image:", err));
@@ -469,7 +334,7 @@ const Profile = () => {
       .catch((err) => console.error("Error retrieving interest:", err));
   }, [authToken]);
 
-  // 5) Fetch current matches
+  // 5) Fetch current matches with constructed photo URLs
   useEffect(() => {
     if (!authToken) return;
     fetch(`${BASE_URL}/users/get-mymatchup-list/`, {
@@ -477,14 +342,24 @@ const Profile = () => {
     })
       .then((res) => res.json())
       .then((data) => {
-        const transformed = data.map((user) => ({
-          id: user.id,
-          name: user.fullname,
-          age: user.age,
-          interests: user.interest ? [user.interest.name] : [],
-          photo: user.profile_image?.image_name || "https://via.placeholder.com/150",
-          status: "approved",
-        }));
+        const transformed = data.map((user) => {
+          let photoUrl = "https://via.placeholder.com/150";
+          if (user.profile_image) {
+            if (typeof user.profile_image === "object" && user.profile_image.image_name) {
+              photoUrl = `${BLOB_STORAGE_BASE_URL}${user.profile_image.image_name}`;
+            } else if (typeof user.profile_image === "string") {
+              photoUrl = `${BLOB_STORAGE_BASE_URL}${user.profile_image}`;
+            }
+          }
+          return {
+            id: user.id,
+            name: user.fullname,
+            age: user.age,
+            interests: user.interest ? [user.interest.name] : [],
+            photo: photoUrl,
+            status: "approved",
+          };
+        });
         setCurrentMatches(transformed);
       })
       .catch((err) => console.error("Failed to fetch current matches:", err));
@@ -497,7 +372,6 @@ const Profile = () => {
       try {
         const formData = new FormData();
         formData.append("profile_image", file);
-
         const response = await fetch(`${BASE_URL}/users/upload-profile-image/`, {
           method: "PUT",
           headers: { Authorization: `Bearer ${authToken}` },
@@ -506,8 +380,6 @@ const Profile = () => {
         if (!response.ok) {
           throw new Error("Profile image upload failed");
         }
-
-        // Retrieve the new profile image
         const newResponse = await fetch(`${BASE_URL}/users/retrieve-profile-image/`, {
           method: "GET",
           headers: { Authorization: `Bearer ${authToken}` },
@@ -522,12 +394,10 @@ const Profile = () => {
     }
   };
 
-  // Gallery upload with local previews + final re-fetch
+  // Gallery image upload
   const handleGalleryImageUpload = async (event) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
-
-    // Show local previews
     const localPreviews = [];
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
@@ -536,14 +406,11 @@ const Profile = () => {
       localPreviews.push({ tempId, url: localUrl });
     }
     setGalleryImages((prev) => [...prev, ...localPreviews]);
-
-    // Upload to backend
     try {
       const formData = new FormData();
       for (let i = 0; i < files.length; i++) {
         formData.append("gallery_images", files[i]);
       }
-
       const response = await fetch(`${BASE_URL}/users/upload-profile-image/`, {
         method: "PUT",
         headers: { Authorization: `Bearer ${authToken}` },
@@ -551,11 +418,8 @@ const Profile = () => {
       });
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("Gallery upload failed:", errorText);
         throw new Error("Gallery image upload failed");
       }
-
-      // Re-fetch updated gallery
       const newResponse = await fetch(`${BASE_URL}/users/retrieve-profile-image/`, {
         method: "GET",
         headers: { Authorization: `Bearer ${authToken}` },
@@ -571,19 +435,17 @@ const Profile = () => {
       }
     } catch (error) {
       console.error("Error uploading gallery image:", error);
-      // If upload fails, you can decide whether to remove local previews or not
     }
   };
 
-  // Remove from gallery (handle local or real)
+  // Remove gallery image
   const removeGalleryImage = async (key) => {
-    // If it's a local preview (temp- prefix), just remove from state
     if (key.startsWith("temp-")) {
-      setGalleryImages((prev) => prev.filter((img) => (img.filename || img.tempId) !== key));
+      setGalleryImages((prev) =>
+        prev.filter((img) => (img.filename || img.tempId) !== key)
+      );
       return;
     }
-
-    // Otherwise, it's a real filename from the server
     try {
       const response = await fetch(`${BASE_URL}/users/delete-gallery-image/`, {
         method: "PATCH",
@@ -608,13 +470,15 @@ const Profile = () => {
     try {
       const response = await fetch(`${BASE_URL}/users/update/`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
+        },
         body: JSON.stringify(payload),
       });
       if (!response.ok) {
         throw new Error("Profile update failed");
       }
-
       if (categories.length > 0) {
         const interestResponse = await fetch(`${BASE_URL}/users/update-interest/`, {
           method: "POST",
@@ -662,7 +526,6 @@ const Profile = () => {
 
   return (
     <div style={styles.outerContainer}>
-      <NavBar navigate={navigate} notificationCount={notificationCount} notifications={[]} />
       <div style={styles.contentWrapper}>
         <div style={styles.contentContainer}>
           <div style={styles.column}>
@@ -697,6 +560,7 @@ const Profile = () => {
               currentMatches={currentMatches}
               handleChat={handleChat}
               handleCancelRequest={handleCancelRequest}
+              navigate={navigate}
             />
           </div>
         </div>
@@ -705,34 +569,7 @@ const Profile = () => {
   );
 };
 
-//
-// Styles
-//
 const styles = {
-  navbar: {
-    backgroundColor: "#315b7e",
-    padding: "25px",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    color: "white",
-    width: "100%",
-  },
-  navItems: {
-    display: "flex",
-    alignItems: "center",
-    gap: "20px",
-  },
-  navButton: {
-    background: "none",
-    border: "none",
-    color: "white",
-    fontSize: "20px",
-    fontWeight: "bold",
-    cursor: "pointer",
-    transition: "color 0.3s",
-    whiteSpace: "nowrap",
-  },
   outerContainer: {
     background: "transparent",
     minHeight: "100vh",
@@ -921,6 +758,7 @@ const styles = {
     display: "flex",
     alignItems: "center",
     marginBottom: "10px",
+    cursor: "pointer",
   },
   matchPhoto: {
     width: "80px",
