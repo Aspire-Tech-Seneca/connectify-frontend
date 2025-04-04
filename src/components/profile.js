@@ -364,17 +364,7 @@ const Profile = () => {
       .then((res) => res.json())
       .then((data) => {
         const transformed = data.map((user) => {
-          // WRONG: 
-          // let photoUrl = "https://via.placeholder.com/150";
-          // if (user.profile_images) {
-          //   if (typeof user.profile_images === "object" && user.profile_images.image_name) {
-          //     photoUrl = `${BLOB_STORAGE_BASE_URL}${user.profile_images.image_name}`;
-          //   } else if (typeof user.profile_images === "string") {
-          //     photoUrl = `${BLOB_STORAGE_BASE_URL}${user.profile_images}`;
-          //   }
-          // }
-  
-          // CORRECT: (match the same approach as MatchesPage.js)
+
           return {
             id: user.id,
             name: user.fullname,
@@ -398,7 +388,7 @@ const Profile = () => {
     if (file) {
       try {
         const formData = new FormData();
-        formData.append("profile_images", file);
+        formData.append("profile_image", file);
         const response = await fetch(`${BASE_URL}/users/upload-profile-image/`, {
           method: "PUT",
           headers: { Authorization: `Bearer ${authToken}` },
@@ -412,8 +402,8 @@ const Profile = () => {
           headers: { Authorization: `Bearer ${authToken}` },
         });
         const newData = await newResponse.json();
-        if (newData.profile_images) {
-          setProfilePic(`${BLOB_STORAGE_BASE_URL}${newData.profile_images}`);
+        if (newData.profile_image) {
+          setProfilePic(`${BLOB_STORAGE_BASE_URL}${newData.profile_image}`);
         }
       } catch (error) {
         console.error("Profile image upload failed:", error);
