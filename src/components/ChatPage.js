@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import CustomNavbar from "./navbar";
 
 // Placeholder image to avoid repeated blob calls
 const DEFAULT_IMAGE = "https://atcdevstorageaccount.blob.core.windows.net/media/profile_images/defaultProfilePic.jpg";
 
-// Reuse your peach background & container styles
 const styles = {
   outerContainer: {
     background: "transparent",
@@ -14,7 +12,7 @@ const styles = {
     width: "100vw",
   },
   contentWrapper: {
-    background:"rgba(7, 53, 102, 0.7)",
+    background: "rgba(7, 53, 102, 0.7)",
     backgroundImage: "url('./peach.jpg')",
     backgroundRepeat: "no-repeat",
     backgroundSize: "cover",
@@ -35,33 +33,9 @@ const styles = {
     display: "flex",
     flexDirection: "column",
   },
-  navbar: {
-    background:"#315b7e",
-    padding: "25px",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    color: "white",
-    width: "100%",
-  },
-  navItems: {
-    display: "flex",
-    alignItems: "center",
-    gap: "20px",
-  },
-  navButton: {
-    background: "none",
-    border: "none",
-    color: "white",
-    fontSize: "20px",
-    fontWeight: "bold",
-    cursor: "pointer",
-    transition: "color 0.3s",
-    whiteSpace: "nowrap",
-  },
-  // Match list styling
+  // Matches list styling
   matchesContainer: {
-    background:"rgba(7, 53, 102, 0.7)",
+    background: "rgba(7, 53, 102, 0.7)",
     borderRadius: "8px",
     boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
     padding: "15px",
@@ -80,7 +54,7 @@ const styles = {
     backgroundColor: "#f5f5f5",
   },
   matchCardSelected: {
-    backgroundColor: "rgb(170 198 227)",
+    backgroundColor: "rgb(170, 198, 227)",
   },
   matchPhoto: {
     width: "50px",
@@ -142,7 +116,7 @@ const styles = {
     border: "1px solid #ccc",
   },
   sendButton: {
-    background:"rgba(7, 53, 102, 0.7)",
+    background: "rgba(7, 53, 102, 0.7)",
     color: "white",
     border: "none",
     borderRadius: "4px",
@@ -151,10 +125,6 @@ const styles = {
   },
 };
 
-// NavBar component
-const NavBar = CustomNavbar;
-
-// Left column: Matches list
 const ChatMatches = ({ matches, selectedMatch, setSelectedMatch }) => {
   return (
     <div style={styles.matchesContainer}>
@@ -186,7 +156,6 @@ const ChatMatches = ({ matches, selectedMatch, setSelectedMatch }) => {
   );
 };
 
-// Right column: Conversation area
 const ChatConversation = ({
   match,
   messages,
@@ -279,7 +248,6 @@ const ChatPage = () => {
 
   return (
     <div style={styles.outerContainer}>
-      <NavBar navigate={navigate} />
       <div style={styles.contentWrapper}>
         <div style={styles.contentContainer}>
           <div style={styles.column}>
