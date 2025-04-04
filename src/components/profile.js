@@ -748,7 +748,7 @@ const styles = {
   },
   deleteButton: {
     position: "absolute",
-    top: "5px",
+    top: "6px",
     right: "5px",
     background: "rgba(255, 0, 0, 0.7)",
     color: "white",
