@@ -3,9 +3,12 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Snackbar, Alert } from "@mui/material";
 
+// Adjust these as needed:
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:8000";
+const BLOB_STORAGE_BASE_URL =
+  process.env.REACT_APP_BLOB_STORAGE_BASE_URL ||
+  "https://atcdevsa.blob.core.windows.net/media/";
 
-// CurrentMatches Component
 const CurrentMatches = ({ currentMatches, handleChat, handleCancelRequest, navigate }) => {
   return (
     <div>
@@ -56,7 +59,6 @@ const CurrentMatches = ({ currentMatches, handleChat, handleCancelRequest, navig
   );
 };
 
-// IncomingRequests Component
 const IncomingRequests = ({ incomingRequests, handleApproveIncoming, handleDeclineIncoming }) => {
   return (
     <div>
@@ -106,17 +108,14 @@ const IncomingRequests = ({ incomingRequests, handleApproveIncoming, handleDecli
   );
 };
 
-// SuggestedMatches Component (Now with Show More / Show Less)
 const SuggestedMatches = ({
   suggestedMatches,
   handleSendRequest,
   handleDeclineSuggested,
   navigate,
 }) => {
-  // Show only 5 at first
   const [visibleCount, setVisibleCount] = useState(5);
 
-  // Slice the array to show only the first 'visibleCount' matches
   const visibleMatches = suggestedMatches.slice(0, visibleCount);
 
   const handleShowMore = () => {
@@ -124,7 +123,6 @@ const SuggestedMatches = ({
   };
 
   const handleShowLess = () => {
-    // Don't go below 5
     setVisibleCount((prev) => Math.max(5, prev - 5));
   };
 
@@ -163,17 +161,13 @@ const SuggestedMatches = ({
                 >
                   ❌ Decline
                 </button>
-                <button
-                  onClick={() => handleSendRequest(match.id)}
-                  style={styles.matchButton}
-                >
+                <button onClick={() => handleSendRequest(match.id)} style={styles.matchButton}>
                   ➤ Send Request
                 </button>
               </div>
             </div>
           ))}
 
-          {/* Show More / Show Less Buttons */}
           <div style={{ textAlign: "center", marginTop: "10px" }}>
             {visibleCount < suggestedMatches.length && (
               <button onClick={handleShowMore} style={styles.showMoreButton}>
@@ -217,7 +211,10 @@ const MatchesPage = () => {
           name: user.fullname,
           age: user.age,
           interests: user.interest ? [user.interest.name] : [],
-          photo: user.profile_images?.image_name || "https://via.placeholder.com/150",
+          // Change profile_images to profile_image (if your API returns singular)
+          photo: user.profile_image?.image_name
+            ? BLOB_STORAGE_BASE_URL + user.profile_image.image_name
+            : "https://via.placeholder.com/150",
           status: "approved",
         }));
         setCurrentMatches(transformed);
@@ -238,7 +235,10 @@ const MatchesPage = () => {
           name: user.fullname,
           age: user.age,
           interests: user.interest ? [user.interest.name] : [],
-          photo: user.profile_images?.image_name || "https://via.placeholder.com/150",
+          // Same fix here
+          photo: user.profile_image?.image_name
+            ? BLOB_STORAGE_BASE_URL + user.profile_image.image_name
+            : "https://via.placeholder.com/150",
         }));
         setIncomingRequests(transformed);
       })
@@ -271,7 +271,10 @@ const MatchesPage = () => {
           name: user.fullname,
           age: user.age,
           interests: user.interest ? [user.interest.name] : [],
-          photo: user.profile_images?.image_name || "https://via.placeholder.com/150",
+          // And here as well
+          photo: user.profile_image?.image_name
+            ? BLOB_STORAGE_BASE_URL + user.profile_image.image_name
+            : "https://via.placeholder.com/150",
         }));
         setSuggestedMatches(transformed);
       })
@@ -305,8 +308,7 @@ const MatchesPage = () => {
       }
       setSuggestedMatches(suggestedMatches.filter((m) => m.id !== id));
       setCurrentMatches([...currentMatches, { ...match, status: "pending" }]);
-      const message = `Match request sent to ${match.name}.`;
-      setSnackbar({ open: true, message, severity: "info" });
+      setSnackbar({ open: true, message: `Match request sent to ${match.name}.`, severity: "info" });
     } catch (err) {
       console.error("Error sending matchup request:", err);
       setSnackbar({ open: true, message: err.message, severity: "error" });
@@ -326,8 +328,11 @@ const MatchesPage = () => {
         throw new Error("Failed to cancel matchup request");
       }
       setCurrentMatches(currentMatches.filter((m) => m.id !== id));
-      const message = `Match request to ${match.name} cancelled successfully.`;
-      setSnackbar({ open: true, message, severity: "info" });
+      setSnackbar({
+        open: true,
+        message: `Match request to ${match.name} cancelled successfully.`,
+        severity: "info",
+      });
     } catch (err) {
       console.error("Error cancelling matchup request:", err);
       setSnackbar({ open: true, message: err.message, severity: "error" });
@@ -349,8 +354,11 @@ const MatchesPage = () => {
       }
       setIncomingRequests(incomingRequests.filter((m) => m.id !== id));
       setCurrentMatches([...currentMatches, { ...match, status: "approved" }]);
-      const message = `You approved the match with ${match.name}.`;
-      setSnackbar({ open: true, message, severity: "success" });
+      setSnackbar({
+        open: true,
+        message: `You approved the match with ${match.name}.`,
+        severity: "success",
+      });
     } catch (err) {
       console.error("Error confirming matchup request:", err);
       setSnackbar({ open: true, message: err.message, severity: "error" });
@@ -371,8 +379,7 @@ const MatchesPage = () => {
         throw new Error(errorData.message || "Failed to deny matchup request");
       }
       setIncomingRequests(incomingRequests.filter((m) => m.id !== id));
-      const message = `${match.name}'s request declined.`;
-      setSnackbar({ open: true, message, severity: "info" });
+      setSnackbar({ open: true, message: `${match.name}'s request declined.`, severity: "info" });
     } catch (err) {
       console.error("Error denying matchup request:", err);
       setSnackbar({ open: true, message: err.message, severity: "error" });
@@ -383,8 +390,7 @@ const MatchesPage = () => {
     const match = suggestedMatches.find((m) => m.id === id);
     if (!match) return;
     setSuggestedMatches(suggestedMatches.filter((m) => m.id !== id));
-    const message = `${match.name} declined.`;
-    setSnackbar({ open: true, message, severity: "info" });
+    setSnackbar({ open: true, message: `${match.name} declined.`, severity: "info" });
   };
 
   return (
@@ -434,7 +440,7 @@ const styles = {
     minHeight: "100vh",
     fontFamily: "'Roboto', sans-serif",
     width: "100vw",
-    marginTop: "260px",
+    marginTop: "300px",
   },
   contentWrapper: {
     background: "rgba(7, 53, 102, 0.5)",
@@ -522,8 +528,6 @@ const styles = {
     boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
     transition: "background 0.3s, transform 0.3s",
   },
-
-  // Show More / Show Less Buttons
   showMoreButton: {
     backgroundColor: "#315b7e",
     color: "#fff",
@@ -541,7 +545,6 @@ const styles = {
     borderRadius: "4px",
     cursor: "pointer",
   },
-
   emptyText: {
     textAlign: "center",
     color: "#ffffff",
