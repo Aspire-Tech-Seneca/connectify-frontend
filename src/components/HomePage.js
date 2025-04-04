@@ -372,7 +372,9 @@ const HomePage = () => {
           name: user.fullname,
           age: user.age,
           interests: user.interest ? [user.interest.name] : [],
-          imgUrl: user.profile_images?.image_name || `${BLOB_STORAGE_BASE_URL}defaultProfilePic.jpg`,
+          imgUrl: user.profile_image?.image_name
+          ? BLOB_STORAGE_BASE_URL + user.profile_image.image_name
+          : "https://via.placeholder.com/150",
         }));
         setMatches(transformed);
       })
@@ -525,11 +527,7 @@ const HomePage = () => {
 
 const styles = {
   outerContainer: {
-<<<<<<< Updated upstream
-    paddingTop: "1100px", // explicitly set the margin for the homepage
-=======
     marginTop: "950px",
->>>>>>> Stashed changes
     background: "transparent",
     minHeight: "100vh",
     fontFamily: "'Roboto', sans-serif",
