@@ -69,7 +69,7 @@ const CommunityChat = () => {
         },
       });
       const data = await res.json();
-      setMessages(Array.isArray(data) ? data : []);
+      if (Array.isArray(data)) setMessages(data);
     } catch (err) {
       console.error("Failed to fetch chat messages:", err);
     } finally {
@@ -79,6 +79,10 @@ const CommunityChat = () => {
 
   useEffect(() => {
     fetchMessages();
+
+    // ⏳ Poll for new messages every 3 seconds
+    const interval = setInterval(fetchMessages, 3000);
+    return () => clearInterval(interval); // cleanup on unmount
   }, []);
 
   useEffect(() => {
@@ -100,9 +104,8 @@ const CommunityChat = () => {
 
       if (!res.ok) throw new Error("Failed to send message");
 
-      const newMessage = await res.json();
-      setMessages((prev) => [...prev, newMessage]);
       setInputMessage("");
+      fetchMessages(); // 🟢 Trigger immediate refresh after sending
     } catch (err) {
       console.error("Send message error:", err);
     }
@@ -143,13 +146,7 @@ const CommunityChat = () => {
               <EmojiEmotionsIcon sx={{ color: "#315b7e" }} />
             </IconButton>
             {showEmojiPicker && (
-              <Box
-                sx={{
-                  position: "absolute",
-                  bottom: "50px",
-                  zIndex: 999,
-                }}
-              >
+              <Box sx={{ position: "absolute", bottom: "50px", zIndex: 999 }}>
                 <Picker onEmojiClick={onEmojiClick} />
               </Box>
             )}
