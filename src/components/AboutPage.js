@@ -7,16 +7,11 @@ import jiyun from "../image/Jiyun.jpg";
 import john from "../image/John.jpg";
 import behzad from "../image/Behzad.jpg";
 import zahrah from "../image/Zahrah.jpg";
-import CustomNavbar from "./navbar";
-
-// NavBar component
-const NavBar = CustomNavbar;
 
 const AboutPage = () => {
   const navigate = useNavigate();
   return (
     <div style={styles.outerContainer}>
-      <NavBar navigate={navigate} />
       <div style={styles.contentWrapper}>
         <Container maxWidth="md">
           <Typography variant="h3" align="center" gutterBottom style={styles.heading}>
@@ -137,30 +132,6 @@ const styles = {
     borderRadius: "8px",
     maxWidth: "1200px",
     width: "95%",
-  },
-  navbar: {
-    backgroundColor: "#315b7e",
-    padding: "25px",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    color: "white",
-    width: "100%",
-  },
-  navItems: {
-    display: "flex",
-    alignItems: "center",
-    gap: "20px",
-  },
-  navButton: {
-    background: "none",
-    border: "none",
-    color: "white",
-    fontSize: "20px",
-    fontWeight: "bold",
-    cursor: "pointer",
-    transition: "color 0.3s",
-    whiteSpace: "nowrap",
   },
   heading: {
     color: "white",
