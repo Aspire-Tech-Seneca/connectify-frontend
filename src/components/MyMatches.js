@@ -20,7 +20,14 @@ const CurrentMatches = ({ currentMatches, handleChat, handleCancelRequest, navig
               <div style={styles.matchDetails}>
                 <p style={styles.matchName}>
                   <strong>
-                    {match.name}, {match.age}{" "}
+                    {/* Username is now clickable */}
+                    <span
+                      onClick={() => navigate(`/user-profile/${match.id}`)}
+                      style={{ cursor: "pointer", textDecoration: "underline" }}
+                    >
+                      {match.name}
+                    </span>
+                    {`, ${match.age} `}
                     {match.status === "pending" && (
                       <span style={{ fontStyle: "italic", color: "#ae4040" }}>
                         (Pending)
@@ -65,7 +72,13 @@ const IncomingRequests = ({ incomingRequests, handleApproveIncoming, handleDecli
               <div style={styles.matchDetails}>
                 <p style={styles.matchName}>
                   <strong>
-                    {match.name}, {match.age}
+                    <span
+                      onClick={() => window.location.assign(`/user-profile/${match.id}`)}
+                      style={{ cursor: "pointer", textDecoration: "underline" }}
+                    >
+                      {match.name}
+                    </span>
+                    {`, ${match.age}`}
                   </strong>
                 </p>
                 <p style={styles.matchInterests}>
@@ -95,7 +108,7 @@ const IncomingRequests = ({ incomingRequests, handleApproveIncoming, handleDecli
 };
 
 // SuggestedMatches Component
-const SuggestedMatches = ({ suggestedMatches, handleSendRequest, handleDeclineSuggested }) => {
+const SuggestedMatches = ({ suggestedMatches, handleSendRequest, handleDeclineSuggested, navigate }) => {
   return (
     <div>
       <h2 style={styles.sectionTitle}>Suggested Matches</h2>
@@ -109,7 +122,13 @@ const SuggestedMatches = ({ suggestedMatches, handleSendRequest, handleDeclineSu
               <div style={styles.matchDetails}>
                 <p style={styles.matchName}>
                   <strong>
-                    {match.name}, {match.age}
+                    <span
+                      onClick={() => navigate(`/user-profile/${match.id}`)}
+                      style={{ cursor: "pointer", textDecoration: "underline" }}
+                    >
+                      {match.name}
+                    </span>
+                    {`, ${match.age}`}
                   </strong>
                 </p>
                 <p style={styles.matchInterests}>
@@ -358,6 +377,7 @@ const MatchesPage = () => {
               suggestedMatches={suggestedMatches}
               handleSendRequest={handleSendRequest}
               handleDeclineSuggested={handleDeclineSuggested}
+              navigate={navigate}
             />
           </div>
         </div>
@@ -382,13 +402,14 @@ const styles = {
     minHeight: "100vh",
     fontFamily: "'Roboto', sans-serif",
     width: "100vw",
+    marginUp: "900",
   },
   contentWrapper: {
     background: "rgba(7, 53, 102, 0.5)",
     backgroundImage: "url('./peach.jpg')",
     backgroundRepeat: "no-repeat",
     backgroundSize: "cover",
-    margin: "20px auto",
+    margin: "10px auto",
     padding: "2rem",
     boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
     borderRadius: "8px",
