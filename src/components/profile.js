@@ -325,8 +325,8 @@ const Profile = () => {
     })
       .then((res) => res.json())
       .then((data) => {
-        if (data.profile_images) {
-          setProfilePic(`${BLOB_STORAGE_BASE_URL}${data.profile_images}`);
+        if (data.profile_image) {
+          setProfilePic(`${BLOB_STORAGE_BASE_URL}${data.profile_image}`);
         }
         if (data.gallery_images && Array.isArray(data.gallery_images)) {
           setGalleryImages(
@@ -364,20 +364,25 @@ const Profile = () => {
       .then((res) => res.json())
       .then((data) => {
         const transformed = data.map((user) => {
-          let photoUrl = "https://via.placeholder.com/150";
-          if (user.profile_images) {
-            if (typeof user.profile_images === "object" && user.profile_images.image_name) {
-              photoUrl = `${BLOB_STORAGE_BASE_URL}${user.profile_images.image_name}`;
-            } else if (typeof user.profile_images === "string") {
-              photoUrl = `${BLOB_STORAGE_BASE_URL}${user.profile_images}`;
-            }
-          }
+          // WRONG: 
+          // let photoUrl = "https://via.placeholder.com/150";
+          // if (user.profile_images) {
+          //   if (typeof user.profile_images === "object" && user.profile_images.image_name) {
+          //     photoUrl = `${BLOB_STORAGE_BASE_URL}${user.profile_images.image_name}`;
+          //   } else if (typeof user.profile_images === "string") {
+          //     photoUrl = `${BLOB_STORAGE_BASE_URL}${user.profile_images}`;
+          //   }
+          // }
+  
+          // CORRECT: (match the same approach as MatchesPage.js)
           return {
             id: user.id,
             name: user.fullname,
             age: user.age,
             interests: user.interest ? [user.interest.name] : [],
-            photo: photoUrl,
+            photo: user.profile_image?.image_name
+              ? BLOB_STORAGE_BASE_URL + user.profile_image.image_name
+              : "https://via.placeholder.com/150",
             status: "approved",
           };
         });
@@ -385,6 +390,7 @@ const Profile = () => {
       })
       .catch((err) => console.error("Failed to fetch current matches:", err));
   }, [authToken]);
+  
 
   // Profile picture upload
   const handleProfilePicChange = async (event) => {
