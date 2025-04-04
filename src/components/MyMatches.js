@@ -1,147 +1,12 @@
+// src/components/MatchesPage.js
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Snackbar,
-  Alert,
-  IconButton,
-  Badge,
-  Popover,
-  List,
-  ListItem,
-  ListItemText,
-} from "@mui/material";
-import NotificationsIcon from "@mui/icons-material/Notifications";
-import ChatIcon from "@mui/icons-material/Chat";
-import MenuIcon from "@mui/icons-material/Menu";
+import { Snackbar, Alert } from "@mui/material";
 
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:8000";
 
-// Updated NavBar Component (matches Profile page)
-const NavBar = ({ navigate, notificationCount, notifications }) => {
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [hamburgerAnchorEl, setHamburgerAnchorEl] = useState(null);
-
-  const handleNotificationIconClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleCloseNotificationPopover = () => {
-    setAnchorEl(null);
-  };
-
-  const handleHamburgerClick = (event) => {
-    setHamburgerAnchorEl(event.currentTarget);
-  };
-  const handleCloseHamburgerPopover = () => {
-    setHamburgerAnchorEl(null);
-  };
-
-  const openNotification = Boolean(anchorEl);
-  const notificationPopoverId = openNotification ? "notification-popover" : undefined;
-  const openHamburger = Boolean(hamburgerAnchorEl);
-  const hamburgerPopoverId = openHamburger ? "hamburger-popover" : undefined;
-
-  const navItems = [
-    { label: "Home", path: "/home", customStyle: { marginLeft: "40px" } },
-    { label: "Chat", path: "/ChatPage" },
-    { label: "My Profile", path: "/profile" },
-    { label: "About Us", path: "/about" },
-    { label: "My Matches", path: "/matches" },
-    { label: "Logout", path: "/login", customStyle: { marginRight: "30px" } },
-  ];
-
-  const additionalMenuItems = [
-    { label: "Notifications", path: "/notifications" },
-    { label: "User Settings", path: "/UserSettings" },
-    { label: "View Events", path: "/ViewEvents" },
-    { label: "Create Event", path: "/createevent" },
-    { label: "Community Chat", path: "/CommunityChat" },
-    { label: "Policy Compliance", path: "/PolicyCompliance" },
-  ];
-
-  return (
-    <nav style={styles.navbar}>
-      <div style={styles.navItems}>
-        {navItems.map((item) => (
-          <button
-            key={item.label}
-            style={{ ...styles.navButton, ...(item.customStyle || {}) }}
-            onClick={() => navigate(item.path)}
-          >
-            {item.label}
-          </button>
-        ))}
-        <div style={{ display: "flex", gap: 0, alignItems: "center" }}>
-          <IconButton onClick={handleNotificationIconClick} style={{ padding: 0 }}>
-            <Badge badgeContent={notificationCount} color="error">
-              <NotificationsIcon style={{ color: "white" }} />
-            </Badge>
-          </IconButton>
-          <IconButton onClick={() => navigate("/ChatPage")} style={{ padding: 0 }}>
-            <ChatIcon style={{ color: "white" }} />
-          </IconButton>
-          <IconButton onClick={handleHamburgerClick} style={{ padding: 0 }}>
-            <MenuIcon style={{ color: "white" }} />
-          </IconButton>
-        </div>
-        <Popover
-          id={notificationPopoverId}
-          open={openNotification}
-          anchorEl={anchorEl}
-          onClose={handleCloseNotificationPopover}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-          transformOrigin={{ vertical: "top", horizontal: "center" }}
-        >
-          <List>
-            {notifications.length === 0 ? (
-              <ListItem>
-                <ListItemText primary="No new notifications" />
-              </ListItem>
-            ) : (
-              notifications.map((notif, index) => (
-                <ListItem
-                  button
-                  key={index}
-                  onClick={() => {
-                    handleCloseNotificationPopover();
-                    navigate("/notifications");
-                  }}
-                >
-                  <ListItemText primary={notif} />
-                </ListItem>
-              ))
-            )}
-          </List>
-        </Popover>
-        <Popover
-          id={hamburgerPopoverId}
-          open={openHamburger}
-          anchorEl={hamburgerAnchorEl}
-          onClose={handleCloseHamburgerPopover}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-          transformOrigin={{ vertical: "top", horizontal: "center" }}
-        >
-          <List>
-            {additionalMenuItems.map((item, index) => (
-              <ListItem
-                button
-                key={index}
-                onClick={() => {
-                  handleCloseHamburgerPopover();
-                  navigate(item.path);
-                }}
-              >
-                <ListItemText primary={item.label} />
-              </ListItem>
-            ))}
-          </List>
-        </Popover>
-      </div>
-    </nav>
-  );
-};
-
 // CurrentMatches Component
-const CurrentMatches = ({ currentMatches, handleChat, handleCancelRequest }) => {
+const CurrentMatches = ({ currentMatches, handleChat, handleCancelRequest, navigate }) => {
   return (
     <div>
       <h2 style={styles.sectionTitle}>Current Matches</h2>
@@ -471,15 +336,8 @@ const MatchesPage = () => {
     setSnackbar({ open: true, message, severity: "info" });
   };
 
-  const notificationCount = incomingRequests.length;
-
   return (
     <div style={styles.outerContainer}>
-      <NavBar
-        navigate={navigate}
-        notificationCount={notificationCount}
-        notifications={notificationList}
-      />
       <div style={styles.contentWrapper}>
         <div style={styles.contentContainer}>
           <div style={styles.column}>
@@ -487,6 +345,7 @@ const MatchesPage = () => {
               currentMatches={currentMatches}
               handleChat={handleChat}
               handleCancelRequest={handleCancelRequest}
+              navigate={navigate}
             />
           </div>
           <div style={styles.column}>
@@ -518,30 +377,6 @@ const MatchesPage = () => {
 };
 
 const styles = {
-  navbar: {
-    backgroundColor: "#315b7e",
-    padding: "25px",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    color: "white",
-    width: "100%",
-  },
-  navItems: {
-    display: "flex",
-    alignItems: "center",
-    gap: "20px",
-  },
-  navButton: {
-    background: "none",
-    border: "none",
-    color: "white",
-    fontSize: "20px",
-    fontWeight: "bold",
-    cursor: "pointer",
-    transition: "color 0.3s",
-    whiteSpace: "nowrap",
-  },
   outerContainer: {
     background: "transparent",
     minHeight: "100vh",
