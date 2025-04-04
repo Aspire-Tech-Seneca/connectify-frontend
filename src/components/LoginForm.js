@@ -11,7 +11,7 @@ import {
 import { Email, Lock } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 import { AnimatedBackground } from "animated-backgrounds";
-import logo from "../newlogo.png"; // Use the same logo as in sign-up
+import logo from "../connectifyLogo.png"; // Use the same logo as in sign-up
 import axios from "axios";
 
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://127.0.0.1:8000";
