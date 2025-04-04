@@ -20,7 +20,6 @@ const CurrentMatches = ({ currentMatches, handleChat, handleCancelRequest, navig
               <div style={styles.matchDetails}>
                 <p style={styles.matchName}>
                   <strong>
-                    {/* Username is now clickable */}
                     <span
                       onClick={() => navigate(`/user-profile/${match.id}`)}
                       style={{ cursor: "pointer", textDecoration: "underline" }}
@@ -107,48 +106,87 @@ const IncomingRequests = ({ incomingRequests, handleApproveIncoming, handleDecli
   );
 };
 
-// SuggestedMatches Component
-const SuggestedMatches = ({ suggestedMatches, handleSendRequest, handleDeclineSuggested, navigate }) => {
+// SuggestedMatches Component (Now with Show More / Show Less)
+const SuggestedMatches = ({
+  suggestedMatches,
+  handleSendRequest,
+  handleDeclineSuggested,
+  navigate,
+}) => {
+  // Show only 5 at first
+  const [visibleCount, setVisibleCount] = useState(5);
+
+  // Slice the array to show only the first 'visibleCount' matches
+  const visibleMatches = suggestedMatches.slice(0, visibleCount);
+
+  const handleShowMore = () => {
+    setVisibleCount((prev) => prev + 5);
+  };
+
+  const handleShowLess = () => {
+    // Don't go below 5
+    setVisibleCount((prev) => Math.max(5, prev - 5));
+  };
+
   return (
     <div>
       <h2 style={styles.sectionTitle}>Suggested Matches</h2>
       {suggestedMatches.length === 0 ? (
         <p style={styles.emptyText}>No suggested matches available.</p>
       ) : (
-        suggestedMatches.map((match) => (
-          <div key={match.id} style={styles.matchedUserCard}>
-            <div style={styles.matchContent}>
-              <img src={match.photo} alt={match.name} style={styles.matchPhoto} />
-              <div style={styles.matchDetails}>
-                <p style={styles.matchName}>
-                  <strong>
-                    <span
-                      onClick={() => navigate(`/user-profile/${match.id}`)}
-                      style={{ cursor: "pointer", textDecoration: "underline" }}
-                    >
-                      {match.name}
-                    </span>
-                    {`, ${match.age}`}
-                  </strong>
-                </p>
-                <p style={styles.matchInterests}>
-                  Interests: {match.interests?.join(", ") || "N/A"}
-                </p>
+        <>
+          {visibleMatches.map((match) => (
+            <div key={match.id} style={styles.matchedUserCard}>
+              <div style={styles.matchContent}>
+                <img src={match.photo} alt={match.name} style={styles.matchPhoto} />
+                <div style={styles.matchDetails}>
+                  <p style={styles.matchName}>
+                    <strong>
+                      <span
+                        onClick={() => navigate(`/user-profile/${match.id}`)}
+                        style={{ cursor: "pointer", textDecoration: "underline" }}
+                      >
+                        {match.name}
+                      </span>
+                      {`, ${match.age}`}
+                    </strong>
+                  </p>
+                  <p style={styles.matchInterests}>
+                    Interests: {match.interests?.join(", ") || "N/A"}
+                  </p>
+                </div>
+              </div>
+              <div style={styles.buttonRow}>
+                <button
+                  onClick={() => handleDeclineSuggested(match.id)}
+                  style={styles.removeButton}
+                >
+                  ❌ Decline
+                </button>
+                <button
+                  onClick={() => handleSendRequest(match.id)}
+                  style={styles.matchButton}
+                >
+                  ➤ Send Request
+                </button>
               </div>
             </div>
-            <div style={styles.buttonRow}>
-              <button
-                onClick={() => handleDeclineSuggested(match.id)}
-                style={styles.removeButton}
-              >
-                ❌ Decline
+          ))}
+
+          {/* Show More / Show Less Buttons */}
+          <div style={{ textAlign: "center", marginTop: "10px" }}>
+            {visibleCount < suggestedMatches.length && (
+              <button onClick={handleShowMore} style={styles.showMoreButton}>
+                Show More
               </button>
-              <button onClick={() => handleSendRequest(match.id)} style={styles.matchButton}>
-                ➤ Send Request
+            )}
+            {visibleCount > 5 && (
+              <button onClick={handleShowLess} style={styles.showLessButton}>
+                Show Less
               </button>
-            </div>
+            )}
           </div>
-        ))
+        </>
       )}
     </div>
   );
@@ -156,10 +194,9 @@ const SuggestedMatches = ({ suggestedMatches, handleSendRequest, handleDeclineSu
 
 const MatchesPage = () => {
   const navigate = useNavigate();
-  const [currentMatches, setCurrentMatches] = useState([]); // Approved or pending outgoing
-  const [incomingRequests, setIncomingRequests] = useState([]); // Pending from others
-  const [suggestedMatches, setSuggestedMatches] = useState([]); // New potential matches
-  const [notificationList, setNotificationList] = useState([]);
+  const [currentMatches, setCurrentMatches] = useState([]);
+  const [incomingRequests, setIncomingRequests] = useState([]);
+  const [suggestedMatches, setSuggestedMatches] = useState([]);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -167,7 +204,7 @@ const MatchesPage = () => {
   });
   const authToken = localStorage.getItem("authToken");
 
-  // 1) Fetch current matches
+  // Fetch current matches
   useEffect(() => {
     if (!authToken) return;
     fetch(`${BASE_URL}/users/get-mymatchup-list/`, {
@@ -180,7 +217,7 @@ const MatchesPage = () => {
           name: user.fullname,
           age: user.age,
           interests: user.interest ? [user.interest.name] : [],
-          photo: user.profile_image?.image_name || "https://via.placeholder.com/150",
+          photo: user.profile_images?.image_name || "https://via.placeholder.com/150",
           status: "approved",
         }));
         setCurrentMatches(transformed);
@@ -188,7 +225,7 @@ const MatchesPage = () => {
       .catch((err) => console.error("Failed to fetch my matches:", err));
   }, [authToken]);
 
-  // 2) Fetch incoming requests
+  // Fetch incoming requests
   useEffect(() => {
     if (!authToken) return;
     fetch(`${BASE_URL}/users/get-matchup-status/`, {
@@ -201,14 +238,14 @@ const MatchesPage = () => {
           name: user.fullname,
           age: user.age,
           interests: user.interest ? [user.interest.name] : [],
-          photo: user.profile_image?.image_name || "https://via.placeholder.com/150",
+          photo: user.profile_images?.image_name || "https://via.placeholder.com/150",
         }));
         setIncomingRequests(transformed);
       })
       .catch((err) => console.error("Failed to fetch incoming requests:", err));
   }, [authToken]);
 
-  // 3) Fetch suggested matches based on user's interest
+  // Fetch suggested matches
   useEffect(() => {
     if (!authToken) return;
     fetch(`${BASE_URL}/users/retrieve-interest/`, {
@@ -234,7 +271,7 @@ const MatchesPage = () => {
           name: user.fullname,
           age: user.age,
           interests: user.interest ? [user.interest.name] : [],
-          photo: user.profile_image?.image_name || "https://via.placeholder.com/150",
+          photo: user.profile_images?.image_name || "https://via.placeholder.com/150",
         }));
         setSuggestedMatches(transformed);
       })
@@ -250,7 +287,6 @@ const MatchesPage = () => {
     navigate("/ChatPage");
   };
 
-  // Send a match request
   const handleSendRequest = async (id) => {
     const match = suggestedMatches.find((m) => m.id === id);
     if (!match) return;
@@ -277,7 +313,6 @@ const MatchesPage = () => {
     }
   };
 
-  // Cancel a pending request
   const handleCancelRequest = async (id) => {
     const match = currentMatches.find((m) => m.id === id && m.status === "pending");
     if (!match) return;
@@ -299,7 +334,6 @@ const MatchesPage = () => {
     }
   };
 
-  // Approve an incoming request
   const handleApproveIncoming = async (id) => {
     const match = incomingRequests.find((m) => m.id === id);
     if (!match) return;
@@ -323,7 +357,6 @@ const MatchesPage = () => {
     }
   };
 
-  // Decline an incoming request
   const handleDeclineIncoming = async (id) => {
     const match = incomingRequests.find((m) => m.id === id);
     if (!match) return;
@@ -346,7 +379,6 @@ const MatchesPage = () => {
     }
   };
 
-  // Decline a suggested match
   const handleDeclineSuggested = (id) => {
     const match = suggestedMatches.find((m) => m.id === id);
     if (!match) return;
@@ -402,14 +434,14 @@ const styles = {
     minHeight: "100vh",
     fontFamily: "'Roboto', sans-serif",
     width: "100vw",
-    marginUp: "900",
+    marginTop: "260px",
   },
   contentWrapper: {
     background: "rgba(7, 53, 102, 0.5)",
     backgroundImage: "url('./peach.jpg')",
     backgroundRepeat: "no-repeat",
     backgroundSize: "cover",
-    margin: "10px auto",
+    margin: "70px auto",
     padding: "2rem",
     boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
     borderRadius: "8px",
@@ -435,7 +467,7 @@ const styles = {
     padding: "15px",
     borderRadius: "8px",
     boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-    marginBottom: "15px",
+    marginBottom: "10px",
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
@@ -468,6 +500,7 @@ const styles = {
   buttonRow: {
     display: "flex",
     gap: "10px",
+    justifyContent: "flex-start",
   },
   matchButton: {
     background: "#315b7e",
@@ -489,6 +522,26 @@ const styles = {
     boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
     transition: "background 0.3s, transform 0.3s",
   },
+
+  // Show More / Show Less Buttons
+  showMoreButton: {
+    backgroundColor: "#315b7e",
+    color: "#fff",
+    border: "none",
+    padding: "8px 16px",
+    marginRight: "10px",
+    borderRadius: "4px",
+    cursor: "pointer",
+  },
+  showLessButton: {
+    backgroundColor: "#a04545",
+    color: "#fff",
+    border: "none",
+    padding: "8px 16px",
+    borderRadius: "4px",
+    cursor: "pointer",
+  },
+
   emptyText: {
     textAlign: "center",
     color: "#ffffff",
