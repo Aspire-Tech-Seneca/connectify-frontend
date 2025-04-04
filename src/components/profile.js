@@ -1,11 +1,13 @@
 // src/components/Profile.js
+
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 // API base URL and Blob Storage base URL
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:8000";
 const BLOB_STORAGE_BASE_URL =
-  process.env.REACT_APP_BLOB_STORAGE_BASE_URL || "http://localhost:8000/";
+  process.env.REACT_APP_BLOB_STORAGE_BASE_URL ||
+  "http://localhost:8000/";
 
 // ProfileCard component (your own profile info)
 const ProfileCard = ({
@@ -131,6 +133,10 @@ const ProfileCard = ({
 // Gallery component
 const Gallery = ({ galleryImages, handleGalleryImageUpload, removeGalleryImage }) => {
   const fileInputRef = useRef(null);
+  
+  // State for handling which image is selected (for the lightbox modal)
+  const [selectedImage, setSelectedImage] = useState(null);
+
   const onButtonClick = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
@@ -153,6 +159,7 @@ const Gallery = ({ galleryImages, handleGalleryImageUpload, removeGalleryImage }
           style={{ display: "none" }}
         />
       </div>
+
       <div style={styles.galleryGrid}>
         {galleryImages.length === 0 ? (
           <p style={styles.emptyGalleryText}>No media added yet.</p>
@@ -165,6 +172,8 @@ const Gallery = ({ galleryImages, handleGalleryImageUpload, removeGalleryImage }
                   src={image.url}
                   alt={`Gallery ${key}`}
                   style={styles.galleryImage}
+                  // Clicking the image sets the selectedImage to the image’s URL
+                  onClick={() => setSelectedImage(image.url)}
                 />
                 <button
                   style={styles.deleteButton}
@@ -177,6 +186,18 @@ const Gallery = ({ galleryImages, handleGalleryImageUpload, removeGalleryImage }
           })
         )}
       </div>
+
+      {/* Modal / Lightbox Overlay */}
+      {selectedImage && (
+        <div style={styles.overlay} onClick={() => setSelectedImage(null)}>
+          <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <button style={styles.modalCloseButton} onClick={() => setSelectedImage(null)}>
+              X
+            </button>
+            <img src={selectedImage} alt="Full Size" style={styles.modalImage} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -727,6 +748,7 @@ const styles = {
     width: "100%",
     height: "100%",
     objectFit: "cover",
+    cursor: "pointer", // so user knows it's clickable
   },
   deleteButton: {
     position: "absolute",
@@ -744,6 +766,50 @@ const styles = {
     textAlign: "center",
     padding: 0,
   },
+
+  // Lightbox/Modal styles
+  overlay: {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.8)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 9999,
+  },
+  modalContent: {
+    position: "relative",
+    backgroundColor: "transparent",
+    padding: "0",
+    maxWidth: "90%",
+    maxHeight: "90%",
+  },
+  modalImage: {
+    maxWidth: "100%",
+    maxHeight: "100%",
+    borderRadius: "4px",
+    display: "block",
+  },
+  modalCloseButton: {
+    position: "absolute",
+    top: "10px",
+    right: "10px",
+    background: "rgba(0, 0, 0, 0.5)",
+    color: "#fff",
+    border: "none",
+    borderRadius: "3px",
+    width: "30px",
+    height: "30px",
+    cursor: "pointer",
+    fontSize: "16px",
+    lineHeight: "30px",
+    textAlign: "center",
+    padding: 0,
+  },
+
   matchedUserCard: {
     backgroundColor: "#fff",
     padding: "15px",
