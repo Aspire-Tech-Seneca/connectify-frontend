@@ -18,6 +18,7 @@ import PolicyCompliance from "./components/PolicyCompliance";
 import NotificationPage from "./components/NotificationPage";
 import UserProfile from "./components/userProfile";
 import CustomNavbar from "./components/CustomNavbar";
+import Comchat from "./components/comchat"; // Capital C
 import abstract from "./abstract.jpg";
 
 const AppContent = () => {
@@ -59,6 +60,7 @@ const AppContent = () => {
           <Route path="/about" element={<AboutPage />} /> 
           <Route path="/profile" element={<Profile />} />
           <Route path="/Signup" element={<Signup />} />
+          <Route path="/comchat" element={<Comchat />} />
           <Route path="/" element={<WelcomePage />} />
           <Route path="/matches" element={<MyMatches />} />
           <Route path="/ChatPage" element={<ChatPage />} />
