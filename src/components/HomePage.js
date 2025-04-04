@@ -525,7 +525,7 @@ const HomePage = () => {
 
 const styles = {
   outerContainer: {
-    marginTop: "520px", // explicitly set the margin for the homepage
+    paddingTop: "1100px", // explicitly set the margin for the homepage
     background: "transparent",
     minHeight: "100vh",
     fontFamily: "'Roboto', sans-serif",
