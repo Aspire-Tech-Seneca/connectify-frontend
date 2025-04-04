@@ -6,18 +6,13 @@ import {
   ListItemText,
   Typography,
   CircularProgress,
-  ListItemAvatar,
-  Badge
+  ListItemAvatar
 } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { useNavigate } from "react-router-dom";
-import CustomNavbar from "./navbar";
 
 // Adjust to your actual backend URLs
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:8000";
-
-// NavBar component
-const NavBar = CustomNavbar;
 
 const NotificationPage = () => {
   const [notifications, setNotifications] = useState([]);
@@ -58,7 +53,7 @@ const NotificationPage = () => {
           return res.json();
         })
         .then((data) => {
-          // Add a 'viewed' property based on localStorage
+          // Add a 'seen' property based on localStorage
           const viewedNotifications = getViewedNotifications();
           const processedNotifications = data.map(notif => ({
             ...notif,
@@ -102,10 +97,6 @@ const NotificationPage = () => {
 
   return (
     <div style={styles.outerContainer}>
-      <NavBar 
-        navigate={navigate} 
-        notificationCount={unreadCount} 
-      />
       <div style={styles.contentWrapper}>
         <Container sx={{ padding: "2rem", maxWidth: "600px", marginTop: "4rem" }}>
           <Typography variant="h4" gutterBottom style={styles.heading}>
@@ -187,35 +178,15 @@ const styles = {
     width: "95%",
     color: "white",
   },
-  navbar: {
-    backgroundColor: "#315b7e",
-    padding: "25px",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
+  heading: {
     color: "white",
-    width: "100%",
-  },
-  navItems: {
-    display: "flex",
-    alignItems: "center",
-    gap: "20px"
+    fontWeight: "bold",
   },
   text: {
     color: "white",
     "&:hover": {
       color: "black",
     },
-  },
-  navButton: {
-    background: "none",
-    border: "none",
-    color: "white",
-    fontSize: "20px",
-    fontWeight: "bold",
-    cursor: "pointer",
-    transition: "color 0.3s",
-    whiteSpace: "nowrap",
   },
 };
 
