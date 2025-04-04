@@ -13,7 +13,7 @@ import {
 import { Lock, LockOpen } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 import axios from "axios";
-import logo from "../newlogo.png";
+import logo from "../connectifyLogo.png";
 
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://127.0.0.1:8000";
 
