@@ -13,7 +13,7 @@ import { AccountCircle, Email, Lock, CalendarToday, LocationOn } from "@mui/icon
 
 import { styled } from "@mui/material/styles";
 import { AnimatedBackground } from "animated-backgrounds";
-import logo from "../newlogo.png"; // Replace with actual logo path
+import logo from "../connectifyLogo.png"; // Replace with actual logo path
 import signupImage from "../friends.png"; // Replace with your actual image path
 import axios from "axios";
 
