@@ -304,8 +304,8 @@ const Profile = () => {
     })
       .then((res) => res.json())
       .then((data) => {
-        if (data.profile_image) {
-          setProfilePic(`${BLOB_STORAGE_BASE_URL}${data.profile_image}`);
+        if (data.profile_images) {
+          setProfilePic(`${BLOB_STORAGE_BASE_URL}${data.profile_images}`);
         }
         if (data.gallery_images && Array.isArray(data.gallery_images)) {
           setGalleryImages(
@@ -344,11 +344,11 @@ const Profile = () => {
       .then((data) => {
         const transformed = data.map((user) => {
           let photoUrl = "https://via.placeholder.com/150";
-          if (user.profile_image) {
-            if (typeof user.profile_image === "object" && user.profile_image.image_name) {
-              photoUrl = `${BLOB_STORAGE_BASE_URL}${user.profile_image.image_name}`;
-            } else if (typeof user.profile_image === "string") {
-              photoUrl = `${BLOB_STORAGE_BASE_URL}${user.profile_image}`;
+          if (user.profile_images) {
+            if (typeof user.profile_images === "object" && user.profile_images.image_name) {
+              photoUrl = `${BLOB_STORAGE_BASE_URL}${user.profile_images.image_name}`;
+            } else if (typeof user.profile_images === "string") {
+              photoUrl = `${BLOB_STORAGE_BASE_URL}${user.profile_images}`;
             }
           }
           return {
@@ -371,7 +371,7 @@ const Profile = () => {
     if (file) {
       try {
         const formData = new FormData();
-        formData.append("profile_image", file);
+        formData.append("profile_images", file);
         const response = await fetch(`${BASE_URL}/users/upload-profile-image/`, {
           method: "PUT",
           headers: { Authorization: `Bearer ${authToken}` },
@@ -385,8 +385,8 @@ const Profile = () => {
           headers: { Authorization: `Bearer ${authToken}` },
         });
         const newData = await newResponse.json();
-        if (newData.profile_image) {
-          setProfilePic(`${BLOB_STORAGE_BASE_URL}${newData.profile_image}`);
+        if (newData.profile_images) {
+          setProfilePic(`${BLOB_STORAGE_BASE_URL}${newData.profile_images}`);
         }
       } catch (error) {
         console.error("Profile image upload failed:", error);
