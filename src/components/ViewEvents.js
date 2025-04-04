@@ -11,14 +11,22 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import { styled } from "@mui/material/styles";
-import SearchIcon from "@mui/icons-material/Search"; 
+import SearchIcon from "@mui/icons-material/Search";
+import bgImage from "../abstract.jpg"; // ✅ Import your image from src/
 
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:8000";
 
 const BackgroundContainer = styled("div")({
   minHeight: "100vh",
-  backgroundColor: "#f8f8f8",
-  paddingTop: "230px", // Leave enough space for fixed navbar if any
+ background: `linear-gradient(
+            rgba(100, 126, 135, 0.4),
+            rgba(255, 255, 255, 0.3)
+          ), url(${bgImage})`,
+  backgroundRepeat: "no-repeat",
+  backgroundSize: "cover",
+  backgroundPosition: "center",
+  backgroundAttachment: "fixed", // Optional: Keeps background static while scrolling
+  paddingTop: "230px",
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
