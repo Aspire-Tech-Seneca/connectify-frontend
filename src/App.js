@@ -66,7 +66,7 @@ const AppContent = () => {
           <Route path="/UserSettings" element={<UserSettings />} />
           <Route path="/ViewEvents" element={<ViewEvents />} />
           <Route path="/createevent" element={<CreateEvent />} />
-          <Route path="/CommunityChat" element={<CommunityChat />} />
+          <Route path="/comchat" element={<CommunityChat />} />
           <Route path="/PolicyCompliance" element={<PolicyCompliance />} />
         </Routes>
       </div>
