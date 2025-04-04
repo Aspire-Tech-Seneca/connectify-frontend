@@ -1,3 +1,4 @@
+// src/components/CommunityChat.js
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -6,142 +7,13 @@ import {
   List,
   ListItem,
   ListItemText,
-  IconButton,
-  Badge,
-  Popover,
   Snackbar,
   Alert,
 } from "@mui/material";
-import NotificationsIcon from "@mui/icons-material/Notifications";
-import ChatIcon from "@mui/icons-material/Chat";
-import MenuIcon from "@mui/icons-material/Menu";
 import Picker from "emoji-picker-react"; // Ensure installation: npm install emoji-picker-react
-import peachImage from "./peach.jpg";
+import peachImage from "./peach.jpg"; // Background image if needed
 
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:8000";
-
-// NavBar component (matching Matches and Profile pages)
-const NavBar = ({ navigate, notificationCount, notifications }) => {
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [hamburgerAnchorEl, setHamburgerAnchorEl] = useState(null);
-
-  const handleNotificationIconClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleCloseNotificationPopover = () => {
-    setAnchorEl(null);
-  };
-  const handleHamburgerClick = (event) => {
-    setHamburgerAnchorEl(event.currentTarget);
-  };
-  const handleCloseHamburgerPopover = () => {
-    setHamburgerAnchorEl(null);
-  };
-
-  const openNotification = Boolean(anchorEl);
-  const notificationPopoverId = openNotification ? "notification-popover" : undefined;
-  const openHamburger = Boolean(hamburgerAnchorEl);
-  const hamburgerPopoverId = openHamburger ? "hamburger-popover" : undefined;
-
-  const navItems = [
-    { label: "Home", path: "/home", customStyle: { marginLeft: "40px" } },
-    { label: "Chat", path: "/ChatPage" },
-    { label: "My Profile", path: "/profile" },
-    { label: "About Us", path: "/about" },
-    { label: "My Matches", path: "/matches" },
-    { label: "Logout", path: "/login", customStyle: { marginRight: "30px" } },
-  ];
-
-  const additionalMenuItems = [
-    { label: "Notifications", path: "/notifications" },
-    { label: "User Settings", path: "/UserSettings" },
-    { label: "View Events", path: "/ViewEvents" },
-    { label: "Create Event", path: "/createevent" },
-    { label: "Community Chat", path: "/CommunityChat" },
-    { label: "Policy Compliance", path: "/PolicyCompliance" },
-  ];
-
-  return (
-    <nav style={styles.navbar}>
-      <div style={styles.navItems}>
-        {navItems.map((item) => (
-          <button
-            key={item.label}
-            style={{ ...styles.navButton, ...(item.customStyle || {}) }}
-            onClick={() => navigate(item.path)}
-          >
-            {item.label}
-          </button>
-        ))}
-        <div style={{ display: "flex", gap: 0, alignItems: "center" }}>
-          <IconButton onClick={handleNotificationIconClick} style={{ padding: 0 }}>
-            <Badge badgeContent={notificationCount} color="error">
-              <NotificationsIcon style={{ color: "white" }} />
-            </Badge>
-          </IconButton>
-          <IconButton onClick={() => navigate("/ChatPage")} style={{ padding: 0 }}>
-            <ChatIcon style={{ color: "white", fontSize: "24px" }} />
-          </IconButton>
-          <IconButton onClick={handleHamburgerClick} style={{ padding: 0 }}>
-            <MenuIcon style={{ color: "white", fontSize: "24px" }} />
-          </IconButton>
-        </div>
-      </div>
-      <Popover
-        id={notificationPopoverId}
-        open={openNotification}
-        anchorEl={anchorEl}
-        onClose={handleCloseNotificationPopover}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        transformOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <List>
-          {notifications.length === 0 ? (
-            <ListItem>
-              <ListItemText primary="No new notifications" />
-            </ListItem>
-          ) : (
-            notifications.map((notif, index) => (
-              <ListItem
-                button
-                key={index}
-                onClick={() => {
-                  handleCloseNotificationPopover();
-                  navigate("/notifications");
-                }}
-              >
-                <ListItemText primary={notif} />
-              </ListItem>
-            ))
-          )}
-        </List>
-      </Popover>
-      <Popover
-        id={hamburgerPopoverId}
-        open={openHamburger}
-        anchorEl={hamburgerAnchorEl}
-        onClose={handleCloseHamburgerPopover}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        transformOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <List>
-          {additionalMenuItems.map((item, index) => (
-            <ListItem
-              button
-              key={index}
-              onClick={() => {
-                handleCloseHamburgerPopover();
-                navigate(item.path);
-              }}
-            >
-              <ListItemText primary={item.label} />
-            </ListItem>
-          ))}
-        </List>
-      </Popover>
-    </nav>
-  );
-};
 
 const CommunityChat = () => {
   const navigate = useNavigate();
@@ -163,10 +35,6 @@ const CommunityChat = () => {
         .catch((err) => console.error("Error fetching user info:", err));
     }
   }, [authToken]);
-
-  // Dummy notifications (if any)
-  const [notifications] = useState([]);
-  const notificationCount = notifications.length;
 
   // Chat messages state
   const [messages, setMessages] = useState([
@@ -190,7 +58,6 @@ const CommunityChat = () => {
     });
   };
 
-  // When sending a message, the message object uses currentUser as the sender's name.
   const sendMessage = () => {
     if (!inputMessage.trim()) return;
     const newMsg = {
@@ -208,11 +75,7 @@ const CommunityChat = () => {
 
   return (
     <div style={styles.outerContainer}>
-      <NavBar
-        navigate={navigate}
-        notificationCount={notificationCount}
-        notifications={notifications}
-      />
+      {/* Main Chat Section */}
       <div style={styles.contentWrapper}>
         <div style={styles.chatSection}>
           <div style={styles.chatContainer}>
@@ -252,7 +115,11 @@ const CommunityChat = () => {
                   if (e.key === "Enter") sendMessage();
                 }}
               />
-              <Button variant="contained" onClick={sendMessage} style={styles.sendButton}>
+              <Button
+                variant="contained"
+                onClick={sendMessage}
+                style={styles.sendButton}
+              >
                 Send
               </Button>
             </div>
@@ -276,30 +143,6 @@ const styles = {
     minHeight: "100vh",
     fontFamily: "'Roboto', sans-serif",
     width: "100vw",
-  },
-  navbar: {
-    backgroundColor: "#315b7e",
-    padding: "25px",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    color: "white",
-    width: "100%",
-  },
-  navItems: {
-    display: "flex",
-    alignItems: "center",
-    gap: "20px",
-  },
-  navButton: {
-    background: "none",
-    border: "none",
-    color: "white",
-    fontSize: "20px",
-    fontWeight: "bold",
-    cursor: "pointer",
-    transition: "color 0.3s",
-    whiteSpace: "nowrap",
   },
   contentWrapper: {
     background: "rgba(7, 53, 102, 0.5)",
