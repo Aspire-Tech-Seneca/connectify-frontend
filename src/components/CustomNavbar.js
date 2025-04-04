@@ -29,7 +29,7 @@ const additionalMenuItems = [
   { label: "View Events", path: "/ViewEvents" },
   { label: "Create Event", path: "/CreateEvent" },
   { label: "User Settings", path: "/UserSettings" },
-  { label: "Community Chat", path: "/CommunityChat" },
+  { label: "Community Chat", path: "/comchat" },
   { label: "Policy Compliance", path: "/PolicyCompliance" },
 ];
 
