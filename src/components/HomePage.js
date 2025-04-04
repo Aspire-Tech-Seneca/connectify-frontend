@@ -1,15 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Snackbar, Alert, TextField, Button, Rating, Box, Typography } from "@mui/material";
-import CustomNavbar from "./navbar";
 
 // Environment variables
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://127.0.0.1:8000";
 const BLOB_STORAGE_BASE_URL = process.env.REACT_APP_BLOB_STORAGE_BASE_URL || "https://yourpublicblobstorage.com/";
 const BLOB_SAS_TOKEN = process.env.REACT_APP_BLOB_SAS_TOKEN || "";
-
-// NavBar component
-const NavBar = CustomNavbar;
 
 const ReviewForm = () => {
   const [reviewText, setReviewText] = useState("");
@@ -271,7 +267,6 @@ const UserReviews = () => {
   );
 };
 
-// Footer component
 const Footer = () => {
   return (
     <footer style={styles.footer}>
@@ -443,7 +438,6 @@ const HomePage = () => {
 
   return (
     <div style={styles.outerContainer}>
-      <NavBar navigate={navigate} />
       <div style={styles.contentWrapper}>
         <div style={styles.contentContainer}>
           <div style={styles.homePage}>
@@ -531,6 +525,7 @@ const HomePage = () => {
 
 const styles = {
   outerContainer: {
+    marginTop: "520px", // explicitly set the margin for the homepage
     background: "transparent",
     minHeight: "100vh",
     fontFamily: "'Roboto', sans-serif",
@@ -576,7 +571,7 @@ const styles = {
     position: "relative",
   },
   arrowButton: {
-    background:"rgba(7, 53, 102, 0.7)",
+    background: "rgba(7, 53, 102, 0.7)",
     color: "white",
     fontSize: "28px",
     fontWeight: "bold",
@@ -595,7 +590,7 @@ const styles = {
     zIndex: "2",
   },
   matchCard: {
-    background:"rgba(7, 53, 102, 0.7)",
+    background: "rgba(7, 53, 102, 0.7)",
     padding: "20px",
     borderRadius: "8px",
     boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
@@ -624,7 +619,7 @@ const styles = {
     color: "white",
   },
   interestTag: {
-    background:"rgba(7, 53, 102, 0.7)",
+    background: "rgba(7, 53, 102, 0.7)",
     padding: "5px 10px",
     borderRadius: "20px",
     fontSize: "14px",
@@ -636,7 +631,7 @@ const styles = {
     marginTop: "10px",
   },
   messageBtn: {
-    background:"rgba(7, 53, 102, 0.7)",
+    background: "rgba(7, 53, 102, 0.7)",
     color: "white",
     padding: "8px 12px",
     border: "none",
@@ -645,30 +640,6 @@ const styles = {
     boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
     transition: "background 0.3s, transform 0.3s",
   },
-  navbar: {
-    backgroundColor: "#315b7e",
-    padding: "25px",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    color: "white",
-    width: "100%",
-  },
-  navItems: {
-    display: "flex",
-    alignItems: "center",
-    gap: "20px",
-  },
-  navButton: {
-    background: "none",
-    border: "none",
-    color: "white",
-    fontSize: "20px",
-    fontWeight: "bold",
-    cursor: "pointer",
-    transition: "color 0.3s",
-    whiteSpace: "nowrap",
-  },
   reviewsContainer: {
     background: "rgba(7, 53, 102, 0.7)",
     padding: "40px 20px",
@@ -676,20 +647,20 @@ const styles = {
     position: "relative",
   },
   reviewSliderContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-    width: '100%',
-    maxWidth: '1200px',
-    margin: '0 auto',
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+    width: "100%",
+    maxWidth: "1200px",
+    margin: "0 auto",
   },
   reviewsList: {
-    display: 'flex',
-    justifyContent: 'center',
-    gap: '20px',
-    width: '100%',
-    overflow: 'hidden',
+    display: "flex",
+    justifyContent: "center",
+    gap: "20px",
+    width: "100%",
+    overflow: "hidden",
   },
   reviewItem: {
     background: "#fff",
@@ -698,7 +669,7 @@ const styles = {
     boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
     width: "300px",
     textAlign: "center",
-    flex: '0 0 auto',
+    flex: "0 0 auto",
   },
   sliderButton: {
     background: "rgba(7, 53, 102, 0.7)",
@@ -721,20 +692,19 @@ const styles = {
     zIndex: 10,
   },
   reviewsTitle: {
-    color: 'white',
-    marginBottom: '20px',
+    color: "white",
+    marginBottom: "20px",
   },
   reviewText: {
-    color: '#333',
-    fontSize: '16px',
-    lineHeight: '1.6',
+    color: "#333",
+    fontSize: "16px",
+    lineHeight: "1.6",
   },
   reviewAuthor: {
-    color: '#666',
-    fontStyle: 'italic',
-    marginTop: '10px',
+    color: "#666",
+    fontStyle: "italic",
+    marginTop: "10px",
   },
-
   // Review Form Styles
   reviewFormContainer: {
     padding: "40px 20px",
@@ -753,7 +723,6 @@ const styles = {
     flexDirection: "column",
     gap: "20px",
   },
-
   formGroup: {
     width: "100%",
   },
@@ -761,13 +730,13 @@ const styles = {
     background: "#fff",
   },
   submitButton: {
-    background:"rgba(7, 53, 102, 0.7)",
+    background: "rgba(7, 53, 102, 0.7)",
     color: "white",
     padding: "10px 20px",
     alignSelf: "center",
     fontWeight: "bold",
     "&:hover": {
-      background:"rgba(7, 53, 102, 0.7)",
+      background: "rgba(7, 53, 102, 0.7)",
     },
   },
   formMessage: {
@@ -775,62 +744,11 @@ const styles = {
     marginTop: "10px",
     fontWeight: "bold",
   },
-
-  reviewsContainer: {
-    background:"rgba(7, 53, 102, 0.7)",
-    padding: "40px 20px",
-    textAlign: "center",
-  },
-  reviewsTitle: {
-    fontSize: "24px",
-    marginBottom: "20px",
-    color: "white",
-  },
-  reviewsList: {
-    display: "flex",
-    justifyContent: "center",
-    gap: "20px",
-    flexWrap: "wrap",
-  },
-  reviewItem: {
-    background: "#fff",
-    padding: "20px",
-    borderRadius: "8px",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-    width: "300px",
-    textAlign: "center",
-  },
-  reviewText: {
-    fontSize: "16px",
-    color: "#5D4037",
-    marginBottom: "10px",
-  },
-  reviewAuthor: {
-    fontSize: "14px",
-    color: "#6c757d",
-  },
-
-  sliderDots: {
-    display: 'flex',
-    justifyContent: 'center',
-    marginTop: '10px',
-  },
-
-  dot: {
-    height: '10px',
-    width: '10px',
-    borderRadius: '50%',
-    margin: '0 5px',
-    cursor: 'pointer',
-    transition: 'background-color 0.3s',
-  },
-
   footer: {
-    background:"rgba(7, 53, 102, 0.7)",
+    background: "rgba(7, 53, 102, 0.7)",
     padding: "40px 20px",
     color: "white",
   },
-
   footerContent: {
     display: "flex",
     justifyContent: "space-between",
