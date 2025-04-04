@@ -11,7 +11,6 @@ import {
 import { styled } from "@mui/material/styles";
 import logo from "../newlogo.png";
 import axios from "axios";
-import CustomNavbar from "./navbar";
 
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:8000";
 const BASE_IMAGE_URL = process.env.REACT_APP_BLOB_STORAGE_EVENT_IMAGES;
@@ -40,7 +39,6 @@ const FormContainer = styled(Container)({
   minWidth: "750px",
   textAlign: "center",
   zIndex: 2,
-  marginTop: "150px",
 });
 
 const StyledButton = styled(Button)({
@@ -170,7 +168,6 @@ const CreateEvent = () => {
 
   return (
     <BackgroundContainer>
-      <CustomNavbar />
       <FormContainer>
         <Typography variant="h4" gutterBottom style={{ fontWeight: "bold", color: "#315b7e" }}>
           Host an Event
