@@ -372,7 +372,7 @@ const HomePage = () => {
           name: user.fullname,
           age: user.age,
           interests: user.interest ? [user.interest.name] : [],
-          imgUrl: user.profile_image?.image_url || `${BLOB_STORAGE_BASE_URL}defaultProfilePic.jpg`,
+          imgUrl: user.profile_images?.image_name || `${BLOB_STORAGE_BASE_URL}defaultProfilePic.jpg`,
         }));
         setMatches(transformed);
       })
