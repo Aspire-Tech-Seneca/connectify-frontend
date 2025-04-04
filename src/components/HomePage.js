@@ -525,7 +525,11 @@ const HomePage = () => {
 
 const styles = {
   outerContainer: {
+<<<<<<< Updated upstream
     paddingTop: "1100px", // explicitly set the margin for the homepage
+=======
+    marginTop: "950px",
+>>>>>>> Stashed changes
     background: "transparent",
     minHeight: "100vh",
     fontFamily: "'Roboto', sans-serif",
