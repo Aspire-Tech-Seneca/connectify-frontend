@@ -14,7 +14,6 @@ import { Lock, LockOpen } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 import axios from "axios";
 import logo from "../newlogo.png";
-import CustomNavbar from "./navbar";
 
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://127.0.0.1:8000";
 
@@ -32,16 +31,19 @@ const FormContainer = styled(Container)(({ theme }) => ({
   padding: "40px 30px",
   borderRadius: "20px",
   boxShadow: "0px 10px 30px rgba(0, 0, 0, 0.2)",
-  maxWidth: "800px",
-  minWidth: "800px",
+  width: "90%",
+  maxWidth: "600px",
+  minWidth: "750px",
   textAlign: "center",
   zIndex: 2,
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
   position: "relative",
-  marginTop: "40px",
+  marginTop: "0px",
 }));
+
+
 
 const StyledButton = styled(Button)({
   background: "linear-gradient(to right, #008080, #315b7e)",
@@ -105,9 +107,12 @@ const UserSettings = () => {
 
   const validateForm = () => {
     let newErrors = {};
-    if (!formData.old_password) newErrors.old_password = "Current password is required";
-    if (formData.new_password.length < 6) newErrors.new_password = "New password must be at least 6 characters";
-    if (formData.new_password !== formData.confirm_new_password) newErrors.confirm_new_password = "Passwords do not match";
+    if (!formData.old_password)
+      newErrors.old_password = "Current password is required";
+    if (formData.new_password.length < 6)
+      newErrors.new_password = "New password must be at least 6 characters";
+    if (formData.new_password !== formData.confirm_new_password)
+      newErrors.confirm_new_password = "Passwords do not match";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -144,7 +149,8 @@ const UserSettings = () => {
       } catch (error) {
         setSnackbar({
           open: true,
-          message: error.response?.data?.detail || "Update failed. Try again.",
+          message:
+            error.response?.data?.detail || "Update failed. Try again.",
           severity: "error",
         });
       }
@@ -153,16 +159,30 @@ const UserSettings = () => {
 
   return (
     <PageContainer>
-      <CustomNavbar />
-
       <FormContainer>
-        <img src={logo} alt="Connectify Logo" style={{ width: "250px", marginBottom: "10px" }} />
-        <Typography variant="h4" gutterBottom style={{ fontWeight: "bold", color: "#315b7e" }}>
+        <img
+          src={logo}
+          alt="Connectify Logo"
+          style={{ width: "250px", marginBottom: "10px" }}
+        />
+        <Typography
+          variant="h4"
+          gutterBottom
+          style={{ fontWeight: "bold", color: "#315b7e" }}
+        >
           Update Password 🔒
         </Typography>
         {errors.api && <Typography color="error">{errors.api}</Typography>}
 
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "15px", width: "100%" }}>
+        <form
+          onSubmit={handleSubmit}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "15px",
+            width: "100%",
+          }}
+        >
           <StyledTextField
             label="Current Password"
             type="password"
@@ -215,7 +235,9 @@ const UserSettings = () => {
             }}
           />
 
-          <StyledButton variant="contained" type="submit">Update Password</StyledButton>
+          <StyledButton variant="contained" type="submit">
+            Update Password
+          </StyledButton>
         </form>
       </FormContainer>
 
@@ -226,7 +248,11 @@ const UserSettings = () => {
         onClose={handleSnackbarClose}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: "100%" }}>
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>

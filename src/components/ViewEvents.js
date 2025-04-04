@@ -11,14 +11,14 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import { styled } from "@mui/material/styles";
-import CustomNavbar from "./navbar"; // ✅ Import the shared navbar here
 import SearchIcon from "@mui/icons-material/Search"; 
+
 const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:8000";
 
 const BackgroundContainer = styled("div")({
   minHeight: "100vh",
   backgroundColor: "#f8f8f8",
-  paddingTop: "230px", // Leave enough space for fixed navbar
+  paddingTop: "230px", // Leave enough space for fixed navbar if any
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
@@ -68,41 +68,28 @@ const ViewEvents = () => {
   const handleSearch = () => {
     fetchEvents();
   };
-<style>
-  {`
-    @keyframes fadeInSlideUp {
-      0% {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-  `}
-</style>
+
   return (
     <BackgroundContainer>
-      <CustomNavbar /> {/* ✅ Replaces your old AppBar/Navbar */}
       <Container maxWidth="lg">
-       <Typography
-  variant="h4"
-  align="center"
-  sx={{
-    fontWeight: "bold",
-    mt: 4,
-    background: "linear-gradient(to right, #315b7e, #008080)",
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent",
-    textShadow: "2px 2px 4px rgba(0,0,0,0.2)",
-    letterSpacing: "3px",
-    animation: "fadeInSlideUp 1s ease-in-out",
-  }}
->
-  Upcoming Events
-</Typography>
-        <Grid container spacing={2} justifyContent="center" sx={{ marginTop: "20px" }}>
+        <Typography
+          variant="h4"
+          align="center"
+          sx={{
+            fontWeight: "bold",
+            mt: 4,
+            background: "linear-gradient(to right, #315b7e, #008080)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            textShadow: "2px 2px 4px rgba(0,0,0,0.2)",
+            letterSpacing: "3px",
+            animation: "fadeInSlideUp 1s ease-in-out",
+            marginTop: "270px"
+          }}
+        >
+          Upcoming Events
+        </Typography>
+        <Grid container spacing={2} justifyContent="center" sx={{ marginTop: "50px" }}>
           <Grid item xs={12} sm={4}>
             <TextField
               label="Location"
@@ -136,30 +123,31 @@ const ViewEvents = () => {
           </Grid>
           <Grid item xs={12} sm={4}>
             <Button
-  variant="contained"
-  onClick={handleSearch}
-  fullWidth
-  startIcon={<SearchIcon />}
-  sx={{
-    marginTop: "10px",
-    padding: "12px 24px",
-    background: "linear-gradient(135deg, #315b7e, #008080)",
-    color: "white",
-    fontWeight: "bold",
-    borderRadius: "30px",
-    boxShadow: "0 8px 20px rgba(49, 91, 126, 0.4)",
-    backdropFilter: "blur(4px)",
-    textTransform: "uppercase",
-    transition: "all 0.3s ease-in-out",
-    "&:hover": {
-      background: "linear-gradient(135deg, #008080, #315b7e)",
-      boxShadow: "0 12px 24px rgba(0, 128, 128, 0.5)",
-      transform: "scale(1.06)",
-    },
-  }}
->
-  Search
-</Button>
+              variant="contained"
+              onClick={handleSearch}
+              fullWidth
+              startIcon={<SearchIcon />}
+              sx={{
+                marginTop: "10px",
+                marginBottom: "10px",
+                padding: "12px 24px",
+                background: "linear-gradient(135deg, #315b7e, #008080)",
+                color: "white",
+                fontWeight: "bold",
+                borderRadius: "30px",
+                boxShadow: "0 8px 20px rgba(49, 91, 126, 0.4)",
+                backdropFilter: "blur(4px)",
+                textTransform: "uppercase",
+                transition: "all 0.3s ease-in-out",
+                "&:hover": {
+                  background: "linear-gradient(135deg, #008080, #315b7e)",
+                  boxShadow: "0 12px 24px rgba(0, 128, 128, 0.5)",
+                  transform: "scale(1.06)",
+                },
+              }}
+            >
+              Search
+            </Button>
           </Grid>
         </Grid>
 
@@ -203,6 +191,20 @@ const ViewEvents = () => {
           </Grid>
         )}
       </Container>
+      <style>
+        {`
+          @keyframes fadeInSlideUp {
+            0% {
+              opacity: 0;
+              transform: translateY(30px);
+            }
+            100% {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+        `}
+      </style>
     </BackgroundContainer>
   );
 };
