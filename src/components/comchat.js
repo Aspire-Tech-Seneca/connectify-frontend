@@ -62,7 +62,7 @@ const CommunityChat = () => {
 
   const fetchMessages = async () => {
     try {
-      const res = await fetch(`${BASE_URL}/users/api/reviews/`, {
+      const res = await fetch(`${BASE_URL}/users/api/community-reviews/`, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${authToken}`,
@@ -93,7 +93,7 @@ const CommunityChat = () => {
     if (!inputMessage.trim()) return;
 
     try {
-      const res = await fetch(`${BASE_URL}/users/api/reviews/`, {
+      const res = await fetch(`${BASE_URL}/users/api/community-reviews/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
